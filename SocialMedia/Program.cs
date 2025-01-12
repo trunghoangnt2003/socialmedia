@@ -1,4 +1,6 @@
-using SocialMedia.Hubs;
+using Microsoft.EntityFrameworkCore;
+using SocialMedia.Models;
+using SocialMedia.Services;
 
 namespace SocialMedia
 {
@@ -7,10 +9,14 @@ namespace SocialMedia
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
+            var connectionString = builder.Configuration.GetConnectionString("DBContext");
             // Add services to the container.
             builder.Services.AddControllersWithViews();
             builder.Services.AddSignalR();
+            builder.Services.AddDbContext<SocialNetworkContext>(options => {
+                options.UseSqlServer(connectionString);
+            });
+            builder.Services.AddScoped<SocialNetworkContext>();
 
             var app = builder.Build();
 
@@ -32,7 +38,7 @@ namespace SocialMedia
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
-            app.MapHub<ChatHub>("/chatHub");
+            app.MapHub<SignalRService>("/signalRService");
             app.Run();
         }
     }

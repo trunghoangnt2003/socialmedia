@@ -169,6 +169,7 @@ public partial class SocialNetworkContext : DbContext
             entity.Property(e => e.Comment).HasColumnName("comment");
             entity.Property(e => e.Post).HasColumnName("post");
             entity.Property(e => e.Type).HasColumnName("type");
+            entity.Property(e => e.User).HasColumnName("user");
 
             entity.HasOne(d => d.CommentNavigation).WithMany(p => p.Reactions)
                 .HasForeignKey(d => d.Comment)
@@ -177,6 +178,10 @@ public partial class SocialNetworkContext : DbContext
             entity.HasOne(d => d.PostNavigation).WithMany(p => p.Reactions)
                 .HasForeignKey(d => d.Post)
                 .HasConstraintName("FK_Reactions_Posts");
+
+            entity.HasOne(d => d.UserNavigation).WithMany(p => p.Reactions)
+                .HasForeignKey(d => d.User)
+                .HasConstraintName("FK_Reactions_Users");
         });
 
         modelBuilder.Entity<Resource>(entity =>
@@ -212,6 +217,7 @@ public partial class SocialNetworkContext : DbContext
                 .HasMaxLength(10)
                 .IsFixedLength()
                 .HasColumnName("phone");
+            entity.Property(e => e.Gender).HasColumnName("gender");
         });
 
         modelBuilder.Entity<UserGroup>(entity =>

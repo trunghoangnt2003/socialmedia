@@ -13,10 +13,20 @@ namespace SocialMedia
             // Add services to the container.
             builder.Services.AddControllersWithViews();
             builder.Services.AddSignalR();
-            builder.Services.AddDbContext<SocialNetworkContext>(options => {
+
+            builder.Services.AddDbContext<SocialNetworkContext>(options =>
+            {
                 options.UseSqlServer(connectionString);
             });
             builder.Services.AddScoped<SocialNetworkContext>();
+
+            builder.Services.AddDistributedMemoryCache();
+            builder.Services.AddSession(options =>
+            {
+                options.Cookie.IsEssential = true;
+                options.IdleTimeout = TimeSpan.FromSeconds(60);
+                options.Cookie.HttpOnly = true;
+            });
 
             var app = builder.Build();
 
@@ -30,6 +40,7 @@ namespace SocialMedia
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
+            app.UseSession();
 
             app.UseRouting();
 

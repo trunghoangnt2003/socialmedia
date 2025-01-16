@@ -24,6 +24,7 @@ public partial class User
     public bool? IsActive { get; set; }
 
     public bool? Online { get; set; }
+    public bool? Gender { get; set; }
 
     public virtual ICollection<Chat> ChatReceiverNavigations { get; set; } = new List<Chat>();
 
@@ -40,6 +41,8 @@ public partial class User
     public virtual ICollection<Notification> NotificationSenderNavigations { get; set; } = new List<Notification>();
 
     public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
+
+    public virtual ICollection<Reaction> Reactions { get; set; } = new List<Reaction>();
 
     public virtual ICollection<UserGroup> UserGroups { get; set; } = new List<UserGroup>();
 }

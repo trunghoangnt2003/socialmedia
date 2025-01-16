@@ -13,7 +13,11 @@ public partial class Reaction
 
     public int? Type { get; set; }
 
+    public int? User { get; set; }
+
     public virtual Comment? CommentNavigation { get; set; }
 
     public virtual Post? PostNavigation { get; set; }
+
+    public virtual User? UserNavigation { get; set; }
 }

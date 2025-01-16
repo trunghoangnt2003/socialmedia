@@ -41,5 +41,7 @@ public partial class User
 
     public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
 
+    public virtual ICollection<Reaction> Reactions { get; set; } = new List<Reaction>();
+
     public virtual ICollection<UserGroup> UserGroups { get; set; } = new List<UserGroup>();
 }

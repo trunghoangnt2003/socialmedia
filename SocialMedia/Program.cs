@@ -1,3 +1,4 @@
+using CloudinaryDotNet;
 using Microsoft.EntityFrameworkCore;
 using SocialMedia.Models;
 using SocialMedia.Services;
@@ -9,11 +10,25 @@ namespace SocialMedia
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-            var connectionString = builder.Configuration.GetConnectionString("DBContext");
+            var configuration = builder.Configuration;
+
+            //get configuration
+            var connectionString = configuration.GetConnectionString("DBContext");
+            var cloudName = configuration.GetValue<string>("AccountSettings:CloudName");
+            var apiKey = configuration.GetValue<string>("AccountSettings:ApiKey");
+            var apiSecret = configuration.GetValue<string>("AccountSettings:ApiSecret");
+
+            if (new[] { cloudName, apiKey, apiSecret }.Any(string.IsNullOrWhiteSpace))
+            {
+                throw new ArgumentException("Please specify Cloudinary account details!");
+            }
+
             // Add services to the container.
             builder.Services.AddControllersWithViews();
             builder.Services.AddSignalR();
 
+            builder.Services.AddSingleton(new Cloudinary(new Account(cloudName, apiKey, apiSecret)));
+            builder.Services.AddSingleton<CloudinaryServices>();
             builder.Services.AddDbContext<SocialNetworkContext>(options =>
             {
                 options.UseSqlServer(connectionString);

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using SocialMedia.Models;
 using SocialMedia.Services;
 using System.Diagnostics;
@@ -9,15 +10,19 @@ namespace SocialMedia.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private CloudinaryServices _cloudinaryServices;
+        private SocialNetworkContext _socialNetworkContext;
 
-        public HomeController(ILogger<HomeController> logger, CloudinaryServices cloudinaryServices)
+        public HomeController(ILogger<HomeController> logger, CloudinaryServices cloudinaryServices, SocialNetworkContext socialNetworkContext)
         {
             _logger = logger;
             _cloudinaryServices = cloudinaryServices;
+            _socialNetworkContext=socialNetworkContext;
         }
 
         public IActionResult Index()
         {
+            var listFriends = _socialNetworkContext.Friends.Where(f => f.User == 1).Include(f => f.Friend1Navigation);
+            ViewBag.Friends = listFriends.ToList();
             return View();
         }
         [HttpPost]

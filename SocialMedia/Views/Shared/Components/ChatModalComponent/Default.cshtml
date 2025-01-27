@@ -1,0 +1,63 @@
+﻿@{
+	User friend;
+}
+<style>
+
+	.chat-container {
+		max-width: 320px;
+		border-radius: 10px;
+		box-shadow: 5px 5px 5px #888888, -5px -5px 10px #cccccc;
+		display: none;
+	}
+
+		.chat-container.active {
+			display: block;
+		}
+
+
+	.chat-header {
+		background-color: #3277ff;
+	}
+
+	.chat-body {
+		height: 340px;
+		overflow-y: auto;
+	}
+
+	.chat-footer {
+		background-color: #3277ff;
+	}
+
+		.chat-footer input {
+			flex-grow: 1;
+			border-radius: 18px;
+			color: #e4e6eb;
+		}
+
+			.chat-footer input::placeholder {
+				color: #b0b3b8;
+			}
+</style>
+
+<div id="chat-modal" class="chat-container overflow-hidden shadow-lg">
+	<div class="chat-header d-flex align-items-center p-2">
+		<div class="position-relative me-3">
+			<img src="https://scontent.fhph3-1.fna.fbcdn.net/v/t39.30808-6/468506906_1256036072118428_4942223550658486191_n.jpg?_nc_cat=111&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeEQK9c8Erk1osghBe-iLGTP80y1j86jgnDzTLWPzqOCcFp43_soIcOH-SgZ2N1HPKfjF5lDVXpHz2u2WvwKRG5e&_nc_ohc=xmhkTmmd_-UQ7kNvgFe8JLN&_nc_zt=23&_nc_ht=scontent.fhph3-1.fna&_nc_gid=A8hTjWMNToDzy-uWA3XutgG&oh=00_AYDg8gia24jSfqf-DSpruaHW4NT1SHj4nMkdknyB-daCYg&oe=67999707"
+				 alt="Avatar of HUY"
+				 class="rounded-circle"
+				 width="40" height="40">
+			<div class="status rounded-circle border border-white border-2 position-absolute bottom-0 end-0 "></div>
+		</div>
+		<span class="fs-6">Nguyen Manh Huy</span>
+		<div class="close-button" onclick="OpenChat()">
+			<i class="fas fa-times"></i>
+		</div>
+	</div>
+	<div class="chat-body bg-white p-10">
+		components
+	</div>
+	<div class="chat-footer d-flex align-items-center p-2 ">
+		<input placeholder="Aa" type="text" class="py-1 px-2 border-0 text-black" />
+	</div>
+</div>
+

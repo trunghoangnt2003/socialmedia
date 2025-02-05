@@ -43,6 +43,8 @@ namespace SocialMedia.Controllers
                 return View();
             }
 
+            HttpContext.Session.SetString("admin", user.Name);
+
         }
     }
 }

@@ -11,10 +11,8 @@ namespace SocialMedia.Controllers.Share.Components
         {
             this._context = context;
         }
-
-        public IViewComponentResult Invoke()
+        public IViewComponentResult Invoke(User friend)
         {
-            var friend = _context.Users.Where(u => u.Id == 2);
             return View(friend);
         }
     }

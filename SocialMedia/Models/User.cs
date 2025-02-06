@@ -25,6 +25,7 @@ public partial class User
 
     public bool? Online { get; set; }
     public bool? Gender { get; set; }
+    public int Role { get; set; }
 
     public virtual ICollection<Chat> ChatReceiverNavigations { get; set; } = new List<Chat>();
 

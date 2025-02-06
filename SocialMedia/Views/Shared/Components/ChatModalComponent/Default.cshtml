@@ -1,6 +1,4 @@
-﻿@{
-	User friend;
-}
+﻿@model SocialMedia.Models.User
 <style>
 
 	.chat-container {
@@ -10,9 +8,9 @@
 		display: none;
 	}
 
-		.chat-container.active {
-			display: block;
-		}
+	.chat-container.active {
+		display: block;
+	}
 
 
 	.chat-header {
@@ -28,36 +26,69 @@
 		background-color: #3277ff;
 	}
 
-		.chat-footer input {
+	.chat-footer input {
 			flex-grow: 1;
 			border-radius: 18px;
 			color: #e4e6eb;
-		}
+	}
 
-			.chat-footer input::placeholder {
-				color: #b0b3b8;
-			}
+	.chat-footer input::placeholder {
+		color: #b0b3b8;
+	}
+
+	.close-button{
+		cursor: pointer;
+	}
+
+	#preview {
+		overflow-x: auto;
+		width: 90%;
+		position: relative;
+		margin: auto;
+		display: flex;
+	}
+
+	figure {
+		width: 60px;
+		margin-right: 5px;
+		display: flex;
+		justify-content:center;
+		align-items:center;
+		background-color: aliceblue;
+		border-radius: 6px;
+	}
 </style>
 
 <div id="chat-modal" class="chat-container overflow-hidden shadow-lg">
-	<div class="chat-header d-flex align-items-center p-2">
-		<div class="position-relative me-3">
-			<img src="https://scontent.fhph3-1.fna.fbcdn.net/v/t39.30808-6/468506906_1256036072118428_4942223550658486191_n.jpg?_nc_cat=111&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeEQK9c8Erk1osghBe-iLGTP80y1j86jgnDzTLWPzqOCcFp43_soIcOH-SgZ2N1HPKfjF5lDVXpHz2u2WvwKRG5e&_nc_ohc=xmhkTmmd_-UQ7kNvgFe8JLN&_nc_zt=23&_nc_ht=scontent.fhph3-1.fna&_nc_gid=A8hTjWMNToDzy-uWA3XutgG&oh=00_AYDg8gia24jSfqf-DSpruaHW4NT1SHj4nMkdknyB-daCYg&oe=67999707"
-				 alt="Avatar of HUY"
+	<div class="chat-header row align-items-center p-2">
+		<div class="position-relative col-md-2">
+			<img src="https://scontent.fhph3-1.fna.fbcdn.net/v/t39.30808-1/468506906_1256036072118428_4942223550658486191_n.jpg?stp=dst-jpg_s160x160_tt6&_nc_cat=111&ccb=1-7&_nc_sid=e99d92&_nc_ohc=LfCe7g3eyMYQ7kNvgGpugWh&_nc_zt=24&_nc_ht=scontent.fhph3-1.fna&_nc_gid=AXAg75f5wx700HwK7tEmSRt&oh=00_AYCWmS6nKECxNztXmZuQcFjCWzI8EDpc-CGBgp2Afwt5xw&oe=67A40605"
+				 alt="Avatar of @Model.Name"
 				 class="rounded-circle"
 				 width="40" height="40">
 			<div class="status rounded-circle border border-white border-2 position-absolute bottom-0 end-0 "></div>
 		</div>
-		<span class="fs-6">Nguyen Manh Huy</span>
-		<div class="close-button" onclick="OpenChat()">
+		<span class="fs-6 col-md-8"> @Model.Name </span>
+		<div class="close-button col-md-2 " onclick="OpenChat(@Model.Id)">
 			<i class="fas fa-times"></i>
 		</div>
 	</div>
-	<div class="chat-body bg-white p-10">
-		components
+	<div class="chat-body bg-white p-10" id="chat-body">
 	</div>
-	<div class="chat-footer d-flex align-items-center p-2 ">
-		<input placeholder="Aa" type="text" class="py-1 px-2 border-0 text-black" />
+	<div class="chat-footer p-2 ">
+		<div id="preview"></div>
+		<div class="d-flex align-items-center">
+			<input hidden  id="friend-id" name="friendID" value="@Model.Id" />
+			<div class="input-files">
+				<label for="fileupload">
+					<i class="fa-solid fa-file-arrow-up fs-4 m-2 text-white" ></i>
+				</label>
+				<input id="fileupload" type="file" onchange="preview()" class="d-none" name="images" multiple accept="image/*,video/*,audio/*">
+			</div>
+			<input placeholder="Aa" type="text" id="content" name="content" class="py-1 px-2 border-0 text-black" />
+			<button class="btn" onclick="SendMessage()">  <i class="fa fa-paper-plane fs-6 text-white"></i></button>
+		</div>
 	</div>
 </div>
+
 

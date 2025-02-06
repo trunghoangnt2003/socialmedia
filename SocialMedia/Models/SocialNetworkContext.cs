@@ -218,6 +218,7 @@ public partial class SocialNetworkContext : DbContext
                 .IsFixedLength()
                 .HasColumnName("phone");
             entity.Property(e => e.Gender).HasColumnName("gender");
+            entity.Property(e => e.Role).HasColumnName("role");
         });
 
         modelBuilder.Entity<UserGroup>(entity =>

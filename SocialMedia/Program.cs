@@ -1,5 +1,6 @@
-using CloudinaryDotNet;
+﻿using CloudinaryDotNet;
 using Microsoft.EntityFrameworkCore;
+using SocialMedia.Controllers;
 using SocialMedia.Models;
 using SocialMedia.Services;
 
@@ -9,7 +10,10 @@ namespace SocialMedia
     {
         public static void Main(string[] args)
         {
-            var builder = WebApplication.CreateBuilder(args);
+			string encryptedText = "+L9zkNrjk5k=";
+			string decryptedText =LoginController.Decrypt(encryptedText, true); // useHashing = true
+			Console.WriteLine("Giải mã: " + decryptedText);
+			var builder = WebApplication.CreateBuilder(args);
             var configuration = builder.Configuration;
 
             //get configuration

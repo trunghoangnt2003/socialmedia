@@ -1,4 +1,14 @@
-﻿var emailLabel = document.querySelector('#loginEmailLabel'), email = document.querySelector('#loginEmail'), passwordLabel = document.querySelector('#loginPasswordLabel'), password = document.querySelector('#loginPassword'), showPasswordCheck = document.querySelector('#showPasswordCheck'), showPasswordToggle = document.querySelector('#showPasswordToggle'), mySVG = document.querySelector('.svgContainer'), twoFingers = document.querySelector('.twoFingers'), armL = document.querySelector('.armL'), armR = document.querySelector('.armR'), eyeL = document.querySelector('.eyeL'), eyeR = document.querySelector('.eyeR'), nose = document.querySelector('.nose'), mouth = document.querySelector('.mouth'), mouthBG = document.querySelector('.mouthBG'), mouthSmallBG = document.querySelector('.mouthSmallBG'), mouthMediumBG = document.querySelector('.mouthMediumBG'), mouthLargeBG = document.querySelector('.mouthLargeBG'), mouthMaskPath = document.querySelector('#mouthMaskPath'), mouthOutline = document.querySelector('.mouthOutline'), tooth = document.querySelector('.tooth'), tongue = document.querySelector('.tongue'), chin = document.querySelector('.chin'), face = document.querySelector('.face'), eyebrow = document.querySelector('.eyebrow'), outerEarL = document.querySelector('.earL .outerEar'), outerEarR = document.querySelector('.earR .outerEar'), earHairL = document.querySelector('.earL .earHair'), earHairR = document.querySelector('.earR .earHair'), hair = document.querySelector('.hair'), bodyBG = document.querySelector('.bodyBGnormal'), bodyBGchanged = document.querySelector('.bodyBGchanged');
+﻿var emailLabel = document.querySelector('#loginEmailLabel'),
+	email = document.querySelector('#loginEmail'),
+	passwordLabel = document.querySelector('#loginPasswordLabel'),
+	password = document.querySelector('#loginPassword'),
+	loginPasswordConfirm = document.querySelector('#loginPasswordConfirm'),
+	loginPasswordConfirmLabel = document.querySelector('#loginPasswordConfirmLabel'),
+	showPasswordCheck = document.querySelector('#showPasswordCheck'),
+	showPasswordToggle = document.querySelector('#showPasswordToggle'),
+	mySVG = document.querySelector('.svgContainer'),
+	twoFingers = document.querySelector('.twoFingers'),
+	armL = document.querySelector('.armL'), armR = document.querySelector('.armR'), eyeL = document.querySelector('.eyeL'), eyeR = document.querySelector('.eyeR'), nose = document.querySelector('.nose'), mouth = document.querySelector('.mouth'), mouthBG = document.querySelector('.mouthBG'), mouthSmallBG = document.querySelector('.mouthSmallBG'), mouthMediumBG = document.querySelector('.mouthMediumBG'), mouthLargeBG = document.querySelector('.mouthLargeBG'), mouthMaskPath = document.querySelector('#mouthMaskPath'), mouthOutline = document.querySelector('.mouthOutline'), tooth = document.querySelector('.tooth'), tongue = document.querySelector('.tongue'), chin = document.querySelector('.chin'), face = document.querySelector('.face'), eyebrow = document.querySelector('.eyebrow'), outerEarL = document.querySelector('.earL .outerEar'), outerEarR = document.querySelector('.earR .outerEar'), earHairL = document.querySelector('.earL .earHair'), earHairR = document.querySelector('.earR .earHair'), hair = document.querySelector('.hair'), bodyBG = document.querySelector('.bodyBGnormal'), bodyBGchanged = document.querySelector('.bodyBGchanged');
 var activeElement, curEmailIndex, screenCenter, svgCoords, emailCoords, emailScrollMax, chinMin = .5, dFromC, mouthStatus = "small", blinking, eyeScale = 1, eyesCovered = false, showPasswordClicked = false;
 var eyeLCoords, eyeRCoords, noseCoords, mouthCoords, eyeLAngle, eyeLX, eyeLY, eyeRAngle, eyeRX, eyeRY, noseAngle, noseX, noseY, mouthAngle, mouthX, mouthY, mouthR, chinX, chinY, chinS, faceX, faceY, faceSkew, eyebrowSkew, outerEarX, outerEarY, hairX, hairS;
 
@@ -21,7 +31,7 @@ function calculateFaceMove(e) {
 	document.body.appendChild(div);
 	div.textContent = email.value.substr(0, carPos);
 	span.textContent = email.value.substr(carPos) || '.';
-	div.appendChild(span);
+	(document.createElement('div')).appendChild(span);
 
 	if (email.scrollWidth <= emailScrollMax) {
 		caretCoords = getPosition(span);
@@ -148,6 +158,7 @@ function onEmailLabelClick(e) {
 
 function onPasswordFocus(e) {
 	activeElement = "password";
+	activeElement = "loginPasswordConfirm";
 	if (!eyesCovered) {
 		coverEyes();
 	}
@@ -156,7 +167,7 @@ function onPasswordFocus(e) {
 function onPasswordBlur(e) {
 	activeElement = null;
 	setTimeout(function () {
-		if (activeElement == "toggle" || activeElement == "password") {
+		if (activeElement == "toggle" || activeElement == "password" || activeElement == "loginPasswordConfirm") {
 		} else {
 			uncoverEyes();
 		}
@@ -174,7 +185,7 @@ function onPasswordToggleBlur(e) {
 	activeElement = null;
 	if (!showPasswordClicked) {
 		setTimeout(function () {
-			if (activeElement == "password" || activeElement == "toggle") {
+			if (activeElement == "password" || activeElement == "toggle" || activeElement =="loginPasswordConfirm") {
 			} else {
 				uncoverEyes();
 			}
@@ -195,11 +206,13 @@ function onPasswordToggleChange(e) {
 		// if checkbox is checked, show password
 		if (e.target.checked) {
 			password.type = "text";
+			loginPasswordConfirm.type = "text"
 			spreadFingers();
 
 			// if checkbox is off, hide password
 		} else {
 			password.type = "password";
+			loginPasswordConfirm.type = "text";
 			closeFingers();
 		}
 	}, 100);

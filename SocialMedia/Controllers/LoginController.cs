@@ -11,39 +11,45 @@ namespace SocialMedia.Controllers
 
 		public LoginController(SocialNetworkContext context)
 		{
-			_context = context; // Dependency Injection
+			_context = context; 
 		}
-		[HttpGet]
-		public IActionResult Login()
+
+		public IActionResult Index()
 		{
 			if (HttpContext.Session.GetString("user") == null)
 			{
-				return View();
+				ViewBag.HideHeaderFooter = true;
+
+                return View();
 			}
 			else
 			{
 				return RedirectToAction("Privacy", "Home");
 			}
 		}
-
 		[HttpPost]
-		public IActionResult login(string usename, string password)
+		public IActionResult Index(string usename, string password)
 		{
 			string encryptedInputPassword = Encrypt(password, true);
 			var account = _context.Users.FirstOrDefault(a => a.Email == usename && a.Password == encryptedInputPassword);
-			if (account != null)
+			if (account != null && account.IsActive == true)
 			{
-				HttpContext.Session.SetString("user", usename);
-				return RedirectToAction("Privacy", "Home");
+					HttpContext.Session.SetString("user", usename);
+					return RedirectToAction("Privacy", "Home");
 			}
-			else
+			else if(account == null)
 			{
-				ViewBag.ErrorMessage = "Username or password not true! Please check again!";
-				return View();
+				ViewBag.ErrorMessage = "Username or password not true!";
+			} else if(account.IsActive == false)
+			{
+				 ViewBag.ErrorMessage = "Account is not active!";
 			}
+			ViewBag.HideHeaderFooter = true;
+
+            return View();
 		}
 
-		public string Encrypt(string toEncrypt, bool useHashing)
+		public static string Encrypt(string toEncrypt, bool useHashing)
 		{
 			byte[] keyArray;
 			byte[] toEncryptArray = Encoding.UTF8.GetBytes(toEncrypt);
@@ -64,7 +70,7 @@ namespace SocialMedia.Controllers
 			return Convert.ToBase64String(resultArray, 0, resultArray.Length);
 		}
 
-		public string Decrypt(string toDecrypt, bool useHashing)
+		public static string Decrypt(string toDecrypt, bool useHashing)
 		{
 			byte[] keyArray;
 			byte[] toEncryptArray = Convert.FromBase64String(toDecrypt);

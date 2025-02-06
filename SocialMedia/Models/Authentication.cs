@@ -13,7 +13,6 @@ namespace SocialMedia.Models
 				context.Result = new RedirectToRouteResult(new RouteValueDictionary
 			{
 				{ "Controller", "Login" },
-				{ "Action", "Login" }
 			});
 			}
 			base.OnActionExecuting(context);

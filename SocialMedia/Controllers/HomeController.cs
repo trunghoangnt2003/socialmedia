@@ -26,10 +26,10 @@ namespace SocialMedia.Controllers
             return View();
         }
         [HttpPost]
-        public async Task<IActionResult> Index(IFormFile[] images)
+        public  IActionResult Index(IFormFile[] images)
         {
             if (images == null)return View();
-            var res = await _cloudinaryServices.PutFilesToCloundinary(images);
+            var res =  _cloudinaryServices.PutFilesToCloundinary(images);
             return View(res);
         }
 

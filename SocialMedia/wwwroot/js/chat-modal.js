@@ -128,7 +128,7 @@ function SendMessage() {
     formData.append("content", content);
 
     for (var i = 0; i < files.length; i++) {
-        formData.append("images", files[i]);
+        formData.append("files", files[i]);
     }
 
     fetch('/Chat/SendMessage', {

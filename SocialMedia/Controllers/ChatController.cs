@@ -22,9 +22,10 @@ namespace SocialMedia.Controllers
         }
 
         [HttpPost]
-        public void SendMessage(IFormFile[] images, string content, int friendID)
+        public void SendMessage(IFormFile[] files, string content, int friendID)
         {
-            content = "";
+            List<Dictionary<string, string>> resClound = _cloudinaryServices.PutFilesToCloundinary(files);
+            
         }
 
         [HttpGet]

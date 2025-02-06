@@ -18,13 +18,13 @@ namespace SocialMedia.Services
             _cloudinary=cloudinary;
         }
 
-        public  async Task<List<Dictionary<string, string>>> PutFilesToCloundinary(IFormFile[] files)
+        public List<Dictionary<string, string>> PutFilesToCloundinary(IFormFile[] files)
         {
             var results = new List<Dictionary<string, string>>();
 
             foreach (var file in files)
             {
-                RawUploadParams uploadParams = new RawUploadParams();
+                    RawUploadParams uploadParams = new RawUploadParams();
 
                 if (file.ContentType.StartsWith("image/"))
                 {
@@ -47,15 +47,15 @@ namespace SocialMedia.Services
                 }
                 else 
                 {
-                    uploadParams = new RawUploadParams
+                    uploadParams = new AutoUploadParams
                     {
                         File = new FileDescription(file.FileName, file.OpenReadStream()),
                         Folder = Folder,
-                        Tags = Tags
+                        Tags = Tags,
                     };
                 }
 
-                var result = await _cloudinary.UploadAsync(uploadParams).ConfigureAwait(false);
+                var result =  _cloudinary.Upload(uploadParams);
 
                 var imageProperties = new Dictionary<string, string>();
                 foreach (var token in result.JsonObj.Children())

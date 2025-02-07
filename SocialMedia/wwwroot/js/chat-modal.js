@@ -12,11 +12,8 @@
                     return;
                 }
                 chatbox.innerHTML = "";
-                console.log("close");
                 return;
             }
-
-            console.log("open" + friendId);
             chatbox.innerHTML = html
             chatbox.children[1].classList.toggle("active");
             LoadChatData(friendId);
@@ -101,7 +98,6 @@ function LoadChatData(friendId) {
                     </div>`;
                 }
             });
-            console.log(messages);
             document.getElementById("chat-body").innerHTML = messages;
         })
         .catch(error => {
@@ -116,8 +112,6 @@ function formatDateTime(isoString) {
 }
 
 function SendMessage() {
-    console.log("send message");
-
     var content = document.getElementById("content").value;
     var friendID = document.getElementById("friend-id").value;
     var fileInput = document.getElementById("fileupload");
@@ -131,19 +125,21 @@ function SendMessage() {
         formData.append("files", files[i]);
     }
 
-    fetch('/Chat/SendMessage', {
-        method: 'POST',
-        body: formData
-    })
-        .then(data => {
-            console.log(data);
-            document.getElementById("content").value = "";
-            fileInput.value = "";
+    try {
+        fetch('/Chat/SendMessage', {
+            method: 'POST',
+            body: formData
         })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('There was an error sending your message.');
-        });
+
+        document.getElementById("content").value= "";
+        fileInput.value = "";
+        let imageContainer = document.getElementById("preview");
+        imageContainer.innerHTML = "";
+
+    } catch (error) {
+        console.error('Error:', error);
+        alert('There was an error sending your message.');
+    };
 }
 
 function preview() {
@@ -159,7 +155,6 @@ function preview() {
         figure.appendChild(figCap);
 
         let media;
-        console.log(i)
         if (i.type.startsWith("video/")) {
             reader.onload = () => {
                 media = document.createElement("video");

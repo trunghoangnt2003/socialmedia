@@ -1,8 +1,7 @@
 ﻿using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
-using static System.Net.Mime.MediaTypeNames;
+using System.IO;
 
 namespace SocialMedia.Services
 {
@@ -18,19 +17,21 @@ namespace SocialMedia.Services
             _cloudinary=cloudinary;
         }
 
-        public List<Dictionary<string, string>> PutFilesToCloundinary(IFormFile[] files)
+        public async Task<List<Dictionary<string, string>>>  PutFilesToCloundinary(IFormFile[] files)
         {
             var results = new List<Dictionary<string, string>>();
 
             foreach (var file in files)
             {
-                    RawUploadParams uploadParams = new RawUploadParams();
+                RawUploadParams uploadParams = new RawUploadParams();
+                var stream = file.OpenReadStream();
 
+                var fileDescription = new FileDescription(file.FileName, stream);
                 if (file.ContentType.StartsWith("image/"))
                 {
                     uploadParams = new ImageUploadParams
                     {
-                        File = new FileDescription(file.FileName, file.OpenReadStream()),
+                        File = fileDescription,
                         Folder = Folder,
                         Tags = Tags
                     };
@@ -39,7 +40,7 @@ namespace SocialMedia.Services
                 {
                     uploadParams = new VideoUploadParams
                     {
-                        File = new FileDescription(file.FileName, file.OpenReadStream()),
+                        File = fileDescription,
                         Folder = Folder,
                         Tags = Tags,
                         EagerAsync = true,
@@ -49,13 +50,13 @@ namespace SocialMedia.Services
                 {
                     uploadParams = new AutoUploadParams
                     {
-                        File = new FileDescription(file.FileName, file.OpenReadStream()),
+                        File = fileDescription,
                         Folder = Folder,
                         Tags = Tags,
                     };
                 }
 
-                var result =  _cloudinary.Upload(uploadParams);
+                var result =  await _cloudinary.UploadAsync(uploadParams).ConfigureAwait(false); ;
 
                 var imageProperties = new Dictionary<string, string>();
                 foreach (var token in result.JsonObj.Children())

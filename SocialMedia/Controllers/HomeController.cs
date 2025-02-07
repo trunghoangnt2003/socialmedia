@@ -28,9 +28,9 @@ namespace SocialMedia.Controllers
         [HttpPost]
         public  IActionResult Index(IFormFile[] images)
         {
-            if (images == null)return View();
-            var res =  _cloudinaryServices.PutFilesToCloundinary(images);
-            return View(res);
+            //if (images == null)return View();
+            //var res =  _cloudinaryServices.PutFilesToCloundinary(images);
+            return View();
         }
 
         public IActionResult Privacy()

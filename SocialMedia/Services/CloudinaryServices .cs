@@ -1,8 +1,6 @@
 ﻿using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace SocialMedia.Services
 {
@@ -24,7 +22,7 @@ namespace SocialMedia.Services
 
             foreach (var file in files)
             {
-                    RawUploadParams uploadParams = new RawUploadParams();
+                RawUploadParams uploadParams = new RawUploadParams();
 
                 if (file.ContentType.StartsWith("image/"))
                 {

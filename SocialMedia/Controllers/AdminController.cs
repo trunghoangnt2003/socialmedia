@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using SocialMedia.Models;
 
 namespace SocialMedia.Controllers
@@ -35,6 +36,7 @@ namespace SocialMedia.Controllers
 
             if (user != null) 
             {
+                HttpContext.Session.SetString("adminId", user.Id.ToString());
                 return RedirectToAction("DashBoard");
             }
             else
@@ -43,8 +45,44 @@ namespace SocialMedia.Controllers
                 return View();
             }
 
-            HttpContext.Session.SetString("admin", user.Name);
+            
 
+        }
+
+        [HttpGet]
+        public IActionResult Home()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult ManageAccount()
+        {
+            return View(_context.Users.ToList());
+        }
+
+        [HttpPost]
+        public IActionResult ManageAccount(int id, bool isActive)
+        {
+            var user = _context.Users.FirstOrDefault( u =>  u.Id == id);
+            if (user != null)
+            {
+                user.IsActive = isActive;
+                _context.SaveChanges();
+            }
+            return View();
+        }
+
+        [HttpGet] 
+        public IActionResult ManagePost()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult Setting()
+        {
+            return View();
         }
     }
 }

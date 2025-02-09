@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using SocialMedia.Models;
 using SocialMedia.Services;
@@ -9,11 +10,13 @@ namespace SocialMedia.Controllers
     {
         private CloudinaryServices _cloudinaryServices;
         private SocialNetworkContext _socialNetworkContext;
+        private readonly SignalRService _signalR;
 
-        public ChatController( CloudinaryServices cloudinaryServices, SocialNetworkContext socialNetworkContext)
+        public ChatController( CloudinaryServices cloudinaryServices, SocialNetworkContext socialNetworkContext, SignalRService signalR)
         {
             _cloudinaryServices = cloudinaryServices;
             _socialNetworkContext=socialNetworkContext;
+            _signalR=signalR;
         }
         public async Task<IActionResult> GetChatModal(int friendId)
         {
@@ -24,6 +27,10 @@ namespace SocialMedia.Controllers
         [HttpPost]
         public async Task SendMessage(IFormFile[] files, string content, int friendID)
         {
+            string user = HttpContext.Session.GetString("User");
+            if (string.IsNullOrEmpty(user)) return;
+
+            int userID = int.Parse(user);
             List<Dictionary<string, string>> resClound = await _cloudinaryServices.PutFilesToCloundinary(files);
 
             if (resClound.Count > 0)
@@ -35,7 +42,7 @@ namespace SocialMedia.Controllers
                     Chat chat = new Chat
                     {
                         Contents = url,
-                        Sender = 1,
+                        Sender = userID,
                         Receiver = friendID,
                         SendTime = DateTime.Now,
                         Status = (int?)Status.SEND,
@@ -59,7 +66,7 @@ namespace SocialMedia.Controllers
                 Chat chat = new Chat
                 {
                     Contents = content,
-                    Sender = 1,
+                    Sender = userID,
                     Receiver = friendID,
                     Status =  (int?)Types.TEXT,
                     SendTime = DateTime.Now,
@@ -67,14 +74,18 @@ namespace SocialMedia.Controllers
                 _socialNetworkContext.Chats.Add(chat);
             }
             _socialNetworkContext.SaveChanges();
+            await _signalR.SendMessage(userID.ToString(),friendID.ToString());
         }
 
         [HttpGet]
         public List<Chat> getAllMessages(int friendId)
         {
-            int user = 1;
+            string user = HttpContext.Session.GetString("User");
+            if (string.IsNullOrEmpty(user)) return new List<Chat>();
+
+            int userID = int.Parse(user);
             var listMessage = _socialNetworkContext.Chats
-                .Where(c => (c.Sender == user && c.Receiver == friendId) || (c.Sender == friendId && c.Receiver == user))
+                .Where(c => (c.Sender == userID && c.Receiver == friendId) || (c.Sender == friendId && c.Receiver == userID))
                 .OrderBy(p => p.SendTime);
             return listMessage.ToList();
         }

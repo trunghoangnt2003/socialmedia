@@ -73,5 +73,17 @@ namespace SocialMedia.Services
             Debug.WriteLine("Disconnected: " + Context.ConnectionId);
             await base.OnDisconnectedAsync(exception);
         }
+
+       public async Task SendMessage(string sender, string reciver)
+        {
+            var httpContext = Context.GetHttpContext();
+            var receiverConnectionId = connectedUser[reciver];
+            var senderConnectionId = connectedUser[sender];
+            if (receiverConnectionId == null) return;
+            
+            await Clients.Client(receiverConnectionId).SendAsync("ReceiveMessageFrom", sender);
+            await Clients.Client(senderConnectionId).SendAsync("SendMessageTo", reciver);
+        }
+
     }
 }

@@ -21,8 +21,13 @@ namespace SocialMedia.Controllers
 
         public IActionResult Index()
         {
-            var listFriends = _socialNetworkContext.Friends.Where(f => f.User == 1).Include(f => f.Friend1Navigation);
+            string user = HttpContext.Session.GetString("User");
+            if (string.IsNullOrEmpty(user)) return View();
+
+            int userID = int.Parse(user);
+            var listFriends = _socialNetworkContext.Friends.Where(f => f.User == userID).Include(f => f.Friend1Navigation);
             ViewBag.Friends = listFriends.ToList();
+            
             return View();
         }
         [HttpPost]
@@ -35,6 +40,12 @@ namespace SocialMedia.Controllers
 
         public IActionResult Privacy()
         {
+            return View();
+        }
+        [HttpPost]
+        public IActionResult Privacy(string id)
+        {
+            HttpContext.Session.SetString("User",id);
             return View();
         }
 

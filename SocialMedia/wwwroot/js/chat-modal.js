@@ -1,4 +1,6 @@
-﻿function OpenChat(friendId) {
+﻿var defaultscrollTop = 0;
+
+function OpenChat(friendId) {
     fetch(`/Chat/GetChatModal?friendId=${friendId}`)
         .then(response => response.text())
         .then(html => {
@@ -16,7 +18,7 @@
             }
             chatbox.innerHTML = html
             chatbox.children[1].classList.toggle("active");
-            LoadChatData(friendId);
+            LoadChatData(friendId, false);
         })
         .catch(error => {
             console.error("Error", error);
@@ -24,9 +26,9 @@
 
 }
 
-function LoadChatData(friendId) {
+function LoadChatData(friendId,skippscroll) {
     let messages = " ";
-    fetch(`Chat/getAllMessages?friendId=${friendId}`, {
+    fetch(`../Chat/getAllMessages?friendId=${friendId}`, {
         method: 'GET',
     })
         .then(response => response.json())
@@ -98,7 +100,11 @@ function LoadChatData(friendId) {
                     </div>`;
                 }
             });
-            document.getElementById("chat-body").innerHTML = messages;
+            var chatBody = document.getElementById("chat-body");
+            chatBody.innerHTML = messages;
+            if (!skippscroll) chatBody.scrollTop = chatBody.scrollHeight;
+            if (defaultscrollTop == 0) defaultscrollTop = chatBody.scrollTop;
+            chatBody.onscroll = function () { scrollFunction(chatBody, defaultscrollTop) };;
         })
         .catch(error => {
             console.error('Error:', error);
@@ -183,5 +189,18 @@ function preview() {
         }
         imageContainer.appendChild(figure);
         reader.readAsDataURL(i);
+    }
+}
+
+function scrollToBottom() {
+    var chatBody = document.getElementById("chat-body");
+    chatBody.scrollTop = chatBody.scrollHeight;
+}
+
+function scrollFunction(chatBody, defaultscrollTop) {
+    if (defaultscrollTop - chatBody.scrollTop > 30) {
+        document.getElementById("scroll-btn").style.display = "block";
+    } else {
+        document.getElementById("scroll-btn").style.display = "none";
     }
 }

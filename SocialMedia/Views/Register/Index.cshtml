@@ -115,7 +115,7 @@
 		<div class="col-md-6">
 			<div class="inputGroup inputGroup1">
 		<label for="loginEmail" id="loginEmailLabel">Email</label>
-		<input type="email" id="loginEmail" name="email" maxlength="254" style="width = 600" />
+		<input type="email" id="loginEmail" name="email" maxlength="254" style="width = 600" required/>
 		<p class="helper helper1">email@domain.com</p>
 	</div>
 	<div>@if (!string.IsNullOrEmpty(ViewBag.ErrorEmail))
@@ -136,7 +136,7 @@
 		<div style="display: flex">
 		<label for="loginPasswordConfirm" id="loginPasswordConfirmLabel">Password Confirm</label>
 		</div>
-		<input type="password" id="loginPasswordConfirm"  name="passwordConfirm"/>
+		<input type="password" id="loginPasswordConfirm"  name="passwordConfirm" required/>
 	</div>
 	<div>@if (!string.IsNullOrEmpty(ViewBag.ErrorPassword))
 							{
@@ -146,37 +146,44 @@
 		<div style="display: flex">
 		<label for="Address" id="addressLabel">Address</label>
 		</div>
-		<input type="text" id="addressInput"  name="address"/>
+		<input type="text" id="addressInput"  name="address" required/>
 	</div>
 		</div>
 		<div class="col-md-6">
 			<div class="inputGroup inputGroup1">
 		<label for="name" id="nameLabel">Full Name</label>
-		<input type="text" id="nameUser" name="fullName" maxlength="254" />
+		<input type="text" id="nameUser" name="fullName" maxlength="254" required />
 	</div>
 	<div class="inputGroup inputGroup2">
 		<div>
 		<label for="phone" id="phoneLabel">Phone Number</label>
 		</div>
-		<input type="number" id="phoneInput"  name="phoneNumber"/>
+		<input type="number" id="phoneInput"  name="phoneNumber" required/>
 	</div>
+		<div>@if (!string.IsNullOrEmpty(ViewBag.ErrorPhone))
+							{
+	<p style="color: red;margin-left: 130px;">@ViewBag.ErrorPhone</p>
+							} </div>
 	<div class="inputGroup inputGroup2" >
 	<div style="display: flex">
 		<label for="dateOfBirth" id="dateOfBirthLabel">Date of Birth</label>
 	</div>
-	<input style="width: 75%; height: 60px; border-radius: 4px;" type="date" id="dateOfBirth" name="dateOfBirth" />
+	<input style="width: 75%; height: 60px; border-radius: 4px;" type="date" id="dateOfBirth" name="dateOfBirth" required/>
 </div>
-
+	<div>@if (!string.IsNullOrEmpty(ViewBag.ErrorPassword))
+							{
+									<p style="color: red;margin-left: 130px;">@ViewBag.ErrorPassword</p>
+							} </div>
 	<div class="inputGroup inputGroup2">
 	<div style="display: flex;padding-top: 20px;">
 		<label id="genderLabel">Gender</label>
 	</div>
 	<div style="display: flex; gap: 10px; align-items: center;">
 		<label for="male">
-			<input type="radio" id="male" name="gender" value="male" /> Male
+			<input type="radio" id="male" name="gender" value="male" required/> Male
 		</label>
 		<label for="female">
-			<input type="radio" id="female" name="gender" value="female" /> Female
+			<input type="radio" id="female" name="gender" value="female" required/> Female
 		</label>
 </div>
 </div>

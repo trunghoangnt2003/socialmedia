@@ -24,7 +24,11 @@ namespace SocialMedia.Controllers
 		{
 			var checkGender = gender == "male";
 			var account = _context.Users.FirstOrDefault(acc => acc.Email == email);
+			var existingPhone = _context.Users.FirstOrDefault(acc => acc.Phone == phoneNumber);
 			var passwordEncrype = LoginController.Encrypt(password, true);
+			var avatarUser = checkGender
+				? "https://res.cloudinary.com/ddg2gdfee/image/upload/v1738900139/avatar_male_default_yjf1du.jpg"
+				: "https://res.cloudinary.com/ddg2gdfee/image/upload/v1738900139/avatar_female_default_tkxgkl.jpg";
 
 			if (account != null)
 			{
@@ -33,7 +37,14 @@ namespace SocialMedia.Controllers
 			else if (password != passwordConfirm)
 			{
 				ViewBag.ErrorPassword = "Password confirm does not match.";
+			}else if(existingPhone != null)
+			{
+				ViewBag.ErrorPhone = "Phone is exist";
 			}
+			else if(dateOfBirth == null)
+			{
+                ViewBag.ErrorDob = "Please true date of birth.";
+            }
 			else
 			{
 				var user = new User
@@ -45,6 +56,8 @@ namespace SocialMedia.Controllers
 					Phone = phoneNumber,
 					Dob = DateOnly.FromDateTime(dateOfBirth),
 					Gender = checkGender,
+					Avatar = avatarUser,
+					Role = 2,
 					IsActive = false 
 				};
 
@@ -56,8 +69,10 @@ namespace SocialMedia.Controllers
 
 				SendMail.SendVerificationEmail(email, subject, body);
                 ViewBag.UserEmail = email;
-                return View("RegisterSuccess");
+				ViewBag.HideHeaderFooter = true;
+				return View("RegisterSuccess");
 			}
+			ViewBag.HideHeaderFooter = true;
 			return View();
 		}
 
@@ -68,8 +83,10 @@ namespace SocialMedia.Controllers
 			{
 				user.IsActive = true;
 				_context.SaveChanges();
+				ViewBag.HideHeaderFooter = true;
 				return View("ConfirmSuccess"); 
 			}
+			ViewBag.HideHeaderFooter = true;
 			return View("ConfirmFailed"); 
 		}
 	}

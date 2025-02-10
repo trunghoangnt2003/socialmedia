@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using SocialMedia.Models;
 using System.Security.Cryptography;
 using System.Text;
@@ -34,8 +35,9 @@ namespace SocialMedia.Controllers
 			var account = _context.Users.FirstOrDefault(a => a.Email == usename && a.Password == encryptedInputPassword);
 			if (account != null && account.IsActive == true)
 			{
-					HttpContext.Session.SetString("user", usename);
-					return RedirectToAction("Privacy", "Home");
+                HttpContext.Session.SetString("User", account.Id.ToString());
+
+                return RedirectToAction("Privacy", "Home");
 			}
 			else if(account == null)
 			{

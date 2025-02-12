@@ -73,7 +73,7 @@ namespace SocialMedia.Controllers
                 };
                 _socialNetworkContext.Chats.Add(chat);
             }
-            _socialNetworkContext.SaveChanges();
+             _socialNetworkContext.SaveChanges();
             await _signalR.SendMessage(userID.ToString(),friendID.ToString());
         }
 

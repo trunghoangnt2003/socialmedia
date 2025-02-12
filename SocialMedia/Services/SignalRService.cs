@@ -74,16 +74,27 @@ namespace SocialMedia.Services
             await base.OnDisconnectedAsync(exception);
         }
 
-       public async Task SendMessage(string sender, string reciver)
+        public async Task SendMessage(string sender, string reciver)
         {
-            var httpContext = Context.GetHttpContext();
-            var receiverConnectionId = connectedUser[reciver];
-            var senderConnectionId = connectedUser[sender];
-            if (receiverConnectionId == null) return;
-            
-            await Clients.Client(receiverConnectionId).SendAsync("ReceiveMessageFrom", sender);
-            await Clients.Client(senderConnectionId).SendAsync("SendMessageTo", reciver);
+            var receiverConnectionId = "";
+            var senderConnectionId = "";
+            if (connectedUser.ContainsKey(reciver))
+            {
+                receiverConnectionId = connectedUser[reciver];
+                if (!string.IsNullOrEmpty(reciver))
+                {
+                    await Clients.Client(receiverConnectionId).SendAsync("ReceiveMessageFrom", sender);
+                }
+            }
+            if(connectedUser.ContainsKey(sender))
+            {
+                senderConnectionId = connectedUser[sender];
+                Console.WriteLine("dsadas");
+                if (!string.IsNullOrEmpty(sender))
+                {
+                    await Clients.Client(senderConnectionId).SendAsync("SendMessageTo", reciver);
+                }
+            }
         }
-
     }
 }

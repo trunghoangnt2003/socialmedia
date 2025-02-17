@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using SocialMedia.Models;
+using PagedList;
 
 namespace SocialMedia.Controllers
 {
@@ -17,11 +19,6 @@ namespace SocialMedia.Controllers
             return View();
         }
 
-        public IActionResult DashBoard()
-        {
-            return View();
-        }
-
         [HttpGet]
         public IActionResult Login()
         {
@@ -35,7 +32,18 @@ namespace SocialMedia.Controllers
 
             if (user != null) 
             {
-                return RedirectToAction("Home");
+                HttpContext.Session.SetString("adminId", user.Id.ToString());
+
+                if (user.Role == 1)
+                {
+                    return RedirectToAction("Home");
+                }
+                else
+                {
+                    //navigate to Home of user
+                    return RedirectToAction("Error");
+                }
+                
             }
             else
             {
@@ -43,8 +51,71 @@ namespace SocialMedia.Controllers
                 return View();
             }
 
-            HttpContext.Session.SetString("admin", user.Name);
+            
 
+        }
+
+        [HttpGet]
+        public IActionResult Home()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult ManageAccount(int? page)
+        {
+
+            int pageSize = 4;
+            int currentPage = page ?? 1;
+
+            var user = _context.Users.ToPagedList(currentPage, pageSize);
+
+            ViewBag.CurrentPage = currentPage;
+
+
+            return View(user);
+        }
+
+        [HttpPost]
+        public IActionResult ManageAccount(int id, bool isActive, int? page, string? searchByName)
+        {
+            // Toggle account status
+            var user = _context.Users.FirstOrDefault(u => u.Id == id);
+            if (user != null)
+            {
+                user.IsActive = isActive;
+                _context.SaveChanges();
+            }
+
+            // Handle search functionality
+            List<User> users = _context.Users.ToList();
+
+            if (!string.IsNullOrEmpty(searchByName))
+            {
+                // Case-insensitive partial match
+                users = users.Where(u => u.Name.Contains(searchByName)).ToList();
+            }
+
+            // Pagination (if needed)
+            int pageSize = 10;
+            int pageNumber = page ?? 1;
+
+            var pagedUsers = users.OrderBy(u => u.Name).ToPagedList(pageNumber, pageSize);
+
+            return View(pagedUsers); 
+        }
+
+
+        [HttpGet] 
+        public IActionResult ManagePost()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult Setting()
+        {
+            return View();
         }
     }
 }

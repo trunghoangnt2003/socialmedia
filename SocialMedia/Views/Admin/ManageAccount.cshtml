@@ -1,11 +1,17 @@
-﻿@model IEnumerable<SocialMedia.Models.User>
+﻿
+@model PagedList.IPagedList<SocialMedia.Models.User>
+@using PagedList.Mvc
+@using PagedList
+
+@{
+    Layout = "_LayoutAdmin";
+}
 
 <style>
     /* Table Styling */
     .table {
         width: 100%;
         border-collapse: collapse;
-        margin: 25px 0;
         font-size: 0.9em;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         min-width: 400px;
@@ -92,7 +98,7 @@
 
     /* Search Input Styling */
     .search-container {
-        margin-bottom: 20px;
+        margin: 20px 0;
     }
 
         .search-container input {
@@ -109,46 +115,102 @@
                 border-color: #2196F3;
                 box-shadow: 0 0 10px rgba(33, 150, 243, 0.5);
             }
+
+    .pagination-container {
+        display: flex;
+        justify-content: right;
+        margin-top: 20px;
+    }
+
+    .pagination-link {
+        padding: 5px 12px;
+        margin: 0 5px;
+        text-decoration: none;
+        background-color: #f1f1f1;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        color: #333;
+        transition: background-color 0.3s, color 0.3s;
+    }
+
+        .pagination-link:hover {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .pagination-link.active {
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+        }
 </style>
 
 <div class="row">
     <!-- Search Input -->
-    <div class="col-md-12 search-container">
-        <input type="text" id="searchInput" placeholder="Search by name..." />
+    <div class="search-container d-flex justify-content-between align-items-center" style="gap: 10px;">
+        <input style="width: 85%;" type="text" id="searchByName" placeholder="Search by name..." />
+
+
+        <i class="fa-solid fa-magnifying-glass" onclick="searchByName()"
+           style="font-size: 28px; color: #74C0FC; display: flex; align-items: center; justify-content: center;"></i>
+
+        <input style="width: 10%;" type="text" id="filter" placeholder="Filter by status" />
     </div>
+
+
 
     <!-- Table -->
     <div class="col-md-12">
-        <table class="table" id="userTable">
-            <thead>
-                <tr>
-                    <th>@Html.DisplayNameFor(model => model.Name)</th>
-                    <th>@Html.DisplayNameFor(model => model.Email)</th>
-                    <th>@Html.DisplayNameFor(model => model.Phone)</th>
-                    <th>@Html.DisplayNameFor(model => model.Dob)</th>
-                    <th>@Html.DisplayNameFor(model => model.Address)</th>
-                    <th>@Html.DisplayNameFor(model => model.IsActive)</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Model)
-                {
+        <div style="min-height: 65vh">
+            <table class="table" id="userTable">
+                <thead>
                     <tr>
-                        <td>@Html.DisplayFor(modelItem => item.Name)</td>
-                        <td>@Html.DisplayFor(modelItem => item.Email)</td>
-                        <td>@Html.DisplayFor(modelItem => item.Phone)</td>
-                        <td>@Html.DisplayFor(modelItem => item.Dob)</td>
-                        <td>@Html.DisplayFor(modelItem => item.Address)</td>
-                        <td>
-                            <label class="switch">
-                                <input type="checkbox" onclick="Toggle(this, @item.Id)" @(item.IsActive ? "checked" : "")>
-                                <span class="slider"></span>
-                            </label>
-                        </td>
+                        <th class="col-md-2">Name</th>
+                        <th class="col-md-2">Mail</th>
+                        <th class="col-md-1">Phone</th>
+                        <th class="col-md-1">Dob</th>
+                        <th class="col-md-4">Address</th>
+                        <th class="col-md-2">Status Account</th>
                     </tr>
+                </thead>
+                <tbody id="tableAccount">
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                            <td>@Html.DisplayFor(modelItem => item.Email)</td>
+                            <td>@Html.DisplayFor(modelItem => item.Phone)</td>
+                            <td>@Html.DisplayFor(modelItem => item.Dob)</td>
+                            <td>@Html.DisplayFor(modelItem => item.Address)</td>
+                            <td>
+                                <label class="switch">
+                                    <input type="checkbox" onclick="Toggle(this, @item.Id)" @(item.IsActive ? "checked" : "")>
+                                    <span class="slider"></span>
+                                </label>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div>
+            <div class="" style="display: flex; justify-content: right ">
+                Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+            </div>
+
+            <div class="pagination-container">
+                @for (int i = 1; i <= Model.PageCount; i++)
+                {
+                    <button class="pagination-link @(i == ViewBag.CurrentPage ? "active" : "")"
+                            onclick="loadPaged(@i)">
+                        @i
+                    </button>
                 }
-            </tbody>
-        </table>
+            </div>
+        </div>
+
+            
     </div>
 </div>
 
@@ -168,18 +230,28 @@
         });
     }
 
-    // Filter by Name Functionality
-    document.getElementById("searchInput").addEventListener("input", function () {
-        const searchValue = this.value.toLowerCase(); // Get the search input value
-        const rows = document.querySelectorAll("#userTable tbody tr"); // Get all table rows
 
-        rows.forEach(row => {
-            const name = row.querySelector("td").textContent.toLowerCase(); // Get the name from the first column
-            if (name.includes(searchValue)) {
-                row.style.display = ""; // Show the row if the name matches
-            } else {
-                row.style.display = "none"; // Hide the row if the name doesn't match
-            }
-        });
-    });
+    function loadPaged(page) {
+       
+        window.location.href = `./ManageAccount?page=${page}`;
+    }
+
+    function searchByName() {
+        const searchValue = document.getElementById("searchByName").value;
+
+        const formData = new FormData();
+        formData.append("searchByName", searchValue);
+
+        fetch("/Admin/ManageAccount", {
+            method: "POST",
+            body: formData
+        })
+            .then(response => response.text())
+            .then(data => {
+                console.log("Data " + data);
+                //document.getElementById("userTable").innerHTML = data;
+            });
+    }
+
+
 </script>

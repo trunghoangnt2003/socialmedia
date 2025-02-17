@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SocialMedia.Models;
+using PagedList;
 
 namespace SocialMedia.Controllers
 {
@@ -14,11 +15,6 @@ namespace SocialMedia.Controllers
             _context = context;
         }
         public IActionResult Index()
-        {
-            return View();
-        }
-
-        public IActionResult DashBoard()
         {
             return View();
         }
@@ -37,7 +33,7 @@ namespace SocialMedia.Controllers
             if (user != null) 
             {
                 HttpContext.Session.SetString("adminId", user.Id.ToString());
-                return RedirectToAction("DashBoard");
+                return RedirectToAction("Home");
             }
             else
             {
@@ -56,22 +52,49 @@ namespace SocialMedia.Controllers
         }
 
         [HttpGet]
-        public IActionResult ManageAccount()
+        public IActionResult ManageAccount(int? page)
         {
-            return View(_context.Users.ToList());
+
+            int pageSize = 4;
+            int currentPage = page ?? 1;
+
+            var user = _context.Users.ToPagedList(currentPage, pageSize);
+
+            ViewBag.CurrentPage = currentPage;
+
+
+            return View(user);
         }
 
         [HttpPost]
-        public IActionResult ManageAccount(int id, bool isActive)
+        public IActionResult ManageAccount(int id, bool isActive, int? page, string? searchByName)
         {
-            var user = _context.Users.FirstOrDefault( u =>  u.Id == id);
+            // Toggle account status
+            var user = _context.Users.FirstOrDefault(u => u.Id == id);
             if (user != null)
             {
                 user.IsActive = isActive;
                 _context.SaveChanges();
             }
-            return View();
+
+            // Handle search functionality
+            List<User> users = _context.Users.ToList();
+
+            if (!string.IsNullOrEmpty(searchByName))
+            {
+                // Case-insensitive partial match
+                users = users.Where(u => u.Name.Contains(searchByName)).ToList();
+            }
+
+            // Pagination (if needed)
+            int pageSize = 10;
+            int pageNumber = page ?? 1;
+
+            var pagedUsers = users.OrderBy(u => u.Name).ToPagedList(pageNumber, pageSize);
+
+            return View(pagedUsers); 
         }
+
 
         [HttpGet] 
         public IActionResult ManagePost()

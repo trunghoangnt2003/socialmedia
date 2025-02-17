@@ -61,7 +61,7 @@
 
 <body>
     <div class="container-fluid">
-        @RenderBody()
+        
         <div class="row">
             <!-- Sidebar -->
             <nav class="col-md-2 sidebar">
@@ -76,27 +76,27 @@
                     </div>
                     <ul class="nav flex-column item-sidebar">
                         <li class="nav-item">
-                            <a class="nav-link active" href="#" onclick="loadPage('/Admin/Home', this)">
+                            <a class="nav-link" href="./Home">
                                 <i class="fa-solid fa-house" style="color: #74C0FC;"></i>&nbsp;&nbsp;Home
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#" onclick="loadPage('/Admin/ManagePost', this)">
+                            <a class="nav-link" href="./ManagePost">
                                 <i class="fa-solid fa-newspaper" style="color: #74C0FC;"></i>&nbsp;&nbsp;Manage Post
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#" onclick="loadPage('/Admin/ManageAccount', this)">
+                            <a class="nav-link" href="./ManageAccount?page=1">
                                 <i class="fa-solid fa-user" style="color: #74C0FC;"></i>&nbsp;&nbsp;Manage Account
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#" onclick="loadPage('/Admin/Setting', this)">
+                            <a class="nav-link" href="./Setting">
                                 <i class="fa-solid fa-gear" style="color: #74C0FC;"></i>&nbsp;&nbsp;Setting
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#" onclick="showComponent('logout')">
+                            <a class="nav-link" href="#" >
                                 <i class="fa-solid fa-right-from-bracket" style="color: #74C0FC;"></i>&nbsp;&nbsp;Logout
                             </a>
                         </li>
@@ -107,47 +107,31 @@
 
             
             <main class="col-md-9 ">
-                
+                @RenderBody()
             </main>
         </div>
     </div>
 
     <script>
-        function loadPage(url, sidebarItem = null) {
-            fetch(url)
-                .then((response) => {
-                    if (!response.ok) {
-                        throw new Error("Failed to load page");
-                    }
-                    return response.text();
-                })
-                .then((html) => {
-                    // Inject the HTML content into the main content area
-                    const mainContent = document.querySelector("main");
-                    mainContent.innerHTML = html;
+        const navLinks = document.querySelectorAll(".nav-link");
+        const currentPath = window.location.pathname.split("/").pop(); // Get current page (e.g., Home, ManageAccount)
 
-                    // Handle the active state of the sidebar
-                    if (sidebarItem) {
-                        const sidebarLinks = document.querySelectorAll(".nav-link");
-                        sidebarLinks.forEach((link) => {
-                            link.classList.remove("active");
-                        });
+        navLinks.forEach(link => {
+            const linkPath = link.getAttribute("href").replace("./", "");
 
-                        sidebarItem.classList.add("active");
-                    }
-                })
-                .catch((error) => {
-                    console.error("Error loading page:", error);
-                    alert("Unable to load the page.");
-                });
-        }
+            // Set active if URL matches
+            if (currentPath === linkPath) {
+                link.classList.add("active");
+            }
 
-        document.addEventListener("DOMContentLoaded", () => {
-            // Load the default page on initial load
-            const defaultPage = '/Admin/ManageAccount';
-            const defaultSidebarItem = document.querySelector(".nav-link[href='#home']");
-            loadPage(defaultPage, defaultSidebarItem);
+            // Add click event to handle active class dynamically
+            link.addEventListener("click", function () {
+                navLinks.forEach(nav => nav.classList.remove("active")); // Remove active from all
+                this.classList.add("active"); // Add active to clicked link
+            });
         });
+
+        
     </script>
 
 

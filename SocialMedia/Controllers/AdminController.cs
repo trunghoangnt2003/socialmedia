@@ -35,7 +35,7 @@ namespace SocialMedia.Controllers
 
             if (user != null) 
             {
-                return RedirectToAction("DashBoard");
+                return RedirectToAction("Home");
             }
             else
             {

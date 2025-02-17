@@ -1,16 +1,12 @@
 ﻿@{
-    ViewBag.Title = "Đăng ký thành công";
+    ViewBag.Title = "Registration Successful";
 }
 
 <div class="container text-center mt-5">
-    <h2 class="text-success">🎉 Đăng ký thành công!</h2>
-    <p>Chúng tôi đã gửi một email xác nhận đến <strong>@ViewBag.UserEmail</strong>. Vui lòng kiểm tra hộp thư và nhấp vào liên kết để kích hoạt tài khoản.</p>
+    <h2 class="text-success">🎉 Registration Successful!</h2>
+    <p>We have sent a confirmation email to <strong>@ViewBag.UserEmail</strong>. Please check your inbox and click the link to activate your account.</p>
 
-    <p class="text-muted">Nếu bạn không nhận được email, hãy kiểm tra mục "Spam" hoặc "Thư rác".</p>
-
-    <a href="@Url.Action("ResendEmail", "Register", new { email = ViewBag.UserEmail })" class="btn btn-warning">
-        Gửi lại email xác nhận
-    </a>
+    <p class="text-muted">If you did not receive the email, please check your "Spam" or "Junk" folder.</p>
     <br /><br />
-    <a href="/Login" class="btn btn-primary">Đến trang đăng nhập</a>
+    <a href="/Login" class="btn btn-primary">Go to Login Page</a>
 </div>

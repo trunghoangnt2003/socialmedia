@@ -1,8 +1,13 @@
-﻿<head>
+﻿@{
+	Layout = "_EmptyLayout";
+}
+
+<head>
 	<link rel="stylesheet" href="~/css/login.css">
 </head>
 <body>
-<div class="row">
+<div style="margin-top: 30px">
+	<div class="row">
 	<div class="col-md-7">
 		<h1>Hello Khanh Ly</h1>
 	</div>
@@ -121,23 +126,23 @@
 	</div>
 	<div class="inputGroup inputGroup2">
 		<label for="loginPassword" id="loginPasswordLabel">Password</label>
-		<input type="password" id="loginPassword"  name="password"/>
+		<input type="password" id="loginPassword"  name="password" require/>
 		<label id="showPasswordToggle" for="showPasswordCheck">Show
-			<input id="showPasswordCheck" type="checkbox"/>
+			<input id="showPasswordCheck" type="checkbox" require/>
 			<div class="indicator"></div>
 		</label>
 	</div>
 	<div>@if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
-					{
-				<p style="color: red;">@ViewBag.ErrorMessage</p>
-					} </div>
+						{
+					<p style="color: red;">@ViewBag.ErrorMessage</p>
+						} </div>
 	<div class="inputGroup inputGroup3">
 		<button id="login" class="btn btn-primary " style="font-size: 25px;"><b>Log in</b></button>
 	</div>
-	<div class="mb-2" style="text-align: end"><a href="Home/Index" class="text-decoration-none">Forgotten password?</a></div>
+	<div class="mb-2" style="text-align: end"><a href="./ForgotPassword" class="text-decoration-none">Forgotten password?</a></div>
 	<div class="inputGroup inputGroup4" style="text-align: center;">
 		<div class="inputGroup inputGroup4" style="text-align: center;">
-	<a href="Register/Index" class="btn btn-success text-decoration-none" style="font-size: 20px; width: 70%; height: 70%; color: white; display: inline-block; padding: 10px 0;">
+	<a href="./Register/Index" class="btn btn-success text-decoration-none" style="font-size: 20px; width: 70%; height: 70%; color: white; display: inline-block; padding: 10px 0;">
 		Create new account
 	</a>
 </div>
@@ -145,6 +150,7 @@
 	</div>
 </form>
 	</div>
+</div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 <script src="~/js/login.js"></script>

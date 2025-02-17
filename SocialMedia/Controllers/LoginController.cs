@@ -1,26 +1,30 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Mvc;
 using SocialMedia.Models;
-using System.Security.Cryptography;
+using System.Security.Claims;
 using System.Text;
+using SocialMedia.Services;
+using Microsoft.AspNetCore.Authorization;
+using Newtonsoft.Json;
 
 namespace SocialMedia.Controllers
 {
 	public class LoginController : Controller
 	{
 		private readonly SocialNetworkContext _context;
+        private readonly MD5CryptoService _contextCrypt;
 
-		public LoginController(SocialNetworkContext context)
+        public LoginController(SocialNetworkContext context, MD5CryptoService _contextCryptT)
 		{
-			_context = context; 
+			_context = context;
+			_contextCrypt = _contextCryptT;
 		}
 
 		public IActionResult Index()
 		{
 			if (HttpContext.Session.GetString("user") == null)
 			{
-				ViewBag.HideHeaderFooter = true;
-
                 return View();
 			}
 			else
@@ -29,15 +33,43 @@ namespace SocialMedia.Controllers
 			}
 		}
 		[HttpPost]
-		public IActionResult Index(string usename, string password)
+		public async Task<IActionResult> Index(string usename, string password)
 		{
-			string encryptedInputPassword = Encrypt(password, true);
+            ClaimsIdentity identity = null;
+			bool isAuthenticate = false;
+			string encryptedInputPassword = _contextCrypt.Encrypt(password, true);
 			var account = _context.Users.FirstOrDefault(a => a.Email == usename && a.Password == encryptedInputPassword);
 			if (account != null && account.IsActive == true)
 			{
+                var userJson = JsonConvert.SerializeObject(account, new JsonSerializerSettings
+                {
+                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                });
+                HttpContext.Session.SetString("UserFull", userJson);
                 HttpContext.Session.SetString("User", account.Id.ToString());
+                var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.Name, account.Email),
+                    new Claim("UserId", account.Id.ToString()),
+                    new Claim(ClaimTypes.Role, account.Role == 1 ? "Admin" : "User") 
+                };
 
-                return RedirectToAction("Privacy", "Home");
+                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                var authProperties = new AuthenticationProperties { IsPersistent = true };
+
+                await HttpContext.SignInAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    new ClaimsPrincipal(claimsIdentity),
+                    authProperties);
+                if (account.Role == 1) 
+                {
+                    return RedirectToAction("Index", "Test"); 
+                }
+                else 
+                {
+                    return RedirectToAction("Index", "Home"); 
+                }
+
 			}
 			else if(account == null)
 			{
@@ -46,53 +78,16 @@ namespace SocialMedia.Controllers
 			{
 				 ViewBag.ErrorMessage = "Account is not active!";
 			}
-			ViewBag.HideHeaderFooter = true;
 
             return View();
 		}
 
-		public static string Encrypt(string toEncrypt, bool useHashing)
+		[Authorize]
+		public async Task<IActionResult> Logout()
 		{
-			byte[] keyArray;
-			byte[] toEncryptArray = Encoding.UTF8.GetBytes(toEncrypt);
-			if (useHashing)
-			{
-				var hashmd5 = new MD5CryptoServiceProvider();
-				keyArray = hashmd5.ComputeHash(Encoding.UTF8.GetBytes("iif"));
-			}
-			else keyArray = Encoding.UTF8.GetBytes("iif");
-			var tdes = new TripleDESCryptoServiceProvider
-			{
-				Key = keyArray,
-				Mode = CipherMode.ECB,
-				Padding = PaddingMode.PKCS7
-			};
-			ICryptoTransform cTransform = tdes.CreateEncryptor();
-			byte[] resultArray = cTransform.TransformFinalBlock(toEncryptArray, 0, toEncryptArray.Length);
-			return Convert.ToBase64String(resultArray, 0, resultArray.Length);
+			await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+			return RedirectToAction("Index", "Login");
 		}
 
-		public static string Decrypt(string toDecrypt, bool useHashing)
-		{
-			byte[] keyArray;
-			byte[] toEncryptArray = Convert.FromBase64String(toDecrypt);
-			if (useHashing)
-			{
-				var hashmd5 = new MD5CryptoServiceProvider();
-				keyArray = hashmd5.ComputeHash(Encoding.UTF8.GetBytes("iif"));
-			}
-			else keyArray = Encoding.UTF8.GetBytes("iif");
-			var tdes = new TripleDESCryptoServiceProvider
-			{
-				Key = keyArray,
-				Mode = CipherMode.ECB,
-				Padding = PaddingMode.PKCS7
-			};
-			ICryptoTransform cTransform = tdes.CreateDecryptor();
-			byte[] resultArray = cTransform.TransformFinalBlock(toEncryptArray, 0, toEncryptArray.Length);
-			return Encoding.UTF8.GetString(resultArray);
-		}
-
-
-	}
+    }
 }

@@ -5,7 +5,7 @@ namespace SocialMedia.Helper
 {
 	public class SendMail
 	{
-		public static bool SendVerificationEmail(string to, string subject, string body)
+		public bool SendVerificationEmail(string to, string subject, string body)
 		{
 			try
 			{

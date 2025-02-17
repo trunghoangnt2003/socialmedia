@@ -1,21 +1,26 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SocialMedia.Models;
 using SocialMedia.Helper;
+using System.Security.Cryptography;
+using SocialMedia.Services;
 
 namespace SocialMedia.Controllers
 {
 	public class RegisterController : Controller
 	{
 		private readonly SocialNetworkContext _context;
+        private readonly MD5CryptoService _contextCrypt;
+		private readonly SendMail _contextMail;
 
-		public RegisterController(SocialNetworkContext context)
+        public RegisterController(SocialNetworkContext context, MD5CryptoService _contextCrypts, SendMail _contextSendMail)
 		{
 			_context = context;
+			_contextCrypt = _contextCrypts;
+			_contextMail = _contextSendMail;
 		}
 
 		public IActionResult Index()
 		{
-			ViewBag.HideHeaderFooter = true;
 			return View();
 		}
 
@@ -25,7 +30,7 @@ namespace SocialMedia.Controllers
 			var checkGender = gender == "male";
 			var account = _context.Users.FirstOrDefault(acc => acc.Email == email);
 			var existingPhone = _context.Users.FirstOrDefault(acc => acc.Phone == phoneNumber);
-			var passwordEncrype = LoginController.Encrypt(password, true);
+			var passwordEncrype = _contextCrypt.Encrypt(password, true);
 			var avatarUser = checkGender
 				? "https://res.cloudinary.com/ddg2gdfee/image/upload/v1738900139/avatar_male_default_yjf1du.jpg"
 				: "https://res.cloudinary.com/ddg2gdfee/image/upload/v1738900139/avatar_female_default_tkxgkl.jpg";
@@ -64,15 +69,14 @@ namespace SocialMedia.Controllers
 				_context.Users.Add(user);
 				_context.SaveChanges();
 				string confirmLink = Url.Action("ConfirmEmail", "Register", new { email = email }, Request.Scheme);
-				string subject = "Xác nhận tài khoản của bạn";
-				string body = $"Vui lòng nhấp vào link sau để xác nhận tài khoản: <a href='{confirmLink}'>Xác nhận tài khoản</a>";
+                string subject = "Confirm Your Account";
+                string body = $"Please click the following link to confirm your account: <a href='{confirmLink}'>Confirm Account</a>";
 
-				SendMail.SendVerificationEmail(email, subject, body);
+
+                _contextMail.SendVerificationEmail(email, subject, body);
                 ViewBag.UserEmail = email;
-				ViewBag.HideHeaderFooter = true;
 				return View("RegisterSuccess");
 			}
-			ViewBag.HideHeaderFooter = true;
 			return View();
 		}
 
@@ -83,10 +87,8 @@ namespace SocialMedia.Controllers
 			{
 				user.IsActive = true;
 				_context.SaveChanges();
-				ViewBag.HideHeaderFooter = true;
 				return View("ConfirmSuccess"); 
 			}
-			ViewBag.HideHeaderFooter = true;
 			return View("ConfirmFailed"); 
 		}
 	}

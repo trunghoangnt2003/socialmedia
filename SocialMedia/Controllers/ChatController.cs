@@ -91,6 +91,27 @@ namespace SocialMedia.Controllers
             return listMessage.ToList();
         }
 
+        [HttpGet]
+        public void ReadMessage(int friendId)
+        {
+            string user = HttpContext.Session.GetString("User");
+            if (string.IsNullOrEmpty(user)) return ;
+
+            int userID = int.Parse(user);
+            var messagesNotSeen = _socialNetworkContext.Chats
+                    .Where(c => (c.Status == (int?)Status.SEND 
+                                && c.Sender == friendId)
+                                && c.Receiver == userID)
+                    .ToList();
+
+            foreach (var message in messagesNotSeen)
+            {
+                message.Status = (int?)Status.SEEN;
+            }
+            _socialNetworkContext.UpdateRange(messagesNotSeen);
+            _socialNetworkContext.SaveChanges();
+        }
+
 
         public List<Chat> getMessageNotification()
         {

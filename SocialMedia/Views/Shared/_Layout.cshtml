@@ -32,6 +32,12 @@
 			cursor: pointer;
         }
 
+        .header-icon-child{
+            height: 40px;
+            align-content: center;
+            text-align: center;
+        }
+
         .popup-messenger {
             position: absolute;
             top: 53px;
@@ -130,7 +136,7 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex  col-6">
                     <ul class="navbar-nav flex-grow-1 justify-content-end">
                         <li class="header-icon nav-item me-2 icon" id="messenger">
-                            <div class=" rounded-circle bg-primary nav-link">
+                            <div class="header-icon-child rounded-circle bg-primary nav-link">
                                 <i class="fa-brands fa-facebook-messenger fa-xl" style="color: #ffffff;"></i>
                             </div>
                             <div class="popup-messenger" id="popupMess">
@@ -140,7 +146,7 @@
                             </div>
                         </li> 
                         <li class="header-icon nav-item me-2 icon" id="notification">
-                            <div class="icon rounded-circle bg-primary nav-link text-center">
+                            <div class="header-icon-child icon rounded-circle bg-primary nav-link text-center">
                                 <i class="fa-solid fa-bell fa-xl" style="color: #ffffff;"></i>
                             </div>
                             <div class="popup-notification" id="popupNoti">
@@ -214,7 +220,7 @@
 
             document.getElementById("popupNoti").style.display = "none";
             document.getElementById("popupMenu").style.display = "none";
-
+            FetchMessageNoti();
             let popup = document.getElementById("popupMess");
             popup.style.display = (popup.style.display === "block") ? "none" : "block";
             event.stopPropagation();
@@ -223,15 +229,19 @@
             event.stopPropagation();
         });
 
+        function OpenChatInHeader(id){
+            document.getElementById("popupMess").style.display = "none";
+            OpenChat(id);
+        };
+
         FetchMessageNoti();
         function FetchMessageNoti(){
              fetch(`/Chat/getMessageNotification`)
             .then(response => response.json())
             .then(res => {
-                console.log(res);
                 var messageNoti = ""
                 res.forEach(element => {
-                    messageNoti += `<div class="element-noti d-flex align-items-center justify-content-between">
+                    messageNoti += `<div class="element-noti d-flex align-items-center justify-content-between" onclick="OpenChatInHeader(${element.id})">
                                         <div class="d-flex align-items-center">
                                             <img src="${element.senderNavigation.avatar}"
                                              alt="Avatar of user"
@@ -253,7 +263,6 @@
 
                 var popMes = document.getElementById("popupMess");
 			    popMes.innerHTML = messageNoti;
-                console.log(messageNoti);
             })
             .catch(error => {
                 console.error("Error", error);

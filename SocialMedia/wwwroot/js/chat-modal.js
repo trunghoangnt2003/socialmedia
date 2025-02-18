@@ -1,5 +1,6 @@
 ﻿var defaultscrollTop = 0;
-
+var isOpendChat = false;
+var isScroll = false;
 function OpenChat(friendId) {
     fetch(`/Chat/GetChatModal?friendId=${friendId}`)
         .then(response => response.text())
@@ -11,14 +12,17 @@ function OpenChat(friendId) {
                     chatbox.innerHTML = html
                     chatbox.children[1].classList.toggle("active");
                     LoadChatData(friendId);
+                    isOpendChat = true;
                     return;
                 }
+                isOpendChat = false;
                 chatbox.innerHTML = "";
                 return;
             }
             chatbox.innerHTML = html
             chatbox.children[1].classList.toggle("active");
             LoadChatData(friendId, false);
+            isOpendChat = true;
         })
         .catch(error => {
             console.error("Error", error);
@@ -102,15 +106,32 @@ function LoadChatData(friendId,skippscroll) {
             });
             var chatBody = document.getElementById("chat-body");
             chatBody.innerHTML = messages;
+
+            if (!isScroll) {
+                skippscroll = false
+            };
             if (!skippscroll) chatBody.scrollTop = chatBody.scrollHeight;
             if (defaultscrollTop == 0) defaultscrollTop = chatBody.scrollTop;
-            chatBody.onscroll = function () { scrollFunction(chatBody, defaultscrollTop) };;
+            chatBody.onscroll = function () {
+                scrollFunction(chatBody, defaultscrollTop)
+            };;
+            if (isOpendChat) {
+                ReadChat(friendId);
+            };
         })
         .catch(error => {
             console.error('Error:', error);
         });
 }
 
+function ReadChat(friendId) {
+    fetch(`../Chat/ReadMessage?friendId=${friendId}`, {
+        method: 'GET',
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
 function formatDateTime(isoString) {
     const date = new Date(isoString);
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")} ` +
@@ -200,7 +221,9 @@ function scrollToBottom() {
 function scrollFunction(chatBody, defaultscrollTop) {
     if (defaultscrollTop - chatBody.scrollTop > 30) {
         document.getElementById("scroll-btn").style.display = "block";
+        isScroll = true;
     } else {
         document.getElementById("scroll-btn").style.display = "none";
+        isScroll = false;
     }
 }

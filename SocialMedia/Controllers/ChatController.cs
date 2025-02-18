@@ -68,8 +68,9 @@ namespace SocialMedia.Controllers
                     Contents = content,
                     Sender = userID,
                     Receiver = friendID,
-                    Status =  (int?)Types.TEXT,
+                    Type =  (int?)Types.TEXT,
                     SendTime = DateTime.Now,
+                    Status = (int?)Status.SEND
                 };
                 _socialNetworkContext.Chats.Add(chat);
             }
@@ -88,6 +89,71 @@ namespace SocialMedia.Controllers
                 .Where(c => (c.Sender == userID && c.Receiver == friendId) || (c.Sender == friendId && c.Receiver == userID))
                 .OrderBy(p => p.SendTime);
             return listMessage.ToList();
+        }
+
+
+        public List<Chat> getMessageNotification()
+        {
+            List<Chat> chats = new List<Chat>();
+            string user = HttpContext.Session.GetString("User");
+            if (string.IsNullOrEmpty(user)) return chats;
+
+            int userId = int.Parse(user);
+
+            var sqlResult = _socialNetworkContext.Users
+                            .Join(
+                                _socialNetworkContext.Chats
+                                    .Where(c => c.Sender == userId || c.Receiver == userId)
+                                    .Select(c => new
+                                    {
+                                        UserId = c.Sender == userId ? c.Receiver : c.Sender,
+                                        c.SendTime,
+                                        c.Status,
+                                        c.Contents,
+                                        c.Sender,
+                                        c.Receiver,
+                                    })
+                                    .GroupBy(c => c.UserId) 
+                                    .Select(g => new
+                                    {
+                                        UserId = g.Key,
+                                        LatestSendTime = g.Max(c => c.SendTime), 
+                                        Status = g.OrderByDescending(c => c.SendTime).Select(c => c.Status).FirstOrDefault(),
+                                        Contents = g.OrderByDescending(c => c.SendTime).Select(c => c.Contents).FirstOrDefault(),
+                                        Sender = g.OrderByDescending(c => c.SendTime).Select(c => c.Sender).FirstOrDefault(),
+                                        Receiver = g.OrderByDescending(c => c.SendTime).Select(c => c.Receiver).FirstOrDefault(),
+                                    }),
+                                user => user.Id,
+                                chat => chat.UserId,
+                                (user, chat) => new
+                                {
+                                    user.Id,
+                                    user.Name,
+                                    user.Avatar,
+                                    chat.LatestSendTime,
+                                    chat.Status,
+                                    chat.Contents,
+                                    chat.Sender,
+                                    chat.Receiver,
+                                })
+                            .OrderByDescending(x => x.LatestSendTime) 
+                            .ToList();
+
+
+            foreach (var item in sqlResult)
+            {
+                chats.Add(new Chat { 
+                    Id = item.Id,
+                    SenderNavigation = new User { Id = item.Id, Name = item.Name, Avatar = item.Avatar },
+                    SendTime = item.LatestSendTime,
+                    Status = item.Status,
+                    Contents = item.Contents,
+                    Sender = item.Sender,
+                    Receiver = item.Receiver
+                } );
+            }
+
+            return chats;
         }
     }
 }

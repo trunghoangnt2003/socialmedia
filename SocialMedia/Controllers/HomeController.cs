@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using SocialMedia.Models;
 using SocialMedia.Services;
 using System.Diagnostics;
@@ -30,13 +31,6 @@ namespace SocialMedia.Controllers
             
             return View();
         }
-        [HttpPost]
-        public  IActionResult Index(IFormFile[] images)
-        {
-            //if (images == null)return View();
-            //var res =  _cloudinaryServices.PutFilesToCloundinary(images);
-            return View();
-        }
 
         public IActionResult Privacy()
         {
@@ -45,7 +39,15 @@ namespace SocialMedia.Controllers
         [HttpPost]
         public IActionResult Privacy(string id)
         {
+            var session = HttpContext.Session;
             HttpContext.Session.SetString("User",id);
+            User user = _socialNetworkContext.Users.FirstOrDefault( u => u.Id  == int.Parse(id) );
+            ViewBag.User = user;
+            var userJson = JsonConvert.SerializeObject(user, new JsonSerializerSettings
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            });
+            session.SetString("UserFull", userJson);
             return View();
         }
 

@@ -97,7 +97,7 @@
 				</label>
 				<input id="fileupload" type="file" onchange="preview()" class="d-none" name="images" multiple accept="image/*,video/*,audio/*">
 			</div>
-			<input placeholder="Aa" type="text" id="content" name="content" class="py-1 px-2 border-0 text-black" />
+			<input placeholder="Aa" type="text" id="content" name="content" class="py-1 px-2 border-0 text-black" onclick="ReadMesaageHandler(@Model.Id)" />
 			<button class="btn" onclick="SendMessage()">  <i class="fa fa-paper-plane fs-6 text-white"></i></button>
 		</div>
 	</div>

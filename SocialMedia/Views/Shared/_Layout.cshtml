@@ -113,7 +113,17 @@
             white-space: nowrap;
             overflow: hidden;
         }
+
+        #unreadCount {
+            font-size: 0.75rem;
+            width: 18px;
+            height:18px;
+            top: -5px;
+            right: -5px;
+        }
+
     </style>
+    <link rel="stylesheet" href="~/css/chat-modal.css" asp-append-version="true" />
 </head>
 <body>
     <header>
@@ -136,15 +146,20 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex  col-6">
                     <ul class="navbar-nav flex-grow-1 justify-content-end">
                         <li class="header-icon nav-item me-2 icon" id="messenger">
-                            <div class="header-icon-child rounded-circle bg-primary nav-link">
-                                <i class="fa-brands fa-facebook-messenger fa-xl" style="color: #ffffff;"></i>
+                            <div class="position-relative">
+                                <div class="header-icon-child rounded-circle bg-primary nav-link">
+                                    <i class="fa-brands fa-facebook-messenger fa-xl" style="color: #ffffff;"></i>
+                                </div>
+                                <div id="unreadCount" class="position-absolute rounded-circle rounded-2 bg-danger text-white text-center d-none ">
+                                    0
+                                </div>
                             </div>
                             <div class="popup-messenger" id="popupMess">
                                 <div class="element-mess">
                                     <i class="fa-solid fa-user text-primary me-2"></i> @(user.Name) Message
                                 </div>
                             </div>
-                        </li> 
+                        </li>
                         <li class="header-icon nav-item me-2 icon" id="notification">
                             <div class="header-icon-child icon rounded-circle bg-primary nav-link text-center">
                                 <i class="fa-solid fa-bell fa-xl" style="color: #ffffff;"></i>
@@ -181,97 +196,35 @@
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
+        <div id="chat-modal" class="chat-modal position-fixed"></div>
     </div>
-
-    <script>
-         document.addEventListener("click", function () {
-            document.getElementById("popupMenu").style.display = "none";
-            document.getElementById("popupNoti").style.display = "none";
-            document.getElementById("popupMess").style.display = "none";
-        });
-        //---------------- menu----------------------------------------
-        document.getElementById("avatar").addEventListener("click", function (event) {
-
-            document.getElementById("popupNoti").style.display = "none";
-            document.getElementById("popupMess").style.display = "none";
-
-            let popup = document.getElementById("popupMenu");
-            popup.style.display = (popup.style.display === "block") ? "none" : "block";
-            event.stopPropagation();
-        });
-        document.getElementById("popupMenu").addEventListener("click", function (event) {
-            event.stopPropagation();
-        });
-        //------------- notifiaction------------------------------------
-        document.getElementById("notification").addEventListener("click", function (event) {
-
-            document.getElementById("popupMenu").style.display = "none";
-            document.getElementById("popupMess").style.display = "none";
-
-            let popup = document.getElementById("popupNoti");
-            popup.style.display = (popup.style.display === "block") ? "none" : "block";
-            event.stopPropagation();
-        });
-        document.getElementById("popupNoti").addEventListener("click", function (event) {
-            event.stopPropagation();
-        });
-        //---------------- messenger------------------------------------
-          document.getElementById("messenger").addEventListener("click", function (event) {
-
-            document.getElementById("popupNoti").style.display = "none";
-            document.getElementById("popupMenu").style.display = "none";
-            FetchMessageNoti();
-            let popup = document.getElementById("popupMess");
-            popup.style.display = (popup.style.display === "block") ? "none" : "block";
-            event.stopPropagation();
-        });
-        document.getElementById("popupMess").addEventListener("click", function (event) {
-            event.stopPropagation();
-        });
-
-        function OpenChatInHeader(id){
-            document.getElementById("popupMess").style.display = "none";
-            OpenChat(id);
-        };
-
-        FetchMessageNoti();
-        function FetchMessageNoti(){
-             fetch(`/Chat/getMessageNotification`)
-            .then(response => response.json())
-            .then(res => {
-                var messageNoti = ""
-                res.forEach(element => {
-                    messageNoti += `<div class="element-noti d-flex align-items-center justify-content-between" onclick="OpenChatInHeader(${element.id})">
-                                        <div class="d-flex align-items-center">
-                                            <img src="${element.senderNavigation.avatar}"
-                                             alt="Avatar of user"
-                                             class="rounded-circle "
-                                             width="40" height="40">
-                                             <div class="ms-2  ${element.status == 1 &&  element.id == element.sender ? `fw-bold` : ''}">
-                                                <div> ${element.senderNavigation.name}</div>
-                                                <div class="text-truncate content-message-noti"> ${element.contents} </div>
-                                             </div>
-                                         </div>
-                                         ${ element.id == element.sender ? 
-                                             ` <div class="align-self-end mb-1">
-                                                    ${element.status == 1 ? `<div class="status-messager bg-primary"></div>` : ''}
-                                                </div>` 
-                                             : ''
-                                         }
-                                    </div>`
-                });
-
-                var popMes = document.getElementById("popupMess");
-			    popMes.innerHTML = messageNoti;
-            })
-            .catch(error => {
-                console.error("Error", error);
-            });
-        }
-    </script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+    <script src="~/js/chat-modal.js" asp-append-version="true"></script>
+    <script src="~/js/header.js" asp-append-version="true"></script>
+    <script src="~/js/signalr/dist/browser/signalr.js"></script>
+    <script>
+        "use strict";
+
+        var connection = new signalR.HubConnectionBuilder().withUrl("/signalRService").build();
+        connection.start().then(function () {
+
+            console.log("currentUser "+ currentUser + "id " + connection.connectionId);
+        });
+        var currentUser = @Context.Session.GetString("User");
+
+        connection.on("SendMessageTo", function (reciver) {
+            console.log("Send to" + `${reciver}`);
+            if(reciver != currentUser) LoadChatData(reciver,false);
+        });
+
+        connection.on("ReceiveMessageFrom", function (sender) {
+            console.log("Receive from" + `${sender}`);
+            FetchNumberMessage();
+            if(sender != currentUser) LoadChatData(sender,true);
+        });
+    </script>
 </body>
 </html>

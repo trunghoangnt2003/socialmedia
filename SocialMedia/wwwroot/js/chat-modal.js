@@ -1,5 +1,4 @@
 ﻿var defaultscrollTop = 0;
-var isOpendChat = false;
 var isScroll = false;
 function OpenChat(friendId) {
     fetch(`/Chat/GetChatModal?friendId=${friendId}`)
@@ -12,17 +11,14 @@ function OpenChat(friendId) {
                     chatbox.innerHTML = html
                     chatbox.children[1].classList.toggle("active");
                     LoadChatData(friendId);
-                    isOpendChat = true;
                     return;
                 }
-                isOpendChat = false;
                 chatbox.innerHTML = "";
                 return;
             }
             chatbox.innerHTML = html
             chatbox.children[1].classList.toggle("active");
             LoadChatData(friendId, false);
-            isOpendChat = true;
         })
         .catch(error => {
             console.error("Error", error);
@@ -115,9 +111,9 @@ function LoadChatData(friendId,skippscroll) {
             chatBody.onscroll = function () {
                 scrollFunction(chatBody, defaultscrollTop)
             };;
-            if (isOpendChat) {
-                ReadChat(friendId);
-            };
+       
+            //ReadChat(friendId);
+            //FetchNumberMessage();
         })
         .catch(error => {
             console.error('Error:', error);
@@ -226,4 +222,9 @@ function scrollFunction(chatBody, defaultscrollTop) {
         document.getElementById("scroll-btn").style.display = "none";
         isScroll = false;
     }
+}
+
+function ReadMesaageHandler(friendId) {
+    ReadChat(friendId);
+    FetchNumberMessage();
 }

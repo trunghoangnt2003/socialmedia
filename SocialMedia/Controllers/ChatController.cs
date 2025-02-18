@@ -112,6 +112,15 @@ namespace SocialMedia.Controllers
             _socialNetworkContext.SaveChanges();
         }
 
+        public int getNumberMessageSend()
+        {
+            string user = HttpContext.Session.GetString("User");
+            if (string.IsNullOrEmpty(user)) return 0;
+
+            int userID = int.Parse(user);
+            int res = _socialNetworkContext.Chats.Where(c => c.Status == (int?)Status.SEND && c.Receiver == userID).Count();
+            return res;
+        }
 
         public List<Chat> getMessageNotification()
         {

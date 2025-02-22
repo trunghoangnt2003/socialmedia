@@ -1,5 +1,8 @@
-using CloudinaryDotNet;
+﻿using CloudinaryDotNet;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using SocialMedia.Controllers;
+using SocialMedia.Helper;
 using SocialMedia.Models;
 using SocialMedia.Services;
 
@@ -9,7 +12,7 @@ namespace SocialMedia
     {
         public static void Main(string[] args)
         {
-            var builder = WebApplication.CreateBuilder(args);
+			var builder = WebApplication.CreateBuilder(args);
             var configuration = builder.Configuration;
 
             //get configuration
@@ -34,6 +37,9 @@ namespace SocialMedia
                 options.UseSqlServer(connectionString);
             });
             builder.Services.AddScoped<SocialNetworkContext>();
+            builder.Services.AddScoped<MD5CryptoService>();
+            builder.Services.AddScoped<SendMail>();
+
 
             builder.Services.AddDistributedMemoryCache();
             builder.Services.AddSession(options =>
@@ -43,13 +49,22 @@ namespace SocialMedia
                 options.Cookie.HttpOnly = true;
             });
 
+            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+            .AddCookie(options =>
+            {
+            options.LoginPath = "/Login/Index"; 
+            options.AccessDeniedPath = "/Home/AccessDenied";
+            });
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+                options.AddPolicy("UserOnly", policy => policy.RequireRole("User"));
+            });
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 
@@ -59,6 +74,7 @@ namespace SocialMedia
 
             app.UseRouting();
 
+            app.UseAuthorization();
             app.UseAuthorization();
 
             app.MapControllerRoute(

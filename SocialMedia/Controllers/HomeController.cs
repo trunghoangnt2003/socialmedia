@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SocialMedia.Models;
 using SocialMedia.Services;
@@ -5,6 +6,7 @@ using System.Diagnostics;
 
 namespace SocialMedia.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
@@ -28,6 +30,7 @@ namespace SocialMedia.Controllers
             return View(res);
         }
 
+        [Authorize(Policy = "AdminOnly")]
         public IActionResult Privacy()
         {
             return View();
@@ -38,5 +41,11 @@ namespace SocialMedia.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+
+        public IActionResult AccessDenied()
+        {
+            return View();
+        }
+
     }
 }

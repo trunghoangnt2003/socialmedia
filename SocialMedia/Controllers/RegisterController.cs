@@ -68,7 +68,8 @@ namespace SocialMedia.Controllers
 
 				_context.Users.Add(user);
 				_context.SaveChanges();
-				string confirmLink = Url.Action("ConfirmEmail", "Register", new { email = email }, Request.Scheme);
+				string encodedEmail = _contextCrypt.Encrypt(email, true);
+				string confirmLink = Url.Action("ConfirmEmail", "Register", new { email = encodedEmail }, Request.Scheme);
                 string subject = "Confirm Your Account";
                 string body = $"Please click the following link to confirm your account: <a href='{confirmLink}'>Confirm Account</a>";
 
@@ -82,14 +83,23 @@ namespace SocialMedia.Controllers
 
 		public IActionResult ConfirmEmail(string email)
 		{
-			var user = _context.Users.FirstOrDefault(u => u.Email == email);
-			if (user != null && user.IsActive == false)
+			try
 			{
-				user.IsActive = true;
-				_context.SaveChanges();
-				return View("ConfirmSuccess"); 
+				string decodedEmail = _contextCrypt.Decrypt(email, true);
+				var user = _context.Users.FirstOrDefault(u => u.Email == decodedEmail);
+				if (user != null && user.IsActive == false)
+				{
+					user.IsActive = true;
+					_context.SaveChanges();
+					return View("ConfirmSuccess");
+				}
 			}
-			return View("ConfirmFailed"); 
+			catch
+			{
+				return View("ConfirmFailed");
+			}
+			return View("ConfirmFailed");
 		}
+
 	}
 }

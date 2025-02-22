@@ -50,11 +50,11 @@ namespace SocialMedia
             });
 
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
-    {
-        options.LoginPath = "/Login/Index"; 
-        options.AccessDeniedPath = "/Home/AccessDenied";
-    });
+            .AddCookie(options =>
+            {
+            options.LoginPath = "/Login/Index"; 
+            options.AccessDeniedPath = "/Home/AccessDenied";
+            });
             builder.Services.AddAuthorization(options =>
             {
                 options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));

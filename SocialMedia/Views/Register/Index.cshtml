@@ -130,7 +130,7 @@
 		<div style="display: flex">
 		<label for="loginPassword" id="loginPasswordLabel">Password</label>
 		<label id="showPasswordToggle" for="showPasswordCheck">Show
-			<input id="showPasswordCheck" type="checkbox"/>
+			<input id="showPasswordCheck"  minlength="5" type="checkbox"/>
 			<div class="indicator"></div>
 		</label>
 		</div>
@@ -140,7 +140,7 @@
 		<div style="display: flex">
 		<label for="loginPasswordConfirm" id="loginPasswordConfirmLabel">Password Confirm</label>
 		</div>
-		<input type="password" id="loginPasswordConfirm"  name="passwordConfirm" required/>
+		<input type="password"  minlength="5" id="loginPasswordConfirm"  name="passwordConfirm" required/>
 	</div>
 	<div>@if (!string.IsNullOrEmpty(ViewBag.ErrorPassword))
 								{

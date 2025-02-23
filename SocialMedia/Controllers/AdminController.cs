@@ -109,7 +109,23 @@ namespace SocialMedia.Controllers
         [HttpGet] 
         public IActionResult ManagePost()
         {
-            return View();
+            // int i = _context.Users.FirstOrDefault(u => u.Id == p.Author);
+            // _context.Users.FirstOrDefault( u => u.Id = _context.Users.FirstOrDefault(u => u.Id == p.Author))
+            var posts = _context.Posts
+                .Select(p => new ManagePost
+                {
+                    Id = p.Id,
+                    Content = p.Contents,
+                    CommentCount = _context.Comments.Count(c => c.Post == p.Id),
+                    ReactCount = _context.Reactions.Count(c => c.Post == p.Id),
+                    Author = _context.Users
+                        .Where(u => u.Id == p.Id)
+                        .Select(u => u.Name)
+                        .FirstOrDefault(),
+                    ModifyTime = p.ModifyTime,
+                }).ToList();
+
+            return View(posts);
         }
 
         [HttpGet]

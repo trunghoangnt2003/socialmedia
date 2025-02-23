@@ -1,0 +1,9 @@
+﻿@{
+    ViewBag.Title = "Confirmation Failed";
+}
+
+<div class="container text-center mt-5">
+    <h2 class="text-danger">⚠️ Confirmation Failed!</h2>
+    <p>The email is invalid, or the account has already been activated.</p>
+    <a href="@Url.Action("Index", "Register")" class="btn btn-warning">Register Again</a>
+</div>

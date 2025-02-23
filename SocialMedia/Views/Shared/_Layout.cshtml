@@ -26,103 +26,7 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/SocialMedia.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <style>
-
-        .header-icon {
-			cursor: pointer;
-        }
-
-        .header-icon-child{
-            height: 40px;
-            align-content: center;
-            text-align: center;
-        }
-
-        .popup-messenger {
-            position: absolute;
-            top: 53px;
-            right: 32px;
-            background: white;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            display: none;
-            width: 250px;
-            height: fit-content;
-            z-index: 1000;
-        }
-
-        .popup-notification {
-            position: absolute;
-            top: 53px;
-            right: 32px;
-            background: white;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            display: none;
-            width: 250px;
-            height: fit-content;
-            z-index: 1000;
-        }
-
-        .popup-menu {
-            position: absolute;
-            top: 45px;
-            right: 0;
-            background: white;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            display: none;
-            width: 200px;
-            z-index: 1000;
-        }
-
-        .element-menu {
-            display: block;
-            padding: 8px 12px;
-            text-decoration: none;
-            color: black;
-        }
-
-        .element-menu:hover {
-            background: #f0f0f0;
-        }
-
-        .element-noti {
-            display: block;
-            padding: 8px 12px;
-            text-decoration: none;
-            color: black;
-        }
-
-        .element-noti:hover {
-            background: #f0f0f0;
-        }
-
-        .status-messager {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-        }
-
-        .content-message-noti{
-            font-size: 12px;
-            width: 150px;
-            white-space: nowrap;
-            overflow: hidden;
-        }
-
-        #unreadCount {
-            font-size: 0.75rem;
-            width: 18px;
-            height:18px;
-            top: -5px;
-            right: -5px;
-        }
-
-    </style>
+    <link rel="stylesheet" href="~/css/header-layout.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/chat-modal.css" asp-append-version="true" />
 </head>
 <body>
@@ -140,7 +44,6 @@
                             </button> *@
                         </div>
                     </div>
-                    <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                 </div>
               
                 <div class="navbar-collapse collapse d-sm-inline-flex  col-6">
@@ -171,7 +74,7 @@
                             </div>
                         </li>
                         <li class="header-icon position-relative nav-item me-4 icon"  id="avatar">
-                            <img src="https://scontent.fhan2-3.fna.fbcdn.net/v/t39.30808-1/468506906_1256036072118428_4942223550658486191_n.jpg?stp=dst-jpg_s160x160_tt6&_nc_cat=111&ccb=1-7&_nc_sid=e99d92&_nc_eui2=AeEQK9c8Erk1osghBe-iLGTP80y1j86jgnDzTLWPzqOCcFp43_soIcOH-SgZ2N1HPKfjF5lDVXpHz2u2WvwKRG5e&_nc_ohc=GB939LK-t34Q7kNvgGRvf9L&_nc_oc=AdgxbWMGiXHhyTlRr_YGGfGmn1hX3MfE_qQhw7nLUhEzBT-TIgelKSCH50Bm5tirjdE&_nc_zt=24&_nc_ht=scontent.fhan2-3.fna&_nc_gid=AvOa-MJxldx4G5B-kOTIAYb&oh=00_AYA301JdzzDjc3e9NgEESn8yVKio84xIRf-WVtR6GB-piw&oe=67B87545"
+                            <img src="@(user.Avatar)"
                                  alt="Avatar of user"
                                  class="rounded-circle "
                                  width="40" height="40">

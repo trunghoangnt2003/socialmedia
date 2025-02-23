@@ -80,7 +80,7 @@ namespace SocialMedia
 
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Home}/{action=Privacy}/{id?}");
+                pattern: "{controller=Login}/{action=Index}/{id?}");
             app.MapHub<SignalRService>("/signalRService");
             app.Run();
         }

@@ -23,7 +23,7 @@ namespace SocialMedia.Controllers
 
 		public IActionResult Index()
 		{
-			if (HttpContext.Session.GetString("user") == null)
+			if (HttpContext.Session.GetString("User") == null)
 			{
                 return View();
 			}

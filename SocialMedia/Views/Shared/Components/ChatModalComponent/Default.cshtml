@@ -1,0 +1,106 @@
+﻿@model SocialMedia.Models.User
+<style>
+
+	.chat-container {
+		max-width: 320px;
+		border-radius: 10px;
+		box-shadow: 5px 5px 5px #888888, -5px -5px 10px #cccccc;
+		display: none;
+	}
+
+	.chat-container.active {
+		display: block;
+	}
+
+
+	.chat-header {
+		background-color: #3277ff;
+	}
+
+	.chat-body {
+		height: 340px;
+		overflow-y: auto;
+	}
+
+	.chat-footer {
+		background-color: #3277ff;
+	}
+
+	.chat-footer input {
+			flex-grow: 1;
+			border-radius: 18px;
+			color: #e4e6eb;
+	}
+
+	.chat-footer input::placeholder {
+		color: #b0b3b8;
+	}
+
+	.close-button{
+		cursor: pointer;
+	}
+
+	#preview {
+		overflow-x: auto;
+		width: 90%;
+		position: relative;
+		margin: auto;
+		display: flex;
+	}
+
+	figure {
+		width: 60px;
+		margin-right: 5px;
+		display: flex;
+		justify-content:center;
+		align-items:center;
+		background-color: aliceblue;
+		border-radius: 6px;
+	}
+
+	.scroll-btn{
+		bottom: 90px;
+		left: 45%;
+		display: none;
+		cursor: pointer;
+		color: skyblue;
+	}
+
+	.scroll-btn:hover{
+		color: #3277ff;
+	}
+</style>
+
+<div id="chat-modal" class="chat-container overflow-hidden shadow-lg">
+	<div class="chat-header row align-items-center p-2">
+		<div class="position-relative col-md-2">
+			<img src="@Model.Avatar"
+				 class="rounded-circle"
+				 width="40" height="40">
+			<div class="status rounded-circle border border-white border-2 position-absolute bottom-0 end-0 "></div>
+		</div>
+		<span class="fs-6 col-md-8"> @Model.Name </span>
+		<div class="close-button col-md-2 " onclick="OpenChat(@Model.Id)">
+			<i class="fas fa-times"></i>
+		</div>
+	</div>
+	<div class="chat-body bg-white p-10" id="chat-body">
+	</div>
+	<i class="fa-2xl fa-solid fa-circle-down position-absolute opacity-75 scroll-btn" id="scroll-btn" onclick="scrollToBottom()"></i>
+	<div class="chat-footer p-2 ">
+		<div id="preview"></div>
+		<div class="d-flex align-items-center">
+			<input hidden  id="friend-id" name="friendID" value="@Model.Id" />
+			<div class="input-files">
+				<label for="fileupload">
+					<i class="fa-solid fa-file-arrow-up fs-4 m-2 text-white" ></i>
+				</label>
+				<input id="fileupload" type="file" onchange="preview()" class="d-none" name="images" multiple accept="image/*,video/*,audio/*">
+			</div>
+			<input placeholder="Aa" type="text" id="content" name="content" class="py-1 px-2 border-0 text-black" onclick="ReadMesaageHandler(@Model.Id)" />
+			<button class="btn" onclick="SendMessage()">  <i class="fa fa-paper-plane fs-6 text-white"></i></button>
+		</div>
+	</div>
+</div>
+
+

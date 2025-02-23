@@ -1,4 +1,22 @@
-﻿<!DOCTYPE html>
+﻿@using Newtonsoft.Json
+@{
+    var userJson = Context.Session.GetString("UserFull");
+    User user = new User { Name = "Unknown" };
+
+    if (!string.IsNullOrEmpty(userJson))
+    {
+        try
+        {
+            user = JsonConvert.DeserializeObject<User>(userJson);
+        }
+        catch (JsonException ex)
+        {
+            Console.WriteLine($"Error deserializing user: {ex.Message}");
+        }
+    }
+}
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -7,38 +25,109 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/SocialMedia.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="~/css/header-layout.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/chat-modal.css" asp-append-version="true" />
 </head>
 <body>
-           <header>
-                <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-                    <div class="container-fluid">
-                        <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">SocialMedia</a>
-                        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                                aria-expanded="false" aria-label="Toggle navigation">
-                            <span class="navbar-toggler-icon"></span>
-                        </button>
-                        <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                            <ul class="navbar-nav flex-grow-1">
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                                </li>
-                            </ul>
+    <header>
+        <nav class="relative  p-2 navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="row">
+                <div class="col-6 d-flex">
+                    <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">SocialMedia</a>
+                    <div class="search-wrapper">
+                        <div class="search-box">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" class="form-control search-input" placeholder="Search anything...">
+                            @* <button class="btn btn-primary search-button">
+                                Search
+                            </button> *@
                         </div>
                     </div>
-                </nav>
-            </header>
+                </div>
+              
+                <div class="navbar-collapse collapse d-sm-inline-flex  col-6">
+                    <ul class="navbar-nav flex-grow-1 justify-content-end">
+                        <li class="header-icon nav-item me-2 icon" id="messenger">
+                            <div class="position-relative">
+                                <div class="header-icon-child rounded-circle bg-primary nav-link">
+                                    <i class="fa-brands fa-facebook-messenger fa-xl" style="color: #ffffff;"></i>
+                                </div>
+                                <div id="unreadCount" class="position-absolute rounded-circle rounded-2 bg-danger text-white text-center d-none ">
+                                    0
+                                </div>
+                            </div>
+                            <div class="popup-messenger" id="popupMess">
+                                <div class="element-mess">
+                                    <i class="fa-solid fa-user text-primary me-2"></i> @(user.Name) Message
+                                </div>
+                            </div>
+                        </li>
+                        <li class="header-icon nav-item me-2 icon" id="notification">
+                            <div class="header-icon-child icon rounded-circle bg-primary nav-link text-center">
+                                <i class="fa-solid fa-bell fa-xl" style="color: #ffffff;"></i>
+                            </div>
+                            <div class="popup-notification" id="popupNoti">
+                                <div class="element-noti">
+                                    <i class="fa-solid fa-user text-primary me-2"></i> @(user.Name) notifi
+                                </div>
+                            </div>
+                        </li>
+                        <li class="header-icon position-relative nav-item me-4 icon"  id="avatar">
+                            <img src="@(user.Avatar)"
+                                 alt="Avatar of user"
+                                 class="rounded-circle "
+                                 width="40" height="40">
+                            <div class="user-icon rounded-circle border border-white border-2 position-absolute bottom-0 end-0 d-flex align-items-center justify-content-center ">
+                                <i class="fa-solid fa-angle-down fa-2xs text-white" ></i>
+                            </div>
+                            <div class="popup-menu" id="popupMenu">
+                                <div class="element-menu">
+                                    <i class="fa-solid fa-user text-primary me-2"></i> @(user.Name)
+                                </div>
+                                <div class="element-menu">
+                                    <i class="fa-solid fa-right-from-bracket text-secondary me-2"></i> Logout
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
+        <div id="chat-modal" class="chat-modal position-fixed"></div>
     </div>
-
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+    <script src="~/js/chat-modal.js" asp-append-version="true"></script>
+    <script src="~/js/header.js" asp-append-version="true"></script>
+    <script src="~/js/signalr/dist/browser/signalr.js"></script>
+    <script>
+        "use strict";
+
+        var connection = new signalR.HubConnectionBuilder().withUrl("/signalRService").build();
+        connection.start().then(function () {
+
+            console.log("currentUser "+ currentUser + "id " + connection.connectionId);
+        });
+        var currentUser = @Context.Session.GetString("User");
+
+        connection.on("SendMessageTo", function (reciver) {
+            console.log("Send to" + `${reciver}`);
+            if(reciver != currentUser) LoadChatData(reciver,false);
+        });
+
+        connection.on("ReceiveMessageFrom", function (sender) {
+            console.log("Receive from" + `${sender}`);
+            FetchNumberMessage();
+            if(sender != currentUser) LoadChatData(sender,true);
+        });
+    </script>
 </body>
 </html>

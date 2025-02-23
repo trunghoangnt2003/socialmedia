@@ -39,13 +39,14 @@ namespace SocialMedia
             builder.Services.AddScoped<SocialNetworkContext>();
             builder.Services.AddScoped<MD5CryptoService>();
             builder.Services.AddScoped<SendMail>();
+            builder.Services.AddSingleton<SignalRService>();
 
 
             builder.Services.AddDistributedMemoryCache();
             builder.Services.AddSession(options =>
             {
                 options.Cookie.IsEssential = true;
-                options.IdleTimeout = TimeSpan.FromSeconds(60);
+                options.IdleTimeout = TimeSpan.FromSeconds(600);
                 options.Cookie.HttpOnly = true;
             });
 
@@ -79,7 +80,7 @@ namespace SocialMedia
 
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
+                pattern: "{controller=Login}/{action=Index}/{id?}");
             app.MapHub<SignalRService>("/signalRService");
             app.Run();
         }

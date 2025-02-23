@@ -2,18 +2,42 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<style>
+    .user-item{
+        cursor: pointer
+    }
 
-    <form method="Post" enctype="multipart/form-data" class="form-group">
-        <div class="mb-3">
-            <label for="fileupload" class="form-label">Select Images</label>
-            <input id="fileupload" type="file" class="form-control" name="images" multiple>
-        </div>
+    .user-item:hover {
+        background-color: lightgray;
+    }
 
-        <div class="d-grid">
-            <input type="submit" value="Upload" class="btn btn-primary btn-block">
-        </div>
-    </form>
+    .status {
+        width: 10px;
+        height: 10px;
+        background-color: green;
+        border-radius: 50%;
+        margin-left: 5px;
+    }
+</style>
+
+<div class="row">
+    <div class="col-md-3"></div>
+    <div class="col-md-6">
+    </div>
+    <div class="col-md-3">
+        <h2>Danh sách bạn bè</h2>
+        @foreach (var friend in ViewBag.Friends)
+        {
+            <div class="user-item d-flex align-items-center p-2 rounded-3" onclick="OpenChat(@friend.Friend1Navigation.Id  )">
+                <div class="position-relative me-3">
+                    <img src="@friend.Friend1Navigation.Avatar"
+                    alt="Avatar of @friend.Friend1Navigation.Name" 
+                    class="rounded-circle" 
+                    width="30" height="30"> 
+                    <div class="status rounded-circle border border-white border-2 position-absolute bottom-0 end-0 "></div>
+                </div>
+                <span>@friend.Friend1Navigation.Name</span>
+            </div>
+        }
+    </div>
 </div>

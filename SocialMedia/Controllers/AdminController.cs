@@ -24,36 +24,6 @@ namespace SocialMedia.Controllers
             return View();
         }
 
-        [HttpPost]
-        public IActionResult Login(string Email, string Password)
-        {
-            var user = _context.Users.FirstOrDefault(u => u.Email == Email && u.Password == Password);
-
-            if (user != null) 
-            {
-                HttpContext.Session.SetString("adminId", user.Id.ToString());
-
-                if (user.Role == 1)
-                {
-                    return RedirectToAction("Home");
-                }
-                else
-                {
-                    //navigate to Home of user
-                    return RedirectToAction("Error");
-                }
-                
-            }
-            else
-            {
-                ViewBag.ErrorMessage = "Invalid email or password, please again!";
-                return View();
-            }
-
-            
-
-        }
-
         [HttpGet]
         public IActionResult Home()
         {

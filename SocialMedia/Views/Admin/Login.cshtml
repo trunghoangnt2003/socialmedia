@@ -52,21 +52,23 @@
             <div class="form-section">
                 <h3>Sign In</h3>
                 <p>Control your social network with role admin</p>
-                <form method="post" asp-controller="Admin" asp-action="Login">
+                <form method="post" asp-controller="Login" asp-action="Index">
                     <div class="mb-3">
-                        <label for="Email" class="form-label">Email</label>
-                        <input type="text" id="Email" name="Email" class="form-control" placeholder="Enter Your Email" required>
+                        <label for="usename" class="form-label">Email</label>
+                        <input type="text" id="usename" name="usename" class="form-control" placeholder="Enter Your Email" required>
                     </div>
                     <div class="mb-3">
                         <label for="Password" class="form-label">Password</label>
                         <input type="password" id="Password" name="Password" class="form-control" placeholder="Enter Your Password" required>
                     </div>
+                    <input type="hidden" value="true" name="isAdmin" />
 
                     <button type="submit" class="btn btn-primary mb-3">Sign In</button>
-                    @if (ViewBag.ErrorMessage != null)
+                    @if (TempData["Error"] != null)
                     {
-                        <div class="alert alert-danger">@ViewBag.ErrorMessage</div>
+                        <div class="alert alert-danger">@TempData["Error"]</div>
                     }
+                    
                     
                 </form>
                 

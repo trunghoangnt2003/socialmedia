@@ -1,0 +1,79 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .signin-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f9f9f9;
+        }
+
+        .signin-card {
+            display: flex;
+            max-width: 900px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(0, 123, 255, 0.3);
+        }
+
+            .signin-card .info {
+                background-color: #007bff;
+                color: white;
+                padding: 30px;
+                width: 40%;
+            }
+
+            .signin-card .form-section {
+                padding: 30px;
+                width: 60%;
+                background-color: white;
+            }
+    </style>
+</head>
+<body>
+    <div class="signin-container">
+        <div class="signin-card">
+            <div class="info">
+                <h2>We're here to help you connect with everyone.</h2>
+                <p>
+                    Our social network is a platform that connects people,
+                    offering opportunities to share joy, emotions, and meaningful moments in life.
+                    With user-friendly features, we help you stay in touch with family and friends,
+                    expand your relationships, explore the world around you,
+                    and build an inspiring community together.
+                </p>
+            </div>
+            <div class="form-section">
+                <h3>Sign In</h3>
+                <p>Control your social network with role admin</p>
+                <form method="post" asp-controller="Admin" asp-action="Login">
+                    <div class="mb-3">
+                        <label for="Email" class="form-label">Email</label>
+                        <input type="text" id="Email" name="Email" class="form-control" placeholder="Enter Your Email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Password" class="form-label">Password</label>
+                        <input type="password" id="Password" name="Password" class="form-control" placeholder="Enter Your Password" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary mb-3">Sign In</button>
+                    @if (ViewBag.ErrorMessage != null)
+                    {
+                        <div class="alert alert-danger">@ViewBag.ErrorMessage</div>
+                    }
+                    
+                </form>
+                
+                <p class="mt-3">Don't' have an account? <a href="Index">Sign Up</a></p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

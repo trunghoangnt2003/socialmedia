@@ -1,0 +1,74 @@
+﻿@{
+    Layout = "_LayoutAdmin";
+}
+@model List<ManagePost>
+
+<h1>Manage Posts</h1>
+
+
+
+<table class="table table-bordered table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>Author</th>
+            <th>Content</th>
+            <th>Comments</th>
+            <th>Reactions</th>
+            <th>Time Update</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var post in Model)
+        {
+            <tr>
+                <td>@post.Id</td>
+                <td>@post.Author</td>
+                <td>@post.Content</td>
+                <td>@post.CommentCount</td>
+                <td>@post.ReactCount</td>
+                <td>@post.ModifyTime</td>
+                <td>
+                    <button onclick="confirmDelete('@post.Id')" class="btn btn-danger btn-sm">Delete</button>
+                </td>
+
+            </tr>
+        }
+    </tbody>
+
+    <div id="deleteModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                    <button type="button" class="close" onclick="hidePopup()" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete this post?
+                </div>
+                <div class="modal-footer">
+                    <button id="cancelButton" type="button" class="btn btn-secondary" onclick="hidePopup()">Cancel</button>
+                    <form method="post" asp-action="ManagePost" asp-controller="Admin">
+                        <input type="hidden" id="deletePostId" name="id" />
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</table>
+<script>
+    function confirmDelete(postId) {
+        $('#deleteModal').modal('show');
+        $('#deletePostId').val(postId);
+    }
+
+    function hidePopup() {
+        $('#deleteModal').modal('hide');
+    }
+</script>
+<script src="~/lib/jquery/dist/jquery.min.js"></script>

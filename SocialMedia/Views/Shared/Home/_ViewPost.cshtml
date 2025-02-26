@@ -185,7 +185,7 @@
         return resource.Type == (int?)Types.IMAGE
             ? Html.Raw($"<img src='{resource.Url}' alt='Post image' />")
             : Html.Raw($"<video controls><source src='{resource.Url}' type='video/mp4'>Trình duyệt của bạn không hỗ trợ video.</video>");
-    }
+    } 
 
    
 }
@@ -196,7 +196,7 @@
         const isLiked = likeText.innerText === 'Thích';
         const likeCount = document.getElementById('likeCount-'+@Model.Id);
         try {
-            const response = await fetch('/Post/ToggleLike', {
+            const response = await fetch('/Post/ToggleLike' , {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -1,7 +1,4 @@
-﻿
-@model PagedList.IPagedList<SocialMedia.Models.User>
-@using PagedList.Mvc
-@using PagedList
+﻿@model IEnumerable<SocialMedia.Models.User>
 
 @{
     Layout = "_LayoutAdmin";
@@ -192,22 +189,6 @@
                     }
                 </tbody>
             </table>
-        </div>
-
-        <div>
-            <div class="" style="display: flex; justify-content: right ">
-                Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
-            </div>
-
-            <div class="pagination-container">
-                @for (int i = 1; i <= Model.PageCount; i++)
-                {
-                    <button class="pagination-link @(i == ViewBag.CurrentPage ? "active" : "")"
-                            onclick="loadPaged(@i)">
-                        @i
-                    </button>
-                }
-            </div>
         </div>
 
             

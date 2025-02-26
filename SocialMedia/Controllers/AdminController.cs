@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SocialMedia.Models;
-using PagedList;
 
 namespace SocialMedia.Controllers
 {
@@ -62,22 +61,19 @@ namespace SocialMedia.Controllers
         }
 
         [HttpGet]
-        public IActionResult ManageAccount(int? page)
+        public IActionResult ManageAccount()
         {
 
-            int pageSize = 4;
-            int currentPage = page ?? 1;
+           
 
-            var user = _context.Users.ToPagedList(currentPage, pageSize);
-
-            ViewBag.CurrentPage = currentPage;
+            var user = _context.Users.ToList();
 
 
             return View(user);
         }
 
         [HttpPost]
-        public IActionResult ManageAccount(int id, bool isActive, int? page, string? searchByName)
+        public IActionResult ManageAccount(int id, bool isActive, string? searchByName)
         {
             // Toggle account status
             var user = _context.Users.FirstOrDefault(u => u.Id == id);
@@ -96,11 +92,7 @@ namespace SocialMedia.Controllers
                 users = users.Where(u => u.Name.Contains(searchByName)).ToList();
             }
 
-            // Pagination (if needed)
-            int pageSize = 10;
-            int pageNumber = page ?? 1;
-
-            var pagedUsers = users.OrderBy(u => u.Name).ToPagedList(pageNumber, pageSize);
+            var pagedUsers = users.OrderBy(u => u.Name).ToList();
 
             return View(pagedUsers); 
         }

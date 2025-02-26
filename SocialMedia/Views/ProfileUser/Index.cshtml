@@ -1,0 +1,435 @@
+﻿@{
+    ViewData["Title"] = "Profile";
+    var user = Context.Session.GetString("User");
+}
+<style>
+    .friend-card {
+        text-align: center;
+    }
+
+    .friend-card img {
+        width: 100%;
+        border-radius: 10px;
+    }
+
+    .friend-name {
+        font-size: 14px;
+        text-align: left;
+        font-weight: 500;
+        margin-top: 5px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+     .highlighted-stories-container {
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .highlighted-stories {
+        display: inline-flex;
+    }
+
+    .story-item {
+        flex: 0 0 auto;
+        width: 90px;
+        width: 150px;
+        height: 200px;
+        margin-right: 10px;
+    }
+
+    .story-item img {
+        width: 100%;
+        border-radius: 10px;
+    }
+    .profile-container {
+        background: white;
+        color: black;
+        padding: 20px;
+        border-radius: 10px;
+        width: 100%;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .profile-introduce{
+         display: flex;
+
+    }
+    .profile-info {
+        padding: 20px 20px 0px 20px;
+        align-self: flex-end;
+    }
+    .profile-header {
+
+    display: flex;
+    align-items: flex-start; 
+    padding: 20px;
+    position: relative; /* Để căn các nút xuống đáy */
+    width: 100%;
+    }
+
+
+
+.bio {
+    font-style: italic;
+    color: #555;
+    margin-bottom: 10px;
+}
+
+.edit-intro, .edit-details {
+    display: block;
+    width: 100%;
+    background: #ddd;
+    border: none;
+    padding: 8px;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.intro-details {
+    list-style: none;
+    padding: 0;
+}
+
+.intro-details li {
+    margin: 8px 0;
+    font-size: 14px;
+    color: #444;
+}
+
+.intro-details i {
+    margin-right: 8px;
+    color: #555;
+}
+
+
+    .profile-avatar {
+        position: relative;
+        display: inline-block;
+    }
+
+    .profile-picture {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid white;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .camera-icon {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        border-radius: 50%;
+        padding: 8px;
+        cursor: pointer;
+    }
+
+    .camera-icon i {
+        font-size: 18px;
+    }
+
+     .profile-intro, .post-box {
+        background: white;
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .profile-intro h3 {
+        font-size: 20px;
+        margin-bottom: 10px;
+    }
+    .post-box {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .post-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+    .post-input {
+        flex-grow: 1;
+        padding: 10px;
+        border-radius: 20px;
+        border: 1px solid #ccc;
+        outline: none;
+    }
+    .post-btn {
+        background: #0866ff;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+.profile-actions {
+    position: absolute;
+    right: 20px; 
+    bottom: 0; 
+    display: flex;
+    gap: 10px; 
+    margin-bottom: 20px;
+}
+
+    .edit-btn, .archive-btn {
+        background: #0866ff;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-right: 10px;
+        transition: 0.3s ease;
+        font-weight: 400;
+    }
+
+    .edit-btn:hover, .archive-btn:hover {
+        background: #0546b6;
+    }
+
+    .profile-tabs {
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+    border-bottom: 2px solid #ddd;
+    background: white;
+}
+
+.tab {
+    padding: 10px 15px;
+    text-decoration: none;
+    color: #555;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.tab.active {
+    color: #0866ff;
+    font-weight: bold;
+    border-bottom: 3px solid #0866ff;
+}
+
+.tab:hover {
+    color: black;
+}
+
+.tab-dropdown {
+    position: relative;
+    cursor: pointer;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: white;
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    min-width: 120px;
+}
+
+.tab-dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.tab-more {
+    background: #f0f2f5;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 50%;
+    margin-left: auto;
+    cursor: pointer;
+}
+
+.tab-more i {
+    font-size: 18px;
+    color: #555;
+}
+
+.tab-more:hover {
+    background: #ddd;
+}
+
+</style>
+<head>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+
+<div class="profile-container mb-3  ">
+    <div class="profile-header ">
+        <div class="profile-avatar">
+            <img src="@(ViewBag.user?.Avatar ?? "https://res.cloudinary.com/ddg2gdfee/image/upload/v1738900139/avatar_male_default_yjf1du.jpg")" 
+                 class="profile-picture" alt="Profile Picture">
+            <label for="avatarUpload" class="camera-icon">
+                <i class="fa fa-camera"></i>
+            </label>
+            <input type="file" id="avatarUpload" accept="image/*" style="display: none;" onchange="uploadAvatar(event)">
+        </div>
+
+        <div class="profile-info">
+            <h2>@ViewBag.user?.Name</h2>
+            <p><strong>@(ViewBag.Friends.Count)</strong> bạn bè</p>
+        </div>
+        <div class="profile-actions">
+            @if (user != null && user.Equals(ViewBag.user.Id.ToString()))
+            {
+                <button  data-bs-toggle="modal" data-bs-target="#updateModal"  class="edit-btn">Chỉnh sửa trang cá nhân</button>
+            <button class="archive-btn">Xem kho lưu trữ</button>
+            }
+            else
+            {
+                <button class="btn btn-secondary">Bạn bè</button>
+            <button class="btn btn-primary">Nhắn tin</button>
+            }
+</div>
+        <button class="tab-more"><i class="fa fa-ellipsis-h"></i></button>
+    </div>
+  </div>
+    <div class="profile-tabs">
+        <a href="#" class="tab active">Bài viết</a>
+        <a href="#" class="tab">Bạn bè</a>
+        <a href="#" class="tab">Ảnh</a>
+        <a href="#" class="tab">Video</a>
+    </div>
+
+    <div class="profile-introduce">
+    <div class="container mt-4">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card profile-intro p-3 shadow-sm bg-white rounded">
+                <h3>Giới thiệu</h3>
+                <ul class="list-unstyled">
+                   <li><i class="fa-solid fa-cake-candles"></i> <span>&nbsp;@ViewBag.user?.Dob</span></li>
+                    <li><i class="fa-solid fa-house"></i><span>&nbsp;@ViewBag.user?.Address</span></li>
+
+                </ul>
+            </div>
+       <div class="card p-3 mt-3">
+        <h4>Tin Nổi Bật</h4>
+        <div class="highlighted-stories-container">
+            <div class="highlighted-stories">
+                <div class="story-item">
+                    <img src="https://res.cloudinary.com/ddg2gdfee/image/upload/v1738900139/avatar_male_default_yjf1du.jpg" class="rounded" alt="Story 1">
+                </div>
+                <div class="story-item">
+                    <img src="https://res.cloudinary.com/ddg2gdfee/image/upload/v1738900139/avatar_male_default_yjf1du.jpg" class="rounded" alt="Story 2">
+                </div>
+                <div class="story-item">
+                    <img src="https://res.cloudinary.com/ddg2gdfee/image/upload/v1738900139/avatar_male_default_yjf1du.jpg" class="rounded" alt="Story 3">
+                </div>
+                <div class="story-item">
+                    <img src="https://res.cloudinary.com/ddg2gdfee/image/upload/v1738900139/avatar_male_default_yjf1du.jpg" class="rounded" alt="Story 4">
+                </div>
+                <div class="story-item">
+                    <img src="https://res.cloudinary.com/ddg2gdfee/image/upload/v1738900139/avatar_male_default_yjf1du.jpg" class="rounded" alt="Story 5">
+                </div>
+            </div>
+        </div>
+    </div>
+
+     <div class="card p-3 mt-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h4 class="mb-0">Bạn bè</h4>
+            <a href="#" class="text-primary">Xem tất cả bạn bè</a>
+        </div>
+        <p class="text-muted">@(ViewBag.Friends.Count) người bạn</p>
+        <div class="friend-list">
+            <div class="row">
+                            @foreach(var u in ViewBag.Friends)
+                            {
+                                 <div class="col-4 mb-2">
+                        <div class="friend-card">
+                                            <img src="@u.Friend1Navigation.Avatar" alt="@u.Friend1Navigation.Name" class="rounded img-fluid">
+                                    <p class="friend-name text-wrap" >@u.Friend1Navigation.Name</p>
+                        </div>
+                    </div>   
+                            }
+
+            </div>
+        </div>
+    </div>
+        </div>
+       <div class="col-md-8">
+            <!-- Ô đăng bài -->
+            <div class="card p-3 mb-3">
+                <div class="d-flex align-items-center">
+                    <img src="https://res.cloudinary.com/ddg2gdfee/image/upload/v1738900139/avatar_male_default_yjf1du.jpg" class="rounded-circle me-2" width="40" height="40">
+                    <input type="text" class="form-control" placeholder="Bạn đang nghĩ gì?">
+                    <button class="btn btn-primary ms-2">Đăng</button>
+                </div>
+            </div>
+
+            <!-- Danh sách bài viết -->
+            <div class="card p-3 mb-3">
+                <div class="d-flex align-items-center">
+                    <img src="https://via.placeholder.com/40" class="rounded-circle me-2" width="40" height="40">
+                    <div>
+                        <strong>Nguyễn Mạnh Huy</strong>
+                        <small class="text-muted d-block">13 tháng 1</small>
+                    </div>
+                </div>
+                <p class="mt-2">Nói chung là có cố gắng nhưng chưa đủ 😢😢😢</p>
+                <img src="https://via.placeholder.com/500x300" class="img-fluid rounded">
+                <div class="mt-2">
+                    <button class="btn btn-light btn-sm"><i class="fa fa-thumbs-up"></i> Thích</button>
+                    <button class="btn btn-light btn-sm"><i class="fa fa-comment"></i> Bình luận</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+    </div>
+</div>
+
+<div class="modal fade" id="updateModal" tabindex="-1" aria-labelledby="editNewsLabel" aria-hidden="true">
+    <div class="modal-dialog" style="max-width: 50%">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editNewsLabel">Edit News Article</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editNewsForm" asp-action="Edit" method="post">
+                  
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+<!-- JavaScript for Upload -->
+<script>
+    function uploadAvatar(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                document.querySelector('.profile-picture').src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+
+            // TODO: Send the file to the server (AJAX, Fetch API, or form submission)
+        }
+    }
+</script>

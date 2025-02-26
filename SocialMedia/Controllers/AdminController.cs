@@ -128,6 +128,37 @@ namespace SocialMedia.Controllers
             return View(posts);
         }
 
+        [HttpPost]
+        public IActionResult ManagePost(int? id)
+        {
+            if (id == null)
+            {
+                return BadRequest("Post ID is required.");
+            }
+
+            try
+            {
+                var post = _context.Posts
+                    .Include(p => p.Comments)
+                    .Include(p => p.Reactions)
+                    .FirstOrDefault(p => p.Id == id);
+                post.Comments.Clear();
+                post.Reactions.Clear();
+                if (post != null)
+                {
+                    _context.Posts.Remove(post);
+                    _context.SaveChanges();
+                }
+                return RedirectToAction("ManagePost");
+            }
+            catch (Exception ex)
+            {
+                
+                return StatusCode(500, "An error occurred while deleting the post.");
+            }
+        }
+
+
         [HttpGet]
         public IActionResult Setting()
         {

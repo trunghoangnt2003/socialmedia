@@ -51,7 +51,10 @@
                 </div>
                 <div class="modal-footer">
                     <button id="cancelButton" type="button" class="btn btn-secondary" onclick="hidePopup()">Cancel</button>
-                    <a id="deleteButton" href="#" class="btn btn-danger">Delete</a>
+                    <form method="post" asp-action="ManagePost" asp-controller="Admin">
+                        <input type="hidden" id="deletePostId" name="id" />
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -59,11 +62,9 @@
 
 </table>
 <script>
-    // Function to handle delete confirmation
     function confirmDelete(postId) {
-        $('#deleteModal').modal('show'); 
-        const deleteUrl = `/Admin/ManagePost?id=${postId}`;
-        $('#deleteButton').attr('href', deleteUrl);
+        $('#deleteModal').modal('show');
+        $('#deletePostId').val(postId);
     }
 
     function hidePopup() {

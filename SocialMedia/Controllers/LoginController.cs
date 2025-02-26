@@ -33,7 +33,7 @@ namespace SocialMedia.Controllers
 			}
 		}
 		[HttpPost]
-		public async Task<IActionResult> Index(string usename, string password)
+		public async Task<IActionResult> Index(string usename, string password, string isAdmin = "")
 		{
             ClaimsIdentity identity = null;
 			bool isAuthenticate = false;
@@ -63,7 +63,7 @@ namespace SocialMedia.Controllers
                     authProperties);
                 if (account.Role == 1) 
                 {
-                    return RedirectToAction("Index", "Test"); 
+                    return RedirectToAction("Home", "Admin"); 
                 }
                 else 
                 {
@@ -73,6 +73,11 @@ namespace SocialMedia.Controllers
 			}
 			else if(account == null)
 			{
+				if(!string.IsNullOrEmpty(isAdmin))
+				{
+					TempData["Error"] = "Username or password not true!";
+                    return RedirectToAction("Login", "Admin");
+				} 
 				ViewBag.ErrorMessage = "Username or password not true!";
 			} else if(account.IsActive == false)
 			{

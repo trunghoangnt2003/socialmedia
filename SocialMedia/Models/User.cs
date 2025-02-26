@@ -21,7 +21,7 @@ public partial class User
 
     public string? Avatar { get; set; }
 
-    public bool? IsActive { get; set; }
+    public bool IsActive { get; set; }
 
     public bool? Online { get; set; }
     public bool? Gender { get; set; }

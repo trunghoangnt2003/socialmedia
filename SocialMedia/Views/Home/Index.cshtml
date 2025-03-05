@@ -11,12 +11,12 @@
     background-color: lightgray;
     }
 
-    .status {
-    width: 10px;
-    height: 10px;
-    background-color: green;
-    border-radius: 50%;
-    margin-left: 5px;
+    .status { 
+     width: 10px; 
+     height: 10px; 
+     background-color: green; 
+     border-radius: 50%; 
+     margin-left: 5px; 
     }
 
     .input-container {
@@ -68,14 +68,7 @@
     color: #f7b928;
     }
 
-    html, body {
-        height: 100%;
-        margin: 0;
-        padding: 0;
-        overflow: auto; /* Cuộn toàn trang */
-    }
-
-    .col-md-8 {
+    .colCustome {
         height: 100vh; /* Chiều cao full màn hình */
         overflow-y: auto; /* Thanh cuộn dọc */
         padding-right: 10px; /* Tránh đè vào thanh cuộn */
@@ -85,25 +78,25 @@
 
 <div class="row">
     <div class="col-md-2"></div>
-    <div class="col-md-8">
-        <div class="container d-flex justify-content-center align-items-start">
-            <div class="w-100">
-                <div class="d-flex align-items-start mb-3 input-container" >
-                    <img src="@ViewBag.User.Avatar" class="rounded-circle" width="40" height="40" alt="User profile picture">
-                    <div class="ms-2 text-black-50 input-container2 w-100" style="cursor:pointer" data-bs-toggle="modal"
-                    data-bs-target="#createModal">@ViewBag.User.Name ơi, bạn đang nghĩ gì thế?</div>
-                </div>
-            </div>
-        </div>
-        <div id="postContainer">
-            @foreach (Post post in ViewBag.Posts)
-            {
-                @await Html.PartialAsync("Home/_ViewPost", post)
-            }
-        </div>
-        <div id="loading" class="text-center mt-3" style="display: none;">
+    <div class="col-md-8 colCustome">
+        <div class="container d-flex justify-content-center align-items-start"> 
+            <div class="w-100"> 
+                 <div class="d-flex align-items-start mb-3 input-container" > 
+                     <img src="@ViewBag.User.Avatar" class="rounded-circle" width="40" height="40" alt="User profile picture"> 
+                     <div class="ms-2 text-black-50 input-container2 w-100" style="cursor:pointer" data-bs-toggle="modal" 
+                     data-bs-target="#createModal">@ViewBag.User.Name ơi, bạn đang nghĩ gì thế?</div> 
+                 </div> 
+             </div> 
+         </div> 
+         <div id="postContainer">
+             @foreach (Post post in ViewBag.Posts) 
+             {
+                 @await Html.PartialAsync("Home/_ViewPost", post)
+             } 
+         </div> 
+         <div id="loading" class="text-center mt-3" style="display: none;"> 
             <span>Đang tải thêm bài viết...</span>
-        </div>
+         </div>
 
     </div>
     <div class="col-md-2">
@@ -124,7 +117,7 @@
     </div>
 </div>
 
-<div id="modal">
+<div id="modal"> 
 
 </div>
 @section Scripts {

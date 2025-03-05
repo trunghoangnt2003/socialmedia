@@ -31,5 +31,25 @@ namespace SocialMedia.Controllers
             return View(getUser);
         }
 
+        public IActionResult EditProfile(string Name, DateOnly Dob, string Address)
+        {
+            var userId = HttpContext.Session.GetString("User");
+            if(userId == null)
+            {
+                return RedirectToAction("Index", "Login");
+            }
+            var user = _contextDb.Users.Find(int.Parse(userId));
+            if(user == null)
+            {
+                return NotFound(); ;
+            }
+            user.Name = Name;
+            user.Dob = Dob;
+            user.Address = Address;
+
+            _contextDb.SaveChanges();
+            return RedirectToAction("Index", new {id = user.Id});
+        }
+
     }
 }

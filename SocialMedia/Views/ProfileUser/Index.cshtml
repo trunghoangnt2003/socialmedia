@@ -285,8 +285,7 @@
         <div class="profile-actions">
             @if (user != null && user.Equals(ViewBag.user.Id.ToString()))
             {
-                <button  data-bs-toggle="modal" data-bs-target="#updateModal"  class="edit-btn">Chỉnh sửa trang cá nhân</button>
-            <button class="archive-btn">Xem kho lưu trữ</button>
+                        <button  data-bs-toggle="modal"  data-bs-target="#updateModal"  class="edit-btn">Chỉnh sửa trang cá nhân</button>
             }
             else
             {
@@ -399,12 +398,23 @@
     <div class="modal-dialog" style="max-width: 50%">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="editNewsLabel">Edit News Article</h5>
+                <h5 class="modal-title" id="editNewsLabel">Edit Profile</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="editNewsForm" asp-action="Edit" method="post">
-                  
+                <form id="editNewsForm" asp-action="EditProfile" method="post">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="name" name="Name" value="@ViewBag.user?.Name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="dob" class="form-label">Date of Birth</label>
+                        <input type="date" class="form-control" id="dob" name="Dob" value="@ViewBag.user?.Dob?.ToString("yyyy-MM-dd")" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="address" class="form-label">Address</label>
+                        <input type="text" class="form-control" id="address" name="Address" value="@ViewBag.user?.Address" required>
+                    </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                         <button type="submit" class="btn btn-primary">Save changes</button>
@@ -414,6 +424,7 @@
         </div>
     </div>
 </div>
+
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 

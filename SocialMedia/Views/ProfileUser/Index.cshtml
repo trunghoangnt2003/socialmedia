@@ -204,6 +204,12 @@
     border-bottom: 2px solid #ddd;
     background: white;
 }
+.tab-content {
+    display: none;
+}
+.tab-content.active {
+    display: block;
+}
 
 .tab {
     padding: 10px 15px;
@@ -262,6 +268,144 @@
 }
 
 </style>
+
+<style>
+    .friends-box {
+    background: #fff;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    margin-top: 10px;
+}
+
+.friends-list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 cột bằng nhau */
+    gap: 15px; /* Khoảng cách giữa các cột */
+}
+
+.friend {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+    border-radius: 8px;
+}
+
+.friend img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+}
+
+.friend-info {
+    flex-grow: 1;
+}
+
+.friend-options {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+}
+.search-box {
+    display: flex;
+    align-items: center;
+    background: #f0f2f5;
+    padding: 8px 12px;
+    border-radius: 20px;
+    gap: 8px;
+    width: 200px;
+}
+
+.search-box i {
+    color: gray;
+}
+
+.search-box input {
+    border: none;
+    background: transparent;
+    outline: none;
+    font-size: 14px;
+    width: 100%;
+}
+.friends {
+        display: flex;
+    justify-content: space-between;
+}
+</style>
+<style>
+
+    /* Grid hiển thị ảnh */
+.photo-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* Chia thành 4 cột */
+    gap: 10px; /* Khoảng cách giữa ảnh */
+    margin-top: 10px;
+}
+
+/* Mỗi ảnh */
+.photo-item {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    width: 100%;
+}
+
+
+/* Tiêu đề */
+h3 {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+/* Grid hiển thị ảnh */
+.photo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+}
+
+/* Mỗi ảnh */
+.photo-item {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.photo-item img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 8px;
+    transition: transform 0.3s;
+}
+
+.photo-item:hover img {
+    transform: scale(1.05);
+}
+
+/* Nút chỉnh sửa (icon bút chì) */
+.edit-button {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(0, 0, 0, 0.5);
+    border: none;
+    color: white;
+    padding: 5px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.edit-button:hover {
+    background: rgba(0, 0, 0, 0.7);
+}
+
+</style>
 <head>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -296,14 +440,16 @@
         <button class="tab-more"><i class="fa fa-ellipsis-h"></i></button>
     </div>
   </div>
-    <div class="profile-tabs">
-        <a href="#" class="tab active">Bài viết</a>
-        <a href="#" class="tab">Bạn bè</a>
-        <a href="#" class="tab">Ảnh</a>
-        <a href="#" class="tab">Video</a>
-    </div>
+   <div class="profile-tabs">
+    <a href="#" class="tab active" data-tab="posts">Bài viết</a>
+    <a href="#" class="tab" data-tab="friends">Bạn bè</a>
+    <a href="#" class="tab" data-tab="photos">Ảnh</a>
+    <a href="#" class="tab" data-tab="videos">Video</a>
+</div>
 
-    <div class="profile-introduce">
+<div id="profile-content">
+    <div class="tab-content active" id="posts">
+        <div class="profile-introduce">
     <div class="container mt-4">
     <div class="row">
         <div class="col-md-4">
@@ -346,16 +492,15 @@
         <p class="text-muted">@(ViewBag.Friends.Count) người bạn</p>
         <div class="friend-list">
             <div class="row">
-                            @foreach(var u in ViewBag.Friends)
-                            {
-                                 <div class="col-4 mb-2">
-                        <div class="friend-card">
-                                            <img src="@u.Friend1Navigation.Avatar" alt="@u.Friend1Navigation.Name" class="rounded img-fluid">
-                                    <p class="friend-name text-wrap" >@u.Friend1Navigation.Name</p>
-                        </div>
-                    </div>   
-                            }
-
+                                    @foreach (var u in ViewBag.Friends)
+                                    {
+                                     <div class="col-4 mb-2">
+                            <div class="friend-card">
+                                                <img src="@u.Friend1Navigation.Avatar" alt="@u.Friend1Navigation.Name" class="rounded img-fluid">
+                                        <p class="friend-name text-wrap" >@u.Friend1Navigation.Name</p>
+                            </div>
+                        </div>   
+                                    }
             </div>
         </div>
     </div>
@@ -393,6 +538,71 @@
 
     </div>
 </div>
+    </div>
+    <div class="tab-content" id="friends">
+    <div class="friends-box">
+        <div class="friends">
+            <h3>Bạn bè</h3>
+        <div class="friends-header">
+            <div class="search-box">
+            <i class="fa fa-search"></i>
+            <input type="text" placeholder="Tìm kiếm bạn bè">
+            </div>
+        </div>
+        </div>
+        <div class="friends-list">
+            @foreach (var u in ViewBag.Friends)
+            {
+                    <div class="friend">
+                        <img src="@u.Friend1Navigation.Avatar" alt="@u.Friend1Navigation.Name">
+                        <div class="friend-info">
+                            <strong>@u.Friend1Navigation.Name</strong>
+                        </div>
+                        <button class="friend-options">⋮</button>
+                    </div>
+            }
+        </div>
+    </div>
+</div>
+
+
+   @*  <div class="tab-content" id="photos">
+    <h3>Ảnh</h3>
+    <div class="photo-grid">
+        @foreach (var photo in ViewBag.Photos)
+        {
+                <div class="photo-item">
+                    <img src="@photo.Url" alt="Ảnh">
+                    <button class="edit-button">
+                        <i class="fa fa-pencil"></i>
+                    </button>
+                </div>
+        }
+    </div>
+</div> *@
+        <div class="tab-content" id="photos">
+    <h3>Ảnh</h3>
+    <div class="photo-grid">
+        @for (int i = 1; i <= 10; i++)
+        {
+                <div class="photo-item">
+                    <img src="https://via.placeholder.com/150" alt="Ảnh @i">
+                    <button class="edit-button">
+                        <i class="fa fa-pencil"></i>
+                    </button>
+                </div>
+        }
+    </div>
+</div>
+
+
+    <div class="tab-content" id="videos">
+        <h3>Video</h3>
+        <p>Danh sách video...</p>
+    </div>
+</div>
+
+
 
 <div class="modal fade" id="updateModal" tabindex="-1" aria-labelledby="editNewsLabel" aria-hidden="true">
     <div class="modal-dialog" style="max-width: 50%">
@@ -443,4 +653,27 @@
             // TODO: Send the file to the server (AJAX, Fetch API, or form submission)
         }
     }
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".profile-tabs .tab").forEach(tab => {
+        tab.addEventListener("click", function (event) {
+            event.preventDefault();
+
+            // Remove active class from all tabs
+            document.querySelectorAll(".profile-tabs .tab").forEach(t => t.classList.remove("active"));
+            this.classList.add("active");
+
+            // Hide all tab contents
+            document.querySelectorAll(".tab-content").forEach(content => content.classList.remove("active"));
+
+            // Show the selected tab content
+            let tabName = this.getAttribute("data-tab");
+            document.getElementById(tabName).classList.add("active");
+        });
+    });
+
+    // Show default tab (posts)
+    document.getElementById("posts").classList.add("active");
+});
 </script>

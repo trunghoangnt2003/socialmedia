@@ -190,7 +190,7 @@
                                 <img src="${group.avatar}" class="rounded me-2" width="30" height="30" alt="Group Avatar">
                         <span>${group.name}</span>
                     `;
-                        //item.onclick = () => window.location.href = `/Group/Details/${group.id}`;
+                        item.onclick = () => window.location.href = `/Group/Details/${group.id}`;
                         searchResults.appendChild(item);
                     });
                 }

@@ -3,21 +3,16 @@
     var user = Context.Session.GetString("User");
 }
 
-<head>
-    <link rel="stylesheet" href="~/css/profile.css" asp-append-version="true">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-</head>
+<link rel="stylesheet" href="~/css/profile.css" asp-append-version="true">
 
 <div class="profile-container mb-3  ">
     <div class="profile-header ">
         <div class="profile-avatar">
             <img src="@(ViewBag.user?.Avatar ?? "https://res.cloudinary.com/ddg2gdfee/image/upload/v1738900139/avatar_male_default_yjf1du.jpg")" 
                  class="profile-picture" alt="Profile Picture">
-            <label for="avatarUpload" class="camera-icon">
+            <label for="avatarUpload" class="camera-icon d-flex align-items-center justify-content-center" data-bs-toggle="modal" data-bs-target="#updateAvatarModal">
                 <i class="fa fa-camera"></i>
             </label>
-            <input type="file" id="avatarUpload" accept="image/*" style="display: none;" onchange="uploadAvatar(event)">
         </div>
 
         <div class="profile-info">
@@ -27,7 +22,7 @@
         <div class="profile-actions">
             @if (user != null && user.Equals(ViewBag.user.Id.ToString()))
             {
-                        <button  data-bs-toggle="modal"  data-bs-target="#updateModal"  class="edit-btn">Chỉnh sửa trang cá nhân</button>
+                <button  data-bs-toggle="modal"  data-bs-target="#updateModal"  class="edit-btn">Chỉnh sửa trang cá nhân</button>
             }
             else
             {
@@ -90,15 +85,15 @@
         <p class="text-muted">@(ViewBag.Friends.Count) người bạn</p>
         <div class="friend-list">
             <div class="row">
-                                    @foreach (var u in ViewBag.Friends)
-                                    {
-                                     <div class="col-4 mb-2">
-                            <div class="friend-card">
-                                                <img src="@u.Friend1Navigation.Avatar" alt="@u.Friend1Navigation.Name" class="rounded img-fluid">
-                                        <p class="friend-name text-wrap" >@u.Friend1Navigation.Name</p>
-                            </div>
-                        </div>   
-                                    }
+                @foreach (var u in ViewBag.Friends)
+                {
+                    <div class="col-4 mb-2">
+                        <div class="friend-card">
+                            <img src="@u.Friend1Navigation.Avatar" alt="@u.Friend1Navigation.Name" class="rounded img-fluid">
+                            <p class="friend-name text-wrap" >@u.Friend1Navigation.Name</p>
+                        </div>
+                    </div>   
+                }
             </div>
         </div>
     </div>
@@ -195,15 +190,28 @@
 
 
 
-<div class="modal fade" id="updateModal" tabindex="-1" aria-labelledby="editNewsLabel" aria-hidden="true">
-    <div class="modal-dialog" style="max-width: 50%">
+<div class="modal fade" id="updateModal" tabindex="-1" aria-labelledby="editProfileLabel" aria-hidden="true">
+    <div class="modal-dialog" style="max-width: 30%">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="editNewsLabel">Edit Profile</h5>
+                <h5 class="modal-title" id="editProfileLabel">Edit Profile</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="editNewsForm" asp-action="EditProfile" method="post">
+                <form id="editNewsForm" asp-action="EditProfile" method="post" enctype="multipart/form-data">
+                    <div class="mb-3 text-center">
+                        <div class="profile-avatar">
+                            <img id="profileEditImage"
+                                 src="@(ViewBag.user?.Avatar ?? "https://res.cloudinary.com/ddg2gdfee/image/upload/v1738900139/avatar_male_default_yjf1du.jpg")"
+                                 class="profile-picture profile-picture-edit"
+                                 style="width: 200px; height: 200px; border-radius: 50%; object-fit: cover;"
+                                 alt="Profile Picture">
+                            <input type="file" id="avatarEditInput" name="avatarEditInput" accept="image/*" style="display: none;">
+                            <label for="avatarEditInput" class="camera-icon d-flex align-items-center justify-content-center" id="uploadEditButton">
+                                <i class="fa fa-camera"></i>
+                            </label>
+                        </div>
+                    </div>
                     <div class="mb-3">
                         <label for="name" class="form-label">Name</label>
                         <input type="text" class="form-control" id="name" name="Name" value="@ViewBag.user?.Name" required>
@@ -226,27 +234,85 @@
     </div>
 </div>
 
+<div class="modal fade" id="updateAvatarModal" tabindex="-1" aria-labelledby="editAvatarLabel" aria-hidden="true">
+    <div class="modal-dialog" style="max-width: 30%">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="editAvatarLabel">Chọn ảnh đại diện</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editProfileForm" asp-action="EditAvatar" method="post" enctype="multipart/form-data">
+                    <div class="text-center">
+                        <img id="profileImage"
+                             src="@(ViewBag.user?.Avatar ?? "https://res.cloudinary.com/ddg2gdfee/image/upload/v1738900139/avatar_male_default_yjf1du.jpg")"
+                             class="profile-picture profile-picture-edit"
+                             style="width: 200px; height: 200px; border-radius: 50%; object-fit: cover;"
+                             alt="Profile Picture">
+                        <input type="file" id="avatarInput" name="avatarInput" accept="image/*" hidden>
+                    </div>
+                    <div class="text-center mt-4">
+                        <button type="button" class="btn btn-primary me-2" id="uploadButton">+ Tải Ảnh Lên</button>
+                        <button type="submit" class="btn btn-success w-25">Lưu</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 
 <!-- JavaScript for Upload -->
 <script>
-    function uploadAvatar(event) {
+
+
+
+     document.addEventListener("DOMContentLoaded", function () {
+        document.getElementById('uploadButton').addEventListener('click', function () {
+            let input = document.createElement('input'); 
+            input.type = 'file'; 
+            input.accept = 'image/*'; 
+            input.style.display = 'none'; 
+            input.classList.add('avatarUpload');
+
+            input.addEventListener('change', function (event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        console.log('Đã chọn ảnh:', file.name);
+                        document.getElementById('profileImage').src = e.target.result;
+
+                        let avatarInput = document.getElementById('avatarInput');
+                        let dataTransfer = new DataTransfer();
+                        dataTransfer.items.add(file);
+                        avatarInput.files = dataTransfer.files;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            document.body.appendChild(input); 
+            input.click(); 
+            document.body.removeChild(input);
+        });
+
+            document.getElementById('avatarEditInput').addEventListener('change', function (event) {
         const file = event.target.files[0];
         if (file) {
             const reader = new FileReader();
             reader.onload = function (e) {
-                document.querySelector('.profile-picture').src = e.target.result;
+                console.log('Image selected:', file.name);
+                document.getElementById('profileEditImage').src = e.target.result;
             };
             reader.readAsDataURL(file);
-
-            // TODO: Send the file to the server (AJAX, Fetch API, or form submission)
         }
-    }
-</script>
-<script>
-document.addEventListener("DOMContentLoaded", function () {
+    });
+
+
     document.querySelectorAll(".profile-tabs .tab").forEach(tab => {
         tab.addEventListener("click", function (event) {
             event.preventDefault();

@@ -20,13 +20,15 @@ namespace SocialMedia.Controllers
             if (string.IsNullOrEmpty(user)) return View();
 
             var listFriends = _contextDb.Friends.Where(f => f.User == id).Include(f => f.Friend1Navigation);
-
+            var listImages = _contextDb.Posts.Where(img => img.Author == id).Include(r => r.Resources)
+                            .ToList();
             var getUser = _contextDb.Users.FirstOrDefault(us => us.Id == id);
             if (user == null)
             {
                 return NotFound();
             }
             ViewBag.Friends = listFriends.ToList();
+            ViewBag.listImages = listImages;
             ViewBag.user = getUser;
             return View(getUser);
         }

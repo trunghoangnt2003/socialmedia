@@ -65,5 +65,21 @@ namespace SocialMedia.Controllers
             return View();
         }
 
+        [HttpGet]
+        public JsonResult GetResults(string query)
+        {
+            var users = _socialNetworkContext.Users
+                .Where(u => u.Name.Contains(query))
+                .Select(u => new { u.Id, u.Name, u.Avatar })
+                .ToList();
+
+            var groups = _socialNetworkContext.Groups
+                .Where(g => g.Name.Contains(query))
+                .Select(g => new { g.Id, g.Name, g.Avatar })
+                .ToList();
+
+            return Json(new { users, groups });
+        }
+
     }
 }

@@ -4,25 +4,107 @@
 
 <style>
     .user-item{
-        cursor: pointer
+    cursor: pointer
     }
 
     .user-item:hover {
-        background-color: lightgray;
+    background-color: lightgray;
     }
 
-    .status {
-        width: 10px;
-        height: 10px;
-        background-color: green;
-        border-radius: 50%;
-        margin-left: 5px;
+    .status { 
+     width: 10px; 
+     height: 10px; 
+     background-color: green; 
+     border-radius: 50%; 
+     margin-left: 5px; 
+    }
+
+    .input-container {
+    background-color: #f0f2f5;
+    border-radius: 8px;
+    padding: 10px 20px;
+    }
+
+    .input-container2 {
+    background-color: #EEEEEE;
+    border-radius: 50px;
+    padding: 10px 20px;
+    }
+
+    .input-container input {
+    background-color: #f0f2f5;
+    border: none;
+    color: #050505;
+    outline: none;
+    }
+
+    .btn-custom {
+    background-color: #e4e6eb;
+    color: #050505;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    }
+
+    .btn-custom i {
+    margin-right: 5px;
+    }
+
+    .btn-custom span {
+    color: #050505;
+    }
+
+    .btn-custom-red {
+    color: #f02849;
+    }
+
+    .btn-custom-green {
+    color: #45bd62;
+    }
+
+    .btn-custom-yellow {
+    color: #f7b928;
+    }
+
+    .colCustome {
+        height: 100vh; /* Chiều cao full màn hình */
+        overflow-y: auto; /* Thanh cuộn dọc */
+        padding-right: 10px; /* Tránh đè vào thanh cuộn */
+        scroll-behavior: smooth; /* Cuộn mượt */
+    }
+
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden; /* Cuộn toàn trang */
     }
 </style>
 
 <div class="row">
     <div class="col-md-3"></div>
-    <div class="col-md-6">
+    <div class="col-md-6 colCustome">
+        <div class="container d-flex justify-content-center align-items-start"> 
+            <div class="w-100"> 
+                 <div class="d-flex align-items-start mb-3 input-container" > 
+                     <img src="@ViewBag.User.Avatar" class="rounded-circle" width="40" height="40" alt="User profile picture"> 
+                     <div class="ms-2 text-black-50 input-container2 w-100" style="cursor:pointer" data-bs-toggle="modal" 
+                     data-bs-target="#createModal">@ViewBag.User.Name ơi, bạn đang nghĩ gì thế?</div> 
+                 </div> 
+             </div> 
+         </div> 
+         <div id="postContainer" class="pb-5">
+             @foreach (Post post in ViewBag.Posts) 
+             {
+                 @await Html.PartialAsync("Home/_ViewPost", post)
+             } 
+         </div> 
+         <div id="loading" class="text-center mt-3" style="display: none;"> 
+            <span>Đang tải thêm bài viết...</span>
+         </div>
+
     </div>
     <div class="col-md-3">
         <h2>Danh sách bạn bè</h2>
@@ -41,3 +123,57 @@
         }
     </div>
 </div>
+
+<div id="modal"> 
+
+</div>
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+                // Load ngay khi trang vừa mở
+                $.get("/Home/LoadCreatePost", function(data) {
+                    $("#modal").html(data);
+                });
+            });
+
+        //         let currentPage = 1;
+        // let isLoading = false;
+
+        // $(window).scroll(function () {
+        //     if ($(window).scrollTop() + $(window).height() >= $(document).height() - 100) {
+        //         loadMorePosts();
+        //     }
+        // });
+
+        // function loadMorePosts() {
+        //     if (isLoading) return;
+        //     isLoading = true;
+        //     currentPage++;
+        //     $("#loading").show();
+
+        //     $.ajax({
+        //         url: '/Home/LoadMorePosts',
+        //         type: 'GET',
+        //         data: { page: currentPage },
+        //         success: function (data) {
+        //             if (data.trim() !== '') {
+        //                 $("#postContainer").append(data);
+        //             } else {
+        //                 $(window).off("scroll"); // Hết dữ liệu thì dừng lắng nghe sự kiện cuộn
+        //             }
+        //         },
+        //         complete: function () {
+        //             isLoading = false;
+        //             $("#loading").hide();
+        //         },
+        //         error: function () {
+        //             console.log("Có lỗi xảy ra khi tải bài viết!");
+        //             isLoading = false;
+        //             $("#loading").hide();
+        //         }
+        //     });
+        // }
+        
+    </script>
+
+}

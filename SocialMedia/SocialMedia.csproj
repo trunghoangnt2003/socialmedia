@@ -6,10 +6,16 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>eca09812-47e1-4d1f-9b73-ea39b2df8544</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+	  <CopyRazorGenerateFilesToPublishDirectory>true</CopyRazorGenerateFilesToPublishDirectory>
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="Views\Shared\Home\PostDetail.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="CloudinaryDotNet" Version="1.27.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="8.0.13" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Common" Version="8.0.11" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.11">
       <PrivateAssets>all</PrivateAssets>
@@ -24,6 +30,10 @@
     <Content Update="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Views\Shared\Components\Post\" />
   </ItemGroup>
 
 </Project>

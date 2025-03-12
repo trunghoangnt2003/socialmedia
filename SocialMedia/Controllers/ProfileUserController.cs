@@ -1,8 +1,12 @@
 ﻿
+using AspNetCoreGeneratedDocument;
+using CloudinaryDotNet;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using SocialMedia.Models;
+using SocialMedia.Services;
 
 namespace SocialMedia.Controllers
 {
@@ -10,9 +14,11 @@ namespace SocialMedia.Controllers
     public class ProfileUserController : Controller
     {
         private readonly SocialNetworkContext _contextDb;
-        public ProfileUserController(SocialNetworkContext context)
+        private readonly CloudinaryServices _cloudinaryServices;
+        public ProfileUserController(SocialNetworkContext context, CloudinaryServices cloudinaryServices)
         {
             _contextDb = context;
+            _cloudinaryServices = cloudinaryServices;
         }
         public IActionResult Index(int? id)
         {
@@ -36,7 +42,7 @@ namespace SocialMedia.Controllers
             return View(getUser);
         }
 
-        public IActionResult EditProfile(string Name, DateOnly Dob, string Address)
+        public async Task<IActionResult> EditProfile(string Name, DateOnly Dob, string Address, IFormFile[] avatarEditInput)
         {
             var userId = HttpContext.Session.GetString("User");
             if(userId == null)
@@ -48,13 +54,32 @@ namespace SocialMedia.Controllers
             {
                 return NotFound(); ;
             }
+            List<Dictionary<string, string>> resClound = await _cloudinaryServices.PutFilesToCloundinary(avatarEditInput);
+
+            if (resClound.Count > 0)
+            {
+                foreach (Dictionary<string, string> pairs in resClound)
+                {
+                    var url = pairs["url"];
+                    var type = pairs["resource_type"];
+                    user.Avatar = url;
+                    _contextDb.Update(user);
+                    _contextDb.SaveChanges();
+                }
+            }
             user.Name = Name;
             user.Dob = Dob;
             user.Address = Address;
 
             _contextDb.SaveChanges();
+            var userJson = JsonConvert.SerializeObject(user, new JsonSerializerSettings
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            });
+            HttpContext.Session.SetString("UserFull", userJson);
             return RedirectToAction("Index", new {id = user.Id});
         }
+
 
         public IActionResult SearchFriends(string searchTerm, int? id)
         {
@@ -73,6 +98,39 @@ namespace SocialMedia.Controllers
             return Json(friends);
         }
 
+        public async Task<IActionResult> EditAvatar(IFormFile[] avatarInput)
+        {
+            var userId = HttpContext.Session.GetString("User");
+            if (userId == null)
+            {
+                return RedirectToAction("Index", "Login");
+            }
+            var user = _contextDb.Users.Find(int.Parse(userId));
+            if (user == null)
+            {
+                return NotFound(); ;
+            }
+            List<Dictionary<string, string>> resClound = await _cloudinaryServices.PutFilesToCloundinary(avatarInput);
 
+            if (resClound.Count > 0)
+            {
+                foreach (Dictionary<string, string> pairs in resClound)
+                {
+                    var url = pairs["url"];
+                    var type = pairs["resource_type"];
+                    user.Avatar = url;
+                    _contextDb.Update(user);
+                    _contextDb.SaveChanges();
+                }
+            }
+
+            var userJson = JsonConvert.SerializeObject(user, new JsonSerializerSettings
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            });
+            HttpContext.Session.SetString("UserFull", userJson);
+
+            return RedirectToAction("Index", new { id = user.Id });
+        }
     }
 }

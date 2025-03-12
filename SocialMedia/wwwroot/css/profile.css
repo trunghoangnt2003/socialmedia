@@ -1,4 +1,4 @@
-﻿<style >
+﻿
 .friend-card {
     text-align: center;
 }
@@ -119,6 +119,8 @@
 }
 
 .camera-icon {
+    width:40px;
+    height: 40px;
     position: absolute;
     bottom: 10px;
     right: 10px;
@@ -294,11 +296,11 @@
     border-radius: 8px;
 }
 
-    .friend img {
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-    }
+.friend img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+}
 
 .friend-info {
     flex-grow: 1;
@@ -310,28 +312,6 @@
     font-size: 20px;
     cursor: pointer;
 }
-
-.search-box {
-    display: flex;
-    align-items: center;
-    background: #f0f2f5;
-    padding: 8px 12px;
-    border-radius: 20px;
-    gap: 8px;
-    width: 200px;
-}
-
-    .search-box i {
-        color: gray;
-    }
-
-    .search-box input {
-        border: none;
-        background: transparent;
-        outline: none;
-        font-size: 14px;
-        width: 100%;
-    }
 
 .friends {
     display: flex;
@@ -407,4 +387,3 @@ h3 {
         background: rgba(0, 0, 0, 0.8);
     }
 
-</style >

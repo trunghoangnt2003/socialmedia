@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using SocialMedia.Models;
 using SocialMedia.Services;
+using System.Runtime.CompilerServices;
 
 namespace SocialMedia.Controllers
 {
@@ -21,6 +22,28 @@ namespace SocialMedia.Controllers
         {
             var post = _socialNetworkContext.Posts.Include(p => p.Reactions).Include(p => p.Resources).Include(p=>p.AuthorNavigation).FirstOrDefault(p => p.Id == id);
             return View(post);
+        }
+        public class CommentRequest
+        {
+            public string content { get; set; }
+            public int postId { get; set; }
+        }
+        [HttpPost]
+        public IActionResult AddComment([FromBody] CommentRequest request)
+        {
+            var post =  _socialNetworkContext.Posts.Find(request.postId);
+            if (post == null) return NotFound();
+            string user = HttpContext.Session.GetString("User");
+            int userID = int.Parse(user);
+            User user1 = _socialNetworkContext.Users.Find(userID);
+            Comment comment = new Comment();
+            comment.ModifyTime = DateTime.Now;
+            comment.Post = request.postId;
+            comment.Contents = request.content;
+            comment.Author = userID;
+            _socialNetworkContext.Comments.Add(comment);
+            _socialNetworkContext.SaveChanges();
+            return Ok(new { success = true , avatar = user1.Avatar, commentName = user1.Name, createAt = comment.ModifyTime, content = request.content });
         }
         [HttpPost]
         public IActionResult ToggleLike([FromBody] LikeRequest request)

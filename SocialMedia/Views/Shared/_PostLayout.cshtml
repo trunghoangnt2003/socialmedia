@@ -1,0 +1,49 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - SocialMedia</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/SocialMedia.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="~/css/header-layout.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/chat-modal.css" asp-append-version="true" />
+</head>
+<body>
+    <div >
+        <main role="main" class="pb-3">
+            @RenderBody()
+            </main>
+    </div>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+    <script src="~/js/chat-modal.js" asp-append-version="true"></script>
+    <script src="~/js/header.js" asp-append-version="true"></script>
+    <script src="~/js/signalr/dist/browser/signalr.js"></script>
+    <script>
+        "use strict";
+
+        var connection = new signalR.HubConnectionBuilder().withUrl("/signalRService").build();
+        connection.start().then(function () {
+
+            console.log("currentUser "+ currentUser + "id " + connection.connectionId);
+        });
+        var currentUser = @Context.Session.GetString("User");
+
+        connection.on("SendMessageTo", function (reciver) {
+            console.log("Send to" + `${reciver}`);
+            if(reciver != currentUser) LoadChatData(reciver,false);
+        });
+
+        connection.on("ReceiveMessageFrom", function (sender) {
+            console.log("Receive from" + `${sender}`);
+            FetchNumberMessage();
+            if(sender != currentUser) LoadChatData(sender,true);
+        });
+    </script>
+</body>
+</html>

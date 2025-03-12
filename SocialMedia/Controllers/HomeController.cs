@@ -51,7 +51,7 @@ namespace SocialMedia.Controllers
             var userDB = _socialNetworkContext.Users.FirstOrDefault(u => u.Id == userID);
             ViewBag.Friends = listFriends.ToList();
             ViewBag.User = userDB;
-            var posts = _socialNetworkContext.Posts.Include(p=>p.Resources).Include(p=>p.Reactions)
+            var posts = _socialNetworkContext.Posts.Include(p=>p.Resources).Include(p=>p.Reactions).Include(p=>p.Comments)
                                 .OrderByDescending(p => p.ModifyTime)
                                 .ToList();
             ViewBag.Posts = posts;

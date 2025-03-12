@@ -74,11 +74,18 @@
         padding-right: 10px; /* Tránh đè vào thanh cuộn */
         scroll-behavior: smooth; /* Cuộn mượt */
     }
+
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden; /* Cuộn toàn trang */
+    }
 </style>
 
 <div class="row">
-    <div class="col-md-2"></div>
-    <div class="col-md-8 colCustome">
+    <div class="col-md-3"></div>
+    <div class="col-md-6 colCustome">
         <div class="container d-flex justify-content-center align-items-start"> 
             <div class="w-100"> 
                  <div class="d-flex align-items-start mb-3 input-container" > 
@@ -88,7 +95,7 @@
                  </div> 
              </div> 
          </div> 
-         <div id="postContainer">
+         <div id="postContainer" class="pb-5">
              @foreach (Post post in ViewBag.Posts) 
              {
                  @await Html.PartialAsync("Home/_ViewPost", post)
@@ -99,7 +106,7 @@
          </div>
 
     </div>
-    <div class="col-md-2">
+    <div class="col-md-3">
         <h2>Danh sách bạn bè</h2>
         @foreach (var friend in ViewBag.Friends)
         {
@@ -128,6 +135,7 @@
                     $("#modal").html(data);
                 });
             });
+
         //         let currentPage = 1;
         // let isLoading = false;
 

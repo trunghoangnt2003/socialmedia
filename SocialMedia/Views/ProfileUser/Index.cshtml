@@ -10,9 +10,12 @@
         <div class="profile-avatar">
             <img src="@(ViewBag.user?.Avatar ?? "https://res.cloudinary.com/ddg2gdfee/image/upload/v1738900139/avatar_male_default_yjf1du.jpg")" 
                  class="profile-picture" alt="Profile Picture">
-            <label for="avatarUpload" class="camera-icon d-flex align-items-center justify-content-center" data-bs-toggle="modal" data-bs-target="#updateAvatarModal">
-                <i class="fa fa-camera"></i>
+             @if (user != null && user.Equals(ViewBag.user.Id.ToString()))
+            {
+                <label for="avatarUpload" class="camera-icon d-flex align-items-center justify-content-center" data-bs-toggle="modal" data-bs-target="#updateAvatarModal">
+                    <i class="fa fa-camera"></i>
             </label>
+            }
         </div>
 
         <div class="profile-info">

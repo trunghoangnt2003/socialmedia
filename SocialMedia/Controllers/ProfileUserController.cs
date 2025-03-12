@@ -26,13 +26,18 @@ namespace SocialMedia.Controllers
             if (string.IsNullOrEmpty(user)) return View();
 
             var listFriends = _contextDb.Friends.Where(f => f.User == id).Include(f => f.Friend1Navigation);
-
+            var listImages = _contextDb.Posts.Where(img => img.Author == id && img.Type == 5).Include(r => r.Resources)
+                            .ToList();
+            var listVideos = _contextDb.Posts.Where(img => img.Author == id && img.Type == 6).Include(r => r.Resources)
+                            .ToList();
             var getUser = _contextDb.Users.FirstOrDefault(us => us.Id == id);
             if (user == null)
             {
                 return NotFound();
             }
             ViewBag.Friends = listFriends.ToList();
+            ViewBag.listImages = listImages;
+            ViewBag.listVideos = listVideos;
             ViewBag.user = getUser;
             return View(getUser);
         }
@@ -75,6 +80,23 @@ namespace SocialMedia.Controllers
             return RedirectToAction("Index", new {id = user.Id});
         }
 
+
+        public IActionResult SearchFriends(string searchTerm, int? id)
+        {
+            if (id == null) return BadRequest("User ID is required");
+
+            var friends = _contextDb.Friends
+                .Where(f => f.User == id && (string.IsNullOrEmpty(searchTerm) || f.Friend1Navigation.Name.Contains(searchTerm)))
+                .Include(f => f.Friend1Navigation)
+                .Select(f => new
+                {
+                    Avatar = f.Friend1Navigation.Avatar,
+                    Name = f.Friend1Navigation.Name
+                })
+                .ToList();
+
+            return Json(friends);
+        }
 
         public async Task<IActionResult> EditAvatar(IFormFile[] avatarInput)
         {

@@ -34,6 +34,18 @@ namespace SocialMedia.Controllers
             {
                 return NotFound();
             }
+     //       string user = HttpContext.Session.GetString("User");
+            if (string.IsNullOrEmpty(user)) return View();
+
+            int userID = int.Parse(user);
+     //       var listFriends = _socialNetworkContext.Friends.Where(f => f.User == userID).Include(f => f.Friend1Navigation);
+            var userDB = _contextDb.Users.FirstOrDefault(u => u.Id == userID);
+            ViewBag.Friends = listFriends.ToList();
+            ViewBag.User = userDB;
+            var posts = _contextDb.Posts.Include(p => p.Resources).Include(p => p.Reactions).Include(p => p.Comments)
+                                .OrderByDescending(p => p.ModifyTime)
+                                .ToList();
+            ViewBag.Posts = posts;
             ViewBag.Friends = listFriends.ToList();
             ViewBag.listImages = listImages;
             ViewBag.listVideos = listVideos;
@@ -130,6 +142,14 @@ namespace SocialMedia.Controllers
             HttpContext.Session.SetString("UserFull", userJson);
 
             return RedirectToAction("Index", new { id = user.Id });
+        }
+
+        public IActionResult LoadCreatePost()
+        {
+            string user = HttpContext.Session.GetString("User");
+            int userID = int.Parse(user);
+            var userDB = _contextDb.Users.FirstOrDefault(u => u.Id == userID);
+            return PartialView("Home/_CreatePost", userDB);
         }
     }
 }

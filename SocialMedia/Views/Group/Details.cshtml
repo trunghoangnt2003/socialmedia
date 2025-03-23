@@ -1,0 +1,528 @@
+﻿@model IEnumerable<SocialMedia.Models.Post>
+@using Microsoft.AspNetCore.Html
+@using Newtonsoft.Json
+
+@{
+    var userJson = Context.Session.GetString("UserFull");
+    User user = new User { Name = "Unknown" };
+
+    if (!string.IsNullOrEmpty(userJson))
+    {
+        try
+        {
+            user = JsonConvert.DeserializeObject<User>(userJson);
+        }
+        catch (JsonException ex)
+        {
+            Console.WriteLine($"Error deserializing user: {ex.Message}");
+        }
+    }
+}
+
+<style>
+    .group-header {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        padding: 20px;
+        background-color: #f5f5f5;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .group-avatar {
+        width: 1000px;
+        height: 300px;
+        border-radius: 10px;
+        object-fit: cover;
+        margin-right: 20px;
+    }
+
+    .group-details h2 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: bold;
+    }
+
+    .group-member-count {
+        color: #666;
+        font-size: 14px;
+        margin-top: 5px;
+    }
+
+    .group-actions {
+        margin-top: 10px;
+    }
+
+        .group-actions button {
+            background-color: #008CBA;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 20px;
+            margin-right: 10px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .group-actions .btn-invite {
+            background-color: orange;
+        }
+
+        .group-actions .btn-share {
+            background-color: lightgray;
+        }
+
+        .group-actions .btn-joined {
+            background-color: #4CAF50;
+        }
+
+        .group-actions button:hover {
+            opacity: 0.8;
+        }
+
+    .image-grid {
+        display: grid;
+        gap: 8px;
+        justify-content: center;
+        align-items: center;
+        justify-content: center;
+        align-items: stretch;
+    }
+
+    .media-item {
+        display: flex;
+        align-items: stretch;
+    }
+
+        .media-item img, .media-item video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+            aspect-ratio: 1 / 1;
+        }
+
+    .media-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        color: #fff;
+        font-size: 24px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 8px;
+    }
+</style>
+
+<div class="group-header">
+    <img src="@ViewBag.Group.Avatar" alt="Group Avatar" class="group-avatar" />
+    <div class="group-details">
+        <h2>@ViewBag.Group.Name</h2>
+        <span class="group-member-count">@ViewBag.Member members</span>
+
+        <div class="group-actions">
+            <button class="btn-invite">+ Invite</button>
+            <button class="btn-share">Share</button>
+            <button class="btn-joined">Joined</button>
+        </div>
+    </div>
+</div>
+
+@foreach(Post post in Model)
+{
+    <div class="container mt-5 p-4 bg-white rounded shadow">
+        <div class="d-flex align-items-center mb-3">
+            <img alt="User profile picture" class="rounded-circle" height="40" src="@post?.AuthorNavigation?.Avatar" width="40" />
+            <div class="ms-3">
+                <p class="fw-semibold mb-0">@post?.AuthorNavigation?.Name</p>
+                @{
+                    var modifyTime = post?.ModifyTime;
+                    if (modifyTime != null)
+                    {
+                        var timeDifference = DateTime.Now - modifyTime.Value;
+                        <p class="text-muted small">
+                            @(timeDifference.TotalMinutes < 1 ? "Vừa xong" : timeDifference.TotalHours < 12 ? (timeDifference.TotalMinutes < 60 ? $"{(int)timeDifference.TotalMinutes} phút trước" : $"{(int)timeDifference.TotalHours} giờ trước") : modifyTime.Value.ToString("dd/MM/yyyy HH:mm"))
+                        </p>
+                    }
+                    else
+                    {
+                        <p class="text-muted small">Không có thời gian chỉnh sửa</p>
+                    }
+                }
+            </div>
+        </div>
+
+        <p>@post?.Contents</p>
+        <div class="image-grid-container">
+            @if (post?.Resources != null && post.Resources.Any())
+            {
+                var resources = post.Resources.ToList();
+                var count = resources.Count;
+
+                if (count == 1)
+                {
+                    <div class="text-center">
+                        @RenderMedia(resources[0], post.Id)
+                    </div>
+                }
+                else if (count == 2)
+                {
+                    <div class="row g-2">
+                        @foreach (var resource in resources)
+                        {
+                            <div class="col-6">
+                                <div class="media-item">
+                                    @RenderMedia(resource, post.Id)
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="row g-2">
+                        <div class="col-8">
+                            <div class="media-item">
+                                @RenderMedia(resources[0], post.Id)
+                            </div>
+                        </div>
+                        <div class="col-4 d-flex flex-column gap-2">
+                            <div class="media-item">
+                                @RenderMedia(resources[1], post.Id)
+                            </div>
+                            <div class="media-item position-relative">
+                                @if (count > 3)
+                                {
+                                    <div class="media-overlay">
+                                        +@(count - 3)
+                                    </div>
+                                }
+                                @RenderMedia(resources[2], post.Id)
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+
+        <p class="text-primary">
+            <i class="far fa-thumbs-up"></i> <span id="likeCount-@post.Id">@post.Reactions.Count</span>
+        </p>
+
+        <div class="d-flex justify-content-between align-items-center border-top pt-1">
+            <div class="d-flex gap-3">
+                @if (post.Reactions.Any(r => r.User == ViewBag.User.Id) == true)
+                {
+                    <button id="likeButton-@post.Id" class="btn text-primary p-0">
+                        <i class="far fa-thumbs-up"></i>
+                        <span id="likeText-@post.Id">Đã Thích</span>
+                    </button>
+                }
+                else
+                {
+                    <button id="likeButton-@post.Id" class="btn  text-muted p-0">
+                        <i class="far fa-thumbs-up"></i>
+                        <span id="likeText-@post.Id">Thích</span>
+                    </button>
+                }
+
+                <button id="shareButton-@post.Id" class="btn text-muted p-0" data-bs-toggle="modal" data-bs-target="#shareModal-@post.Id">
+                    <i class="far fa-comment"></i> Bình luận
+                </button>
+            </div>
+            <button class="btn text-muted p-0">
+                <i class="fas fa-share"></i> Chia sẻ
+            </button>
+        </div>
+    </div>
+    <div class="modal fade" id="shareModal-@post.Id" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header justify-content-center position-relative">
+                    <h5 class="modal-title" id="shareModalLabel">Bài viết của @post?.AuthorNavigation?.Name</h5>
+                    <button type="button" class="btn-close position-absolute end-0 me-3" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <img alt="User profile picture" class="rounded-circle" height="40" src="@post?.AuthorNavigation?.Avatar" width="40" />
+                        <div class="ms-3">
+                            <p class="fw-semibold mb-0">@post?.AuthorNavigation?.Name</p>
+                            @{
+                                if (modifyTime != null)
+                                {
+                                    var timeDifference = DateTime.Now - modifyTime.Value;
+                                    <p class="text-muted small">
+                                        @(timeDifference.TotalMinutes < 1 ? "Vừa xong" : timeDifference.TotalHours < 12 ? (timeDifference.TotalMinutes < 60 ? $"{(int)timeDifference.TotalMinutes} phút trước" : $"{(int)timeDifference.TotalHours} giờ trước") : modifyTime.Value.ToString("dd/MM/yyyy HH:mm"))
+                                    </p>
+                                }
+                                else
+                                {
+                                    <p class="text-muted small">Không có thời gian chỉnh sửa</p>
+                                }
+                            }
+                        </div>
+                    </div>
+
+                    <p>@post?.Contents</p>
+                    <div class="image-grid-container">
+                        @if (post?.Resources != null && post.Resources.Any())
+                        {
+                            var resources = post.Resources.ToList();
+                            var count = resources.Count;
+
+                            if (count == 1)
+                            {
+                                <div class="text-center">
+                                    @RenderMedia(resources[0], post.Id)
+                                </div>
+                            }
+                            else if (count == 2)
+                            {
+                                <div class="row g-2">
+                                    @foreach (var resource in resources)
+                                    {
+                                        <div class="col-6">
+                                            <div class="media-item">
+                                                @RenderMedia(resource, post.Id)
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="row g-2">
+                                    <div class="col-8">
+                                        <div class="media-item">
+                                            @RenderMedia(resources[0], post.Id)
+                                        </div>
+                                    </div>
+                                    <div class="col-4 d-flex flex-column gap-2">
+                                        <div class="media-item">
+                                            @RenderMedia(resources[1], post.Id)
+                                        </div>
+                                        <div class="media-item position-relative">
+                                            @if (count > 3)
+                                            {
+                                                <div class="media-overlay">
+                                                    +@(count - 3)
+                                                </div>
+                                            }
+                                            @RenderMedia(resources[2], post.Id)
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm">
+                    <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
+                        <div class="d-flex">
+                            @if (post.Reactions.Any(r => r.User == ViewBag.User.Id) == true)
+                            {
+                                <button id="likeButton-@post.Id" class="btn text-primary p-0">
+                                    <i class="far fa-thumbs-up"></i>
+                                    <span id="likeText-@post.Id">Đã Thích</span>
+                                </button>
+                            }
+                            else
+                            {
+                                <button id="likeButton-@post.Id" class="btn  text-muted p-0">
+                                    <i class="far fa-thumbs-up"></i>
+                                    <span id="likeText-@post.Id">Thích</span>
+                                </button>
+                            }
+
+                        </div>
+                        <span class="text-secondary">
+                            @post.Comments.Count bình luận
+                        </span>
+                    </div>
+                    <div class="mb-4">
+
+
+                        @foreach (var comment in post.Comments)
+                        {
+                            <div class="d-flex mb-3">
+                                <img alt="User profile picture" class="rounded-circle" height="40" src="@comment.AuthorNavigation.Avatar" width="40" />
+                                <div class="bg-light p-2 rounded-lg ms-2 flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="fw-bold">
+                                            @comment.AuthorNavigation.Name
+                                        </span>
+                                        <span class="text-secondary small">
+                                            @{
+                                                var modifyTime2 = comment?.ModifyTime;
+                                                @if (modifyTime2 != null)
+                                                {
+                                                    var timeDifference = DateTime.Now - modifyTime2.Value;
+                                                    <p class="text-muted small">
+                                                        @(timeDifference.TotalMinutes < 1 ? "Vừa xong" : timeDifference.TotalHours < 12 ? (timeDifference.TotalMinutes < 60 ? $"{(int)timeDifference.TotalMinutes} phút trước" : $"{(int)timeDifference.TotalHours} giờ trước") : modifyTime2.Value.ToString("dd/MM/yyyy HH:mm"))
+                                                    </p>
+                                                }
+                                            }
+
+                                        </span>
+                                    </div>
+                                    <p class="mb-1">
+                                        @comment.Contents
+                                    </p>
+                                    <div class="d-flex text-secondary small">
+                                        <button class="btn btn-link p-0 me-3">
+                                            Thích
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        <div id="commentList-@post.Id">
+                        </div>
+
+                    </div>
+                    <div class="d-flex align-items-center w-100">
+                        @* <img alt="User profile picture" class="rounded-circle" height="40" src="@user.Avatar" width="40" /> *@
+                        <form id="commentForm-@post.Id">
+                            <div class="bg-light p-2 rounded-pill ms-2 flex-grow-1 d-flex align-items-center">
+                                <input id="commentContent-@post.Id" class="form-control border-0 bg-transparent w-100" placeholder="Bình luận dưới tên @user.Name" type="text" />
+                                <button class="btn btn-link text-primary p-0" type="submit">
+                                    <i class="fas fa-paper-plane">
+                                    </i>
+                                </button>
+                            </div>
+
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+@functions {
+    public IHtmlContent RenderMedia(Resource resource, int postId)
+    {
+        var postDetailUrl = Url.Action("PostDetail", "Post", new { id = postId });
+
+        return resource.Type == (int?)Types.IMAGE
+            ? Html.Raw($@"
+                <a href='{postDetailUrl}'>
+                    <img src='{resource.Url}' alt='Post image' class='img-fluid' style='cursor: pointer;' />
+                </a>")
+            : Html.Raw($@"
+                <a href='{postDetailUrl}'>
+                <video controls class='img-fluid'>
+                    <source src='{resource.Url}' type='video/mp4'>
+                    Trình duyệt của bạn không hỗ trợ video.
+                </video> </a>");
+    }
+}
+
+
+@* <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const postId = @Model.Id;
+        const userId = @user.Id;
+        const form = document.getElementById('commentForm-' + postId);
+        const commentContent = document.getElementById('commentContent-' + postId);
+        const commentList = document.getElementById('commentList-' + postId);
+
+        if (form) {
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                const content = commentContent.value.trim();
+                if (!content) {
+                    alert('Nội dung bình luận không được để trống!');
+                    return;
+                }
+
+                const data = {
+                    content: content,
+                    postId: postId,
+                    userId: userId
+                };
+
+                fetch('/Post/AddComment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                })
+                    .then(response => {
+                        console.log("info:", response)
+                        if (!response.ok) {
+                            throw new Error('Lỗi mạng hoặc server!');
+                        }
+                        return response.json();
+                    })
+                    .then(response => {
+                        if (response) {
+                            const commentHtml = `
+                                <div class="d-flex mb-3">
+                                    <img alt="User profile picture" class="rounded-circle" height="40" src="${response.avatar}" width="40" />
+                                    <div class="bg-light p-2 rounded-lg ms-2 flex-grow-1">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="fw-bold">
+                                                ${response.commentName}
+                                            </span>
+                                            <span class="text-secondary small">
+                                                ${response.createAt}
+                                            </span>
+                                        </div>
+                                        <p class="mb-1">
+                                            ${response.content}
+                                        </p>
+                                        <div class="d-flex text-secondary small">
+                                            <button class="btn btn-link p-0 me-3">
+                                                Thích
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                            commentList.insertAdjacentHTML('afterbegin', commentHtml);
+                            commentContent.value = ''; // Xóa nội dung ô nhập sau khi gửi
+                        }
+                    })
+                    .catch(error => {
+                        alert('Có lỗi xảy ra: ' + error.message);
+                    });
+            });
+        }
+    });
+
+    document.getElementById('likeButton-' + @Model.Id).addEventListener('click', async () => {
+        const likeButton = document.getElementById('likeButton-' + @Model.Id);
+        const likeText = document.getElementById('likeText-' + @Model.Id);
+        const isLiked = likeText.innerText === 'Thích';
+        const likeCount = document.getElementById('likeCount-' + @Model.Id);
+
+        try {
+            const response = await fetch('/Post/ToggleLike', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ postId: @Model.Id, like: isLiked })
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                likeText.innerText = result.liked ? 'Đã thích' : 'Thích';
+                likeButton.classList.toggle('text-primary', result.liked);
+                likeButton.classList.toggle('text-muted', !result.liked);
+                likeCount.innerText = result.likeCount;
+            } else {
+                alert('Có lỗi xảy ra khi gửi like!');
+            }
+        } catch (error) {
+            console.error('Lỗi:', error);
+        }
+    });
+</script> *@

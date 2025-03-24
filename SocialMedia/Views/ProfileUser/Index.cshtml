@@ -5,8 +5,8 @@
 
 <link rel="stylesheet" href="~/css/profile.css" asp-append-version="true">
 
-<div class="profile-container mb-3  ">
-    <div class="profile-header ">
+<div class="profile-container mb-3" style="display: flex;justify-content: center;" >
+    <div class="profile-header" style="width: 90%;">
         <div class="profile-avatar">
             <img src="@(ViewBag.user?.Avatar ?? "https://res.cloudinary.com/ddg2gdfee/image/upload/v1738900139/avatar_male_default_yjf1du.jpg")" 
                  class="profile-picture" alt="Profile Picture">
@@ -36,12 +36,14 @@
         <button class="tab-more"><i class="fa fa-ellipsis-h"></i></button>
     </div>
   </div>
-   <div class="profile-tabs">
+   <div style="display: flex;justify-content: center;">
+       <div class="profile-tabs" style="width: 90%">
     <a href="#" class="tab active" data-tab="posts">Bài viết</a>
     <a href="#" class="tab" data-tab="friends">Bạn bè</a>
     <a href="#" class="tab" data-tab="photos">Ảnh</a>
     <a href="#" class="tab" data-tab="videos">Video</a>
 </div>
+   </div>
 
 <div id="profile-content">
     <div class="tab-content active" id="posts">
@@ -149,8 +151,9 @@
 </div>
     </div>
 <div class="tab-content" id="friends">
-    <div class="friends-box">
-        <div class="friends">
+    <div class="friends-box" style="display: flex;justify-content: center;">
+        <div style="width: 90%;">
+            <div class="friends">
             <h3>Bạn bè</h3>
             <div class="friends-header">
                 <div class="search-box">
@@ -161,52 +164,57 @@
             </div>
         </div>
         <div class="friends-list" id="friendsList">
-            @foreach (var u in ViewBag.Friends)
-            {
-                    <div class="friend">
-                        <img src="@u.Friend1Navigation.Avatar" alt="@u.Friend1Navigation.Name">
-                        <div class="friend-info">
-                            <strong>@u.Friend1Navigation.Name</strong>
-                        </div>
-                        <button class="friend-options">⋮</button>
-                    </div>
-            }
-        </div>
-    </div>
-</div>
-
- <div class="tab-content" id="photos">
-    <div class="photo-container">
-        <h3>Ảnh</h3>
-        <div class="photo-grid">
-            @foreach (var photo in ViewBag.listImages)
-            {
-                @foreach (var resource in photo.Resources)
+                @foreach (var u in ViewBag.Friends)
                 {
-                        <div class="photo-item">
-                            <img src="@resource.Url" alt="Image"/>
+                        <div class="friend">
+                            <img src="@u.Friend1Navigation.Avatar" alt="@u.Friend1Navigation.Name">
+                            <div class="friend-info">
+                                <strong>@u.Friend1Navigation.Name</strong>
+                            </div>
+                            <button class="friend-options">⋮</button>
                         </div>
                 }
-            }
+        </div>
         </div>
     </div>
 </div>
+<div  style="display: flex;justify-content: center;">
 
- <div class="tab-content" id="videos">
+ <div class="tab-content" id="photos" style="width: 90%;">
+    <div class="photo-container">
+            <h3>Ảnh</h3>
+        <div class="photo-grid">
+                @foreach (var photo in ViewBag.listImages)
+                {
+                    @foreach (var resource in photo.Resources)
+                    {
+                                        <div class="photo-item">
+                                            <img src="@resource.Url" alt="Image"/>
+                                        </div>
+                    }
+                }
+        </div>
+    </div>
+</div>
+</div>
+
+<div  style="display: flex;justify-content: center;">
+     <div class="tab-content" id="videos" style="width: 90%;">
     <div class="photo-container">
         <h3>Video</h3>
         <div class="photo-grid">
-            @foreach (var photo in ViewBag.listVideos)
-            {
-                @foreach (var resource in photo.Resources)
+                @foreach (var photo in ViewBag.listVideos)
                 {
-                                <div class="photo-item">
-                                    <img src="@resource.Url" alt="Image"/>
-                                </div>
+                    @foreach (var resource in photo.Resources)
+                    {
+                                        <div class="photo-item">
+                                            <img src="@resource.Url" alt="Image"/>
+                                        </div>
+                    }
                 }
-            }
         </div>
     </div>
+</div>
 </div>
 
 

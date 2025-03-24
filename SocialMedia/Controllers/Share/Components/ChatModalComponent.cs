@@ -15,5 +15,6 @@ namespace SocialMedia.Controllers.Share.Components
         {
             return View(friend);
         }
+
     }
 }

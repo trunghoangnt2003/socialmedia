@@ -25,10 +25,20 @@ namespace SocialMedia.Controllers
             if (string.IsNullOrEmpty(user)) return View();
 
             var listFriends = _contextDb.Friends.Where(f => f.User == id).Include(f => f.Friend1Navigation);
-            var listImages = _contextDb.Posts.Where(img => img.Author == id && img.Type == 5).Include(r => r.Resources)
-                            .ToList();
-            var listVideos = _contextDb.Posts.Where(img => img.Author == id && img.Type == 6).Include(r => r.Resources)
-                            .ToList();
+            var listImages = _contextDb.Posts
+            .Where(p => p.Author == id) 
+            .Include(p => p.Resources) 
+            .SelectMany(p => p.Resources) 
+            .Where(r => r.Type == 5) 
+            .ToList();
+
+
+            var listVideos = _contextDb.Posts
+            .Where(p => p.Author == id)
+            .Include(p => p.Resources)
+            .SelectMany(p => p.Resources)
+            .Where(r => r.Type == 6)
+            .ToList();
             var getUser = _contextDb.Users.FirstOrDefault(us => us.Id == id);
             if (user == null)
             {

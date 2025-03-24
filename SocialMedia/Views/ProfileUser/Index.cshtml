@@ -184,14 +184,18 @@
     <div class="photo-container">
             <h3>Ảnh</h3>
         <div class="photo-grid">
-                @foreach (var photo in ViewBag.listImages)
+                @if (ViewBag.listImages != null && ViewBag.listImages.Count > 0)
                 {
-                    @foreach (var resource in photo.Resources)
+                    @foreach (var resource in ViewBag.listImages)
                     {
-                                        <div class="photo-item">
-                                            <img src="@resource.Url" alt="Image"/>
-                                        </div>
+                            <div class="photo-item">
+                                <img src="@resource.Url" alt="Image"/>
+                            </div>
                     }
+                }
+                else
+                {
+                    <p>No images found.</p>
                 }
         </div>
     </div>

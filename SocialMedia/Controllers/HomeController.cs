@@ -51,16 +51,29 @@ namespace SocialMedia.Controllers
             var userDB = _socialNetworkContext.Users.FirstOrDefault(u => u.Id == userID);
             ViewBag.Friends = listFriends.ToList();
             ViewBag.User = userDB;
+            var suggestedFriends = _socialNetworkContext.Users
+        .Where(u => u.Id != userID && // Exclude the current user
+                    !_socialNetworkContext.Friends
+                        .Any(f => (f.User == userID && f.Friend1 == u.Id) ||
+                                  (f.Friend1 == userID && f.User == u.Id))) // Exclude existing friends
+        .Take(4) // Limit to 4 suggestions
+        .ToList();
+            ViewBag.SuggestedFriends = suggestedFriends;
+            var friendIds = _socialNetworkContext.Friends
+                .Where(f => f.User == userID && f.Status == 2) // Assuming Status == 1 means "accepted"
+                .Select(f => f.Friend1)
+                .ToList();
+
             var posts = _socialNetworkContext.Posts
-                    .Include(p => p.Resources)
-                    .Include(p => p.Reactions)
-                    .Include(p => p.Comments)
-                    .Include(p => p.GroupNavigation)
-                    .Where(p => p.Group == null || // Posts not in a group are visible to all
-                                _socialNetworkContext.UserGroups
-                                    .Any(ug => ug.Group == p.Group && ug.User == userID)) // Posts in groups where user is a member
-                    .OrderByDescending(p => p.ModifyTime)
-                    .ToList();
+        .Include(p => p.Resources)
+        .Include(p => p.Reactions)
+        .Include(p => p.Comments)
+        .Include(p => p.GroupNavigation)
+        .Where(p => (p.Group == null && (friendIds.Contains(p.Author) || p.Author == userID)) || // Non-group posts by friends or user
+                    (p.Group != null && _socialNetworkContext.UserGroups
+                        .Any(ug => ug.Group == p.Group && ug.User == userID))) // Group posts only if user is a member
+        .OrderByDescending(p => p.ModifyTime)
+        .ToList();
             ViewBag.Posts = posts;
             var suggestedGroups = _socialNetworkContext.Groups
             .Where(g => !_socialNetworkContext.UserGroups

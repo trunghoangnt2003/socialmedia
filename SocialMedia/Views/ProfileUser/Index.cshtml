@@ -116,6 +116,7 @@
                    </div>
 
                  <div id="postContainer" class="pb-5">
+
                                         @foreach (Post post in ViewBag.Posts)
                                         {
                                             @await Html.PartialAsync("Home/_ViewPost", post)

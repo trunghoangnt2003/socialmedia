@@ -161,6 +161,11 @@ public partial class SocialNetworkContext : DbContext
             entity.HasOne(d => d.Post1Navigation).WithMany(p => p.InversePost1Navigation)
                 .HasForeignKey(d => d.Post1)
                 .HasConstraintName("FK_Posts_Posts");
+            entity.HasOne(d => d.GroupNavigation) // Navigation property
+            .WithMany(g => g.Posts)          // Inverse navigation in Group (needs to be added)
+            .HasForeignKey(d => d.Group)     // Foreign key
+            .OnDelete(DeleteBehavior.ClientSetNull) // Optional: Define delete behavior
+            .HasConstraintName("FK_Posts_Groups");
         });
 
         modelBuilder.Entity<Reaction>(entity =>

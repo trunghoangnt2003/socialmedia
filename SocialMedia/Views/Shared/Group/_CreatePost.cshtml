@@ -49,9 +49,10 @@
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content" id="postContainer">
             <div class="bg-white text-dark" style="max-width: 900px; border-radius: 8px; padding: 16px; box-shadow: 0 0 14px rgba(0,0,0,0.1);">
-                <form asp-controller="Home" asp-action="Upload" enctype="multipart/form-data" method="post" id="postForm">
+                <form asp-controller="Group" asp-action="Upload" enctype="multipart/form-data" method="post" id="postForm">
+                    <input type="hidden" name="groupId" value="@ViewBag.Group.Id" />
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h2 class="h5">Tạo bài viết </h2>
+                        <h2 class="h5">Tạo bài viết ở @ViewBag.Group.Name</h2>
                         <i class="fas fa-times" style="cursor: pointer;" onclick="closeModal()"></i>
                     </div>
                     <div class="d-flex align-items-center mb-4">

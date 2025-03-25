@@ -59,16 +59,7 @@
     <div class="d-flex align-items-center mb-3">
         <img alt="User profile picture" class="rounded-circle" height="40" src="@Model?.AuthorNavigation?.Avatar" width="40" />
         <div class="ms-3">
-            <p class="fw-semibold mb-0">
-                @Model?.AuthorNavigation?.Name
-                @if (Model.GroupNavigation != null)
-                {
-                    <i class="fas fa-caret-right"></i>
-                    <a href="@Url.Action("Details", "Group", new { id = Model.GroupNavigation.Id })" class="text-decoration-none text-dark fw-semibold">
-                        @Model?.GroupNavigation?.Name
-                    </a>
-                }
-            </p>
+            <p class="fw-semibold mb-0">@Model?.AuthorNavigation?.Name</p>
             @{
                 var modifyTime = Model?.ModifyTime;
                 if (modifyTime != null)
@@ -401,7 +392,7 @@
                     userId: userId
                 };
 
-                fetch('/Post/AddComment', {
+                fetch('../../Post/AddComment', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -458,7 +449,7 @@
         const likeCount = document.getElementById('likeCount-' + @Model.Id);
 
         try {
-            const response = await fetch('/Post/ToggleLike', {
+            const response = await fetch('../../Post/ToggleLike', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ postId: @Model.Id, like: isLiked })

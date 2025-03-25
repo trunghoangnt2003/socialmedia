@@ -143,24 +143,33 @@
                 </ul>
                 <hr>
                 <div>
-                    <h5 class="font-weight-bold mb-3">Lối tắt của bạn</h5>
+                    <h5 class="font-weight-bold mb-3">Nhóm của bạn</h5>
                     <ul class="list-unstyled">
-                        <li class="d-flex align-items-center mb-2">
-                            <img src="https://storage.googleapis.com/a1aa/image/vFQW6tc3TP_8xpHGXg-IREVyYMBRvUVuh3-Lp-d9zmc.jpg" alt="Chợ Võ Case Máy Tính" class="rounded-circle mr-2" width="32" height="32">
-                            <span class="ps-1">Chợ Võ Case Máy Tính</span>
-                        </li>
-                        <li class="d-flex align-items-center mb-2">
-                            <img src="https://storage.googleapis.com/a1aa/image/YHxMWSQ1XpSRqcdjNP_GWFw09V-L_XWD08llV_M506Y.jpg" alt="CHỢ PC CŨ THANH LÝ" class="rounded-circle mr-2" width="32" height="32">
-                            <span class="ps-1">CHỢ PC CŨ THANH LÝ</span>
-                        </li>
-                        <li class="d-flex align-items-center mb-2">
-                            <img src="https://storage.googleapis.com/a1aa/image/c-zgzYm9kgAou1YUgmgp_fEwuVmtThFHKYLwG2aIf_s.jpg" alt="GEARVN - Chợ PC &amp; Gaming Gear" class="rounded-circle mr-2" width="32" height="32">
-                            <span class="ps-1">GEARVN - Chợ PC &amp; Gaming Gear</span>
-                        </li>
-                        <li class="d-flex align-items-center mb-2">
-                            <img src="https://storage.googleapis.com/a1aa/image/8CLZhArYGqVSxxlUaPlkLPyUUfjBL4hPGqw2ShspzZc.jpg" alt="REMOTE, Freelancer IT Vietnam" class="rounded-circle mr-2" width="32" height="32">
-                            <span class="ps-1">REMOTE, Freelancer IT Vietnam</span>
-                        </li>
+                        @if (ViewBag.UserGroups != null && ((List<SocialMedia.Models.Group>)ViewBag.UserGroups).Any())
+                        {
+                            @foreach (var group in ViewBag.UserGroups as List<SocialMedia.Models.Group>)
+                            {
+                                <li class="d-flex align-items-center mb-2">
+                                    <img src="@group.Avatar" alt="@group.Name" class="rounded-circle mr-2" width="32" height="32">
+                                    <a href="@Url.Action("Details", "Group", new { id = group.Id })" class="ps-1 text-decoration-none text-dark">@group.Name</a>
+                                </li>
+                            }
+                        }
+                        else
+                        {
+                            <li class="text-muted">Bạn chưa tham gia nhóm nào.</li>
+                        }
+                    </ul>
+                    <hr>
+                    <h5 class="font-weight-bold mb-3">Các nhóm gợi ý cho bạn</h5>
+                    <ul class="list-unstyled">
+                        @foreach (var group in ViewBag.SuggestedGroups as List<SocialMedia.Models.Group>)
+                        {
+                            <li class="d-flex align-items-center mb-2">
+                                <img src="@group.Avatar" alt="@group.Name" class="rounded-circle mr-2" width="32" height="32">
+                                <a href="@Url.Action("Details", "Group", new { id = group.Id })" class="ps-1 text-decoration-none text-dark">@group.Name</a>
+                            </li>
+                        }
                     </ul>
                 </div>
             </div>
@@ -216,44 +225,35 @@
                     $("#modal").html(data);
                 });
             });
+            function showToast(message, type = "success") {
+            var toastId = "toast-" + Date.now(); // Unique ID for each toast
+            var bgClass = type === "success" ? "bg-success" : "bg-danger"; // Color based on type
+            var toastHtml = `
+                <div id="${toastId}" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-bs-delay="3000">
+                    <div class="toast-header ${bgClass} text-white">
+                        <strong class="me-auto">${type === "success" ? "Thành công" : "Lỗi"}</strong>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                </div>
+            `;
 
-        //         let currentPage = 1;
-        // let isLoading = false;
+            // Append toast to container
+            $("#toastContainer").append(toastHtml);
 
-        // $(window).scroll(function () {
-        //     if ($(window).scrollTop() + $(window).height() >= $(document).height() - 100) {
-        //         loadMorePosts();
-        //     }
-        // });
+            // Initialize and show the toast
+            var toastElement = document.getElementById(toastId);
+            var toast = new bootstrap.Toast(toastElement);
+            toast.show();
 
-        // function loadMorePosts() {
-        //     if (isLoading) return;
-        //     isLoading = true;
-        //     currentPage++;
-        //     $("#loading").show();
-
-        //     $.ajax({
-        //         url: '/Home/LoadMorePosts',
-        //         type: 'GET',
-        //         data: { page: currentPage },
-        //         success: function (data) {
-        //             if (data.trim() !== '') {
-        //                 $("#postContainer").append(data);
-        //             } else {
-        //                 $(window).off("scroll"); // Hết dữ liệu thì dừng lắng nghe sự kiện cuộn
-        //             }
-        //         },
-        //         complete: function () {
-        //             isLoading = false;
-        //             $("#loading").hide();
-        //         },
-        //         error: function () {
-        //             console.log("Có lỗi xảy ra khi tải bài viết!");
-        //             isLoading = false;
-        //             $("#loading").hide();
-        //         }
-        //     });
-        // }
+            // Remove toast from DOM after it hides
+            toastElement.addEventListener('hidden.bs.toast', function () {
+                toastElement.remove();
+            });
+        }
+       
         
     </script>
 

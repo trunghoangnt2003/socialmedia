@@ -51,10 +51,29 @@ namespace SocialMedia.Controllers
             var userDB = _socialNetworkContext.Users.FirstOrDefault(u => u.Id == userID);
             ViewBag.Friends = listFriends.ToList();
             ViewBag.User = userDB;
-            var posts = _socialNetworkContext.Posts.Include(p=>p.Resources).Include(p=>p.Reactions).Include(p=>p.Comments)
-                                .OrderByDescending(p => p.ModifyTime)
-                                .ToList();
+            var posts = _socialNetworkContext.Posts
+                    .Include(p => p.Resources)
+                    .Include(p => p.Reactions)
+                    .Include(p => p.Comments)
+                    .Include(p => p.GroupNavigation)
+                    .Where(p => p.Group == null || // Posts not in a group are visible to all
+                                _socialNetworkContext.UserGroups
+                                    .Any(ug => ug.Group == p.Group && ug.User == userID)) // Posts in groups where user is a member
+                    .OrderByDescending(p => p.ModifyTime)
+                    .ToList();
             ViewBag.Posts = posts;
+            var suggestedGroups = _socialNetworkContext.Groups
+            .Where(g => !_socialNetworkContext.UserGroups
+                .Any(ug => ug.Group == g.Id && ug.User == userID))
+            .Take(4) 
+            .ToList();
+            ViewBag.SuggestedGroups = suggestedGroups;
+            var userGroups = _socialNetworkContext.UserGroups
+        .Where(ug => ug.User == userID)
+        .Include(ug => ug.GroupNavigation)
+        .Select(ug => ug.GroupNavigation)
+        .ToList();
+            ViewBag.UserGroups = userGroups;
             return View();
         }
         public IActionResult PostDetail(int id)

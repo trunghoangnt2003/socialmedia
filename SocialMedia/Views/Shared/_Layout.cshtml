@@ -221,6 +221,15 @@
     </header>
     <div class="">
         <main role="main" class="pb-3">
+            <div aria-live="polite" aria-atomic="true" class="position-fixed top-0 end-0 p-3" style="z-index: 1050;">
+                <div id="toastContainer"></div>
+            </div>
+
+            <div id="loadingSpinner" class="position-fixed top-50 start-50 translate-middle" style="display: none; z-index: 1060;">
+                <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                    <span class="visually-hidden">Đang tải...</span>
+                </div>
+            </div>
             @RenderBody()
         </main>
         <div id="chat-modal" class="chat-modal position-fixed"></div>

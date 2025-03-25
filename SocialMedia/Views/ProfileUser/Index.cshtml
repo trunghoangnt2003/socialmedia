@@ -188,9 +188,11 @@
                 {
                     @foreach (var resource in ViewBag.listImages)
                     {
-                            <div class="photo-item">
-                                <img src="@resource.Url" alt="Image"/>
-                            </div>
+                        <div class="photo-item">
+                            <a href="@Url.Action("PostDetail", "Post", new { id = resource.PostNavigation.Id })">
+                                <img src="@resource.Url" alt="Image" />
+                            </a>
+                        </div>
                     }
                 }
                 else

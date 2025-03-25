@@ -159,11 +159,12 @@
             <div class="row">
                 <div class="col-6 d-flex">
                     <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">SocialMedia</a>
-                    <div class="search-wrapper">
+                    <div class="search-wrapper position-relative">
                         <div class="search-box">
                             <i class="fas fa-search search-icon"></i>
-                            <input type="text" class="form-control search-input" placeholder="Search anything...">
+                            <input type="text" class="form-control search-input" placeholder="Search users or groups...">
                         </div>
+                        <ul style="z-index: 10" class="search-results list-group position-absolute w-100 d-none"></ul>
                     </div>
                 </div>
                 <div class="navbar-collapse collapse d-sm-inline-flex col-6">
@@ -287,6 +288,77 @@
             if (!notification.contains(e.target)) {
                 console.log("Clicked outside, hiding popup");
                 document.getElementById('popupNoti').classList.remove('show');
+            }
+        });
+
+        document.addEventListener("DOMContentLoaded", function () {
+            let searchInput = document.querySelector(".search-input");
+            let searchResults = document.querySelector(".search-results");
+
+            if (searchInput) {
+                let debounceTimeout;
+
+                searchInput.addEventListener("input", function (event) {
+                    clearTimeout(debounceTimeout);
+                    let query = searchInput.value.trim();
+
+                    // Chỉ tìm kiếm khi có dấu cách
+                    if (query.length > 0 && event.data === " ") {
+                        debounceTimeout = setTimeout(() => {
+                            performSearch(query);
+                        }, 300);
+                    } else {
+                        searchResults.innerHTML = "";
+                        searchResults.classList.add("d-none");
+                    }
+                });
+
+                // Ẩn dropdown khi click ra ngoài
+                document.addEventListener("click", function (event) {
+                    if (!searchResults.contains(event.target) && event.target !== searchInput) {
+                        searchResults.classList.add("d-none");
+                    }
+                });
+            }
+
+            function performSearch(query) {
+                fetch(`/Home/GetResults?query=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("data: ", data);
+                        displayResults(data);
+                    })
+                    .catch(error => console.error("Search error:", error));
+            }
+
+            function displayResults(data) {
+                searchResults.innerHTML = "";
+                if (data.users.length === 0 && data.groups.length === 0) {
+                    searchResults.innerHTML = `<li class="list-group-item">No results found</li>`;
+                } else {
+                    data.users.forEach(user => {
+                        let item = document.createElement("li");
+                        item.classList.add("list-group-item", "list-group-item-action", "d-flex", "align-items-center");
+                        item.innerHTML = `
+                                        <img src="${user.avatar}" class="rounded-circle me-2" width="30" height="30" alt="Avatar">
+                                <span>${user.name}</span>
+                            `;
+                        item.onclick = () => window.location.href = `/ProfileUser/Index/${user.id}`;
+                        searchResults.appendChild(item);
+                    });
+
+                    data.groups.forEach(group => {
+                        let item = document.createElement("li");
+                        item.classList.add("list-group-item", "list-group-item-action", "d-flex", "align-items-center");
+                        item.innerHTML = `
+                                        <img src="${group.avatar}" class="rounded me-2" width="30" height="30" alt="Group Avatar">
+                                <span>${group.name}</span>
+                            `;
+                        item.onclick = () => window.location.href = `/Group/Details/${group.id}`;
+                        searchResults.appendChild(item);
+                    });
+                }
+                searchResults.classList.remove("d-none");
             }
         });
     </script>

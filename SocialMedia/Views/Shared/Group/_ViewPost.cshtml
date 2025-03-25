@@ -59,7 +59,9 @@
     <div class="d-flex align-items-center mb-3">
         <img alt="User profile picture" class="rounded-circle" height="40" src="@Model?.AuthorNavigation?.Avatar" width="40" />
         <div class="ms-3">
-            <p class="fw-semibold mb-0">@Model?.AuthorNavigation?.Name</p>
+            <a href="@Url.Action("Index", "ProfileUser", new { id = @Model?.AuthorNavigation?.Id })" class="text-decoration-none text-dark fw-semibold">
+                @Model?.AuthorNavigation?.Name
+            </a>
             @{
                 var modifyTime = Model?.ModifyTime;
                 if (modifyTime != null)

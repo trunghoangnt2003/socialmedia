@@ -28,11 +28,11 @@
     }
 
     .status { 
-     width: 10px; 
-     height: 10px; 
-     background-color: green; 
-     border-radius: 50%; 
-     margin-left: 5px; 
+    width: 10px; 
+    height: 10px; 
+    background-color: green; 
+    border-radius: 50%; 
+    margin-left: 5px; 
     }
 
     .input-container {
@@ -85,17 +85,17 @@
     }
 
     .colCustome {
-        height: 100vh; /* Chiều cao full màn hình */
-        overflow-y: auto; /* Thanh cuộn dọc */
-        padding-right: 10px; /* Tránh đè vào thanh cuộn */
-        scroll-behavior: smooth; /* Cuộn mượt */
+    height: 100vh; /* Chiều cao full màn hình */
+    overflow-y: auto; /* Thanh cuộn dọc */
+    padding-right: 10px; /* Tránh đè vào thanh cuộn */
+    scroll-behavior: smooth; /* Cuộn mượt */
     }
 
     html, body {
-        height: 100%;
-        margin: 0;
-        padding: 0;
-        overflow: hidden; /* Cuộn toàn trang */
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden; /* Cuộn toàn trang */
     }
 </style>
 
@@ -105,7 +105,9 @@
             <div>
                 <div class="d-flex align-items-center mb-4">
                     <img src="@user.Avatar" alt="User profile picture" class="rounded-circle mr-2" width="32" height="32">
-                    <span class="font-weight-bold ps-1" >@user.Name</span>
+                    <a href="@Url.Action("Index", "ProfileUser", new { id = user.Id })" class="text-decoration-none text-dark fw-semibold ps-2">
+                        @user.Name
+                    </a>
                 </div>
                 <ul class="list-unstyled">
                     <li class="d-flex align-items-center mb-2">
@@ -163,13 +165,21 @@
                     <hr>
                     <h5 class="font-weight-bold mb-3">Các nhóm gợi ý cho bạn</h5>
                     <ul class="list-unstyled">
-                        @foreach (var group in ViewBag.SuggestedGroups as List<SocialMedia.Models.Group>)
+                        @if (ViewBag.SuggestedGroups != null && ((List<SocialMedia.Models.Group>)ViewBag.SuggestedGroups).Any())
                         {
-                            <li class="d-flex align-items-center mb-2">
-                                <img src="@group.Avatar" alt="@group.Name" class="rounded-circle mr-2" width="32" height="32">
-                                <a href="@Url.Action("Details", "Group", new { id = group.Id })" class="ps-1 text-decoration-none text-dark">@group.Name</a>
-                            </li>
+                            @foreach (var group in ViewBag.SuggestedGroups as List<SocialMedia.Models.Group>)
+                            {
+                                <li class="d-flex align-items-center mb-2">
+                                    <img src="@group.Avatar" alt="@group.Name" class="rounded-circle mr-2" width="32" height="32">
+                                    <a href="@Url.Action("Details", "Group", new { id = group.Id })" class="ps-1 text-decoration-none text-dark">@group.Name</a>
+                                </li>
+                            }
                         }
+                        else
+                        {
+                            <li class="text-muted">Không có nhóm gợi ý nào.</li>
+                        }
+                        
                     </ul>
                 </div>
             </div>

@@ -1,7 +1,23 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
 }
+@using Newtonsoft.Json
+@{
+    var userJson = Context.Session.GetString("UserFull");
+    User user = new User { Name = "Unknown" };
 
+    if (!string.IsNullOrEmpty(userJson))
+    {
+        try
+        {
+            user = JsonConvert.DeserializeObject<User>(userJson);
+        }
+        catch (JsonException ex)
+        {
+            Console.WriteLine($"Error deserializing user: {ex.Message}");
+        }
+    }
+}
 <style>
     .user-item{
     cursor: pointer
@@ -84,7 +100,72 @@
 </style>
 
 <div class="row">
-    <div class="col-md-3"></div>
+    <div class="col-md-3">
+        <div class="ms-4">
+            <div>
+                <div class="d-flex align-items-center mb-4">
+                    <img src="@user.Avatar" alt="User profile picture" class="rounded-circle mr-2" width="32" height="32">
+                    <span class="font-weight-bold ps-1" >@user.Name</span>
+                </div>
+                <ul class="list-unstyled">
+                    <li class="d-flex align-items-center mb-2">
+                        <i class="fas fa-user-friends text-primary mr-2"></i>
+                        <span class="ps-1">  Bạn bè</span>
+                    </li>
+                    <li class="d-flex align-items-center mb-2">
+                        <i class="fas fa-users text-primary mr-2"></i>
+                        <span class="ps-1">  Nhóm</span>
+                    </li>
+                    <li class="d-flex align-items-center mb-2">
+                        <i class="fas fa-clock text-primary mr-2"></i>
+                        <span class="ps-1">  Kỷ niệm</span>
+                    </li>
+                    <li class="d-flex align-items-center mb-2">
+                        <i class="fas fa-bookmark text-purple mr-2"></i>
+                        <span class="ps-1">  Đã lưu</span>
+                    </li>
+                    <li class="d-flex align-items-center mb-2">
+                        <i class="fas fa-video text-primary mr-2"></i>
+                        <span class="ps-1"> Video</span>
+                    </li>
+                    <li class="d-flex align-items-center mb-2">
+                        <i class="fas fa-store text-primary mr-2"></i>
+                        <span class="ps-1">  Marketplace</span>
+                    </li>
+                    <li class="d-flex align-items-center mb-2">
+                        <i class="fas fa-newspaper text-primary mr-2"></i>
+                        <span class="ps-1">  Bảng feed</span>
+                    </li>
+                    <li class="d-flex align-items-center mb-2">
+                        <i class="fas fa-chevron-down text-secondary mr-2"></i>
+                        <span class="ps-1">  Xem thêm</span>
+                    </li>
+                </ul>
+                <hr>
+                <div>
+                    <h5 class="font-weight-bold mb-3">Lối tắt của bạn</h5>
+                    <ul class="list-unstyled">
+                        <li class="d-flex align-items-center mb-2">
+                            <img src="https://storage.googleapis.com/a1aa/image/vFQW6tc3TP_8xpHGXg-IREVyYMBRvUVuh3-Lp-d9zmc.jpg" alt="Chợ Võ Case Máy Tính" class="rounded-circle mr-2" width="32" height="32">
+                            <span class="ps-1">Chợ Võ Case Máy Tính</span>
+                        </li>
+                        <li class="d-flex align-items-center mb-2">
+                            <img src="https://storage.googleapis.com/a1aa/image/YHxMWSQ1XpSRqcdjNP_GWFw09V-L_XWD08llV_M506Y.jpg" alt="CHỢ PC CŨ THANH LÝ" class="rounded-circle mr-2" width="32" height="32">
+                            <span class="ps-1">CHỢ PC CŨ THANH LÝ</span>
+                        </li>
+                        <li class="d-flex align-items-center mb-2">
+                            <img src="https://storage.googleapis.com/a1aa/image/c-zgzYm9kgAou1YUgmgp_fEwuVmtThFHKYLwG2aIf_s.jpg" alt="GEARVN - Chợ PC &amp; Gaming Gear" class="rounded-circle mr-2" width="32" height="32">
+                            <span class="ps-1">GEARVN - Chợ PC &amp; Gaming Gear</span>
+                        </li>
+                        <li class="d-flex align-items-center mb-2">
+                            <img src="https://storage.googleapis.com/a1aa/image/8CLZhArYGqVSxxlUaPlkLPyUUfjBL4hPGqw2ShspzZc.jpg" alt="REMOTE, Freelancer IT Vietnam" class="rounded-circle mr-2" width="32" height="32">
+                            <span class="ps-1">REMOTE, Freelancer IT Vietnam</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="col-md-6 colCustome">
         <div class="container d-flex justify-content-center align-items-start"> 
             <div class="w-100"> 

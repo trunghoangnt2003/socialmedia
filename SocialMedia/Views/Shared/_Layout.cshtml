@@ -28,7 +28,86 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="~/css/header-layout.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/chat-modal.css" asp-append-version="true" />
+    
     <style>
+        .header-icon-child {
+            position: relative; /* Đảm bảo phần tử cha có position để position:absolute hoạt động */
+            width: 40px; /* Đảm bảo kích thước hình tròn */
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #unreadNotiCount {
+            position: absolute;
+            top: -5px; /* Di chuyển lên trên */
+            right: -5px; /* Di chuyển sang phải */
+            width: 20px; /* Kích thước hình tròn nhỏ */
+            height: 20px;
+            line-height: 20px; /* Căn giữa số trong hình tròn */
+            font-size: 12px; /* Kích thước chữ nhỏ hơn */
+            background-color: #dc3545; /* Màu đỏ cho nền */
+            color: #fff; /* Màu trắng cho số */
+            border-radius: 50%; /* Hình tròn */
+            text-align: center;
+            border: 2px solid #fff; /* Viền trắng để nổi bật */
+        }
+        .popup-notification {
+            position: fixed; /* Thay absolute thành fixed để kiểm tra */
+            top: 50px; /* Đặt vị trí cụ thể */
+            right: 10px;
+            width: 350px;
+            max-height: 400px;
+            background-color: #fff; /* Đảm bảo có nền trắng */
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            overflow-y: auto;
+            z-index: 2000; /* Tăng z-index */
+            display: none;
+        }
+
+            .popup-notification.show {
+                display: block !important;
+                z-index: 3000 !important; /* Tăng cao hơn để vượt qua navbar */
+            }
+
+        .notification-list {
+            padding: 5px;
+        }
+
+        .notification-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+            .notification-item.unread {
+                background-color: #f0f7ff;
+            }
+
+            .notification-item:hover {
+                background-color: #f8f9fa;
+            }
+
+            .notification-item p {
+                margin: 0;
+                font-size: 0.9rem;
+            }
+
+            .notification-item .time {
+                font-size: 0.75rem;
+                color: #6c757d;
+            }
+
+        .no-notifications {
+            padding: 10px;
+            text-align: center;
+            color: #6c757d;
+        }
+
         .notification-toast {
             min-width: 300px;
             max-width: 400px;
@@ -72,36 +151,6 @@
                 font-size: 0.75rem;
                 color: #6c757d;
             }
-
-        .popup-notification {
-            position: absolute;
-            top: 50px;
-            right: 0;
-            width: 300px;
-            background-color: #fff;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            display: none;
-            z-index: 1000;
-        }
-
-            .popup-notification.show {
-                display: block;
-            }
-
-        .element-noti {
-            padding: 10px;
-            border-bottom: 1px solid #eee;
-        }
-
-            .element-noti:last-child {
-                border-bottom: none;
-            }
-
-            .element-noti.unread {
-                background-color: #f8f9fa;
-            }
     </style>
 </head>
 <body>
@@ -139,12 +188,16 @@
                                 <div class="header-icon-child icon rounded-circle bg-primary nav-link text-center">
                                     <i class="fa-solid fa-bell fa-xl" style="color: #ffffff;"></i>
                                 </div>
-                                <div id="unreadNotiCount" class="position-absolute rounded-circle rounded-2 bg-danger text-white text-center d-none">
+                                <div id="unreadNotiCount" class="position-absolute rounded-circle bg-danger text-white text-center d-none">
                                     0
                                 </div>
                             </div>
                             <div class="popup-notification" id="popupNoti">
-                                <div id="notificationList"></div>
+                                <div class="notification-header p-2 border-bottom d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0">Thông báo</h6>
+                                    <button id="markAllRead" class="btn btn-link btn-sm">Đọc tất cả</button>
+                                </div>
+                                <div class="notification-list" id="notificationList"></div>
                             </div>
                         </li>
                         <li class="header-icon position-relative nav-item me-4 icon" id="avatar">
@@ -185,16 +238,14 @@
         "use strict";
 
         var connection = new signalR.HubConnectionBuilder().withUrl("/signalRService").build();
+        var currentUser = @Html.Raw(Json.Serialize(Context.Session.GetString("UserFull")));
+
         connection.start().then(function () {
             console.log("Connected to SignalR, Connection ID: " + connection.connectionId);
-            loadNotifications();
+            window.initializeNotification(connection, currentUser);
         }).catch(function (err) {
             console.error("SignalR connection error: " + err.toString());
         });
-
-        var currentUser = @Html.Raw(Json.Serialize(Context.Session.GetString("UserFull")));
-        console.log("Current user: ", currentUser);
-
 
         connection.on("SendMessageTo", function (receiver) {
             console.log("Send to: " + receiver);
@@ -207,55 +258,22 @@
             if (sender !== currentUser) LoadChatData(sender, true);
         });
 
-
-        initializeNotification(connection, currentUser);
-
-
-        function loadNotifications() {
-            $.ajax({
-                url: '/Post/GetRecentNotifications',
-                method: 'GET',
-                success: function (data) {
-                    const notificationList = $('#notificationList');
-                    notificationList.empty();
-
-                    data.forEach(noti => {
-                        const notiItem = `
-                            <div class="element-noti ${noti.status === 0 ? 'unread' : ''}">
-                                <i class="fa-solid fa-user text-primary me-2"></i>
-                                ${noti.sender} ${noti.message}
-                                <div class="time">${noti.sendTime}</div>
-                            </div>
-                        `;
-                        notificationList.append(notiItem);
-                    });
-
-                    const unreadCount = data.filter(n => n.status === 0).length;
-                    const unreadNotiCount = $('#unreadNotiCount');
-                    if (unreadCount > 0) {
-                        unreadNotiCount.removeClass('d-none').text(unreadCount);
-                    } else {
-                        unreadNotiCount.addClass('d-none');
-                    }
-                },
-                error: function (err) {
-                    console.error("Error loading notifications: ", err);
-                }
-            });
-        }
-
-
-        $('#notification').on('click', function () {
-            $('#popupNoti').toggleClass('show');
-            if ($('#popupNoti').hasClass('show')) {
-                loadNotifications();
+        document.getElementById('notification').addEventListener('click', function (e) {
+            e.stopPropagation();
+            console.log("Mo popu[]");
+            const popupNoti = document.getElementById('popupNoti');
+            popupNoti.classList.toggle('show');
+            if (popupNoti.classList.contains('show')) {
+                console.log("Mo popu[] 2");
+                window.loadNotifications(); // Gọi hàm từ noti.js
             }
         });
 
-
-        $(document).on('click', function (e) {
-            if (!$(e.target).closest('#notification').length) {
-                $('#popupNoti').removeClass('show');
+        document.addEventListener('click', function (e) {
+            const notification = document.getElementById('notification');
+            if (!notification.contains(e.target)) {
+                console.log("Clicked outside, hiding popup");
+                document.getElementById('popupNoti').classList.remove('show');
             }
         });
     </script>

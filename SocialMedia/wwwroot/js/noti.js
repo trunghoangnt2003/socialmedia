@@ -1,9 +1,10 @@
 ﻿"use strict";
+console.log("noti.js loaded");
 
-function formatTimeDifference(timestamp) {
+function formatTimeDifference(sendTime) {
     const now = new Date();
-    const time = new Date(timestamp);
-    const timeDifference = (now - time) / 60000; // Phút
+    const time = new Date(sendTime); // Sửa từ timestamp thành sendTime
+    const timeDifference = (now - time) / 60000;
 
     if (timeDifference < 1) return "Vừa xong";
     if (timeDifference < 720) {
@@ -18,9 +19,9 @@ function formatTimeDifference(timestamp) {
     return `${day}/${month}/${year} ${hours}:${minutes}`;
 }
 
-function addNotificationToast(sender, message, timestamp, postId) {
+function addNotificationToast(sender, message, sendTime, postId,notiId) {
     const toastContainer = document.getElementById('notification-toast-container');
-    const toastId = `toast-${Date.now()}`;
+    const toastId = `toast-${notiId || Date.now()}`;
 
     const toastHtml = `
         <div id="${toastId}" class="notification-toast">
@@ -29,7 +30,7 @@ function addNotificationToast(sender, message, timestamp, postId) {
             </div>
             <div class="toast-content">
                 <p>${sender} ${message}</p>
-                <span class="time">${formatTimeDifference(timestamp)}</span>
+                <span class="time">${formatTimeDifference(sendTime)}</span>
             </div>
         </div>
     `;
@@ -39,11 +40,9 @@ function addNotificationToast(sender, message, timestamp, postId) {
     const toast = document.getElementById(toastId);
     setTimeout(() => toast.classList.add('show'), 100);
 
-    // Use the postId parameter for redirection
     toast.addEventListener('click', () => {
-        if (postId) {
-            window.location.href = `/Post/PostDetail/${postId}`;
-        }
+        if (notiId) markNotificationAsRead(notiId);
+        if (postId) window.location.href = `/Post/PostDetail/${postId}`;
     });
 
     setTimeout(() => {
@@ -51,29 +50,114 @@ function addNotificationToast(sender, message, timestamp, postId) {
         setTimeout(() => toast.remove(), 300);
     }, 5000);
 
-    const unreadNotiCount = document.getElementById('unreadNotiCount');
-    unreadNotiCount.classList.remove('d-none');
-    unreadNotiCount.textContent = parseInt(unreadNotiCount.textContent || 0) + 1;
+    updateUnreadCount();
 }
 
-function initializeNotification(connection, currentUserName) {
-    console.log("Initializing notification for user: " + currentUserName);
-    connection.on("ReceiveNotification", function (sender, message, timestamp, postId) {
-        console.log("Received notification:");
-        console.log("Sender: " + sender);
-        console.log("Message: " + message);
-        console.log("Timestamp: " + timestamp);
-        console.log("Post ID: " + postId);
-        console.log("Current user name: " + currentUserName);
-        if (sender !== currentUserName) {
-            console.log("Displaying notification toast...");
-            addNotificationToast(sender, message, timestamp, postId);
-            // Refresh the notification list
-            if (typeof loadNotifications === "function") {
-                loadNotifications();
+function markNotificationAsRead(notificationId) {
+    fetch('/Post/MarkNotificationAsRead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(notificationId)
+    })
+        .then(response => {
+            if (!response.ok) throw new Error('Failed to mark notification as read');
+            console.log(`Notification ${notificationId} marked as read`);
+            loadNotifications();
+        })
+        .catch(err => console.error("Error marking notification as read: ", err));
+}
+
+function markAllNotificationsAsRead() {
+    fetch('/Post/MarkAllNotificationsAsRead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+    })
+        .then(response => {
+            if (!response.ok) throw new Error('Failed to mark all notifications as read');
+            console.log("All notifications marked as read");
+            loadNotifications();
+        })
+        .catch(err => console.error("Error marking all notifications as read: ", err));
+}
+
+function loadNotifications() {
+    fetch('/Post/GetNotifications')
+        .then(response => response.json())
+        .then(notifications => {
+            console.log("Notifications data:", notifications);
+            const notificationList = document.getElementById('notificationList');
+            if (!notificationList) {
+                console.error("notificationList element not found");
+                return;
             }
-        } else {
-            console.log("Notification not displayed: Sender is the current user.");
+
+            notificationList.innerHTML = '';
+
+            if (notifications.length === 0) {
+                notificationList.innerHTML = '<div class="no-notifications">Bạn chưa có thông báo nào</div>';
+                updateUnreadCount(0);
+                return;
+            }
+
+            notifications.forEach(n => {
+                console.log("Rendering notification:", n);
+                const itemHtml = `
+                    <div class="notification-item ${n.status === 1 ? 'unread' : ''}" data-id="${n.id}">
+                        <p>${n.sender} ${n.message}</p>
+                        <span class="time">${formatTimeDifference(n.sendTime)}</span>
+                    </div>
+                `;
+                notificationList.insertAdjacentHTML('beforeend', itemHtml);
+            });
+
+            document.querySelectorAll('.notification-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const notificationId = item.getAttribute('data-id');
+                    if (notificationId) markNotificationAsRead(notificationId);
+                });
+            });
+
+            updateUnreadCount();
+        })
+        .catch(err => console.error("Error loading notifications: ", err));
+}
+
+function updateUnreadCount(count) {
+    const unreadNotiCount = document.getElementById('unreadNotiCount');
+    if (!unreadNotiCount) return;
+
+    const unreadCount = count !== undefined ? count : document.querySelectorAll('.notification-item.unread').length;
+    if (unreadCount > 0) {
+        unreadNotiCount.textContent = unreadCount;
+        unreadNotiCount.classList.remove('d-none');
+    } else {
+        unreadNotiCount.classList.add('d-none');
+    }
+}
+
+function initializeNotification(connection, currentUser) {
+    const parsedUser = typeof currentUser === 'string' ? JSON.parse(currentUser) : currentUser;
+    const currentUserName = parsedUser.Name;
+
+    console.log("Initializing notification for user: " + currentUserName);
+
+    connection.on("ReceiveNotification", function (sender, message, sendTime, postId, notiId) {
+        console.log("Received notification:", { sender, message, sendTime, postId, notiId });
+        if (sender !== currentUserName) {
+            addNotificationToast(sender, message, sendTime, postId, notiId);
+            loadNotifications();
         }
     });
+
+    loadNotifications();
+
+    const markAllReadBtn = document.getElementById('markAllRead');
+    if (markAllReadBtn) {
+        markAllReadBtn.addEventListener('click', () => {
+            markAllNotificationsAsRead();
+        });
+    }
 }
+
+window.loadNotifications = loadNotifications;
+window.initializeNotification = initializeNotification;

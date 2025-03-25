@@ -81,11 +81,11 @@ namespace SocialMedia.Services
         }
 
 
-        public async Task SendNotification(string senderName, string receiverId, string message, string timestamp, string postId)
+        public async Task SendNotification(string senderName, string receiverId, string message, string timestamp, string postId,string notiId)
         {
             if (ConnectedUsers.TryGetValue(receiverId, out string connectionId))
             {
-                await Clients.Client(connectionId).SendAsync("ReceiveNotification", senderName, message, timestamp,postId);
+                await Clients.Client(connectionId).SendAsync("ReceiveNotification", senderName, message, timestamp,postId,notiId);
             }
         }
     }

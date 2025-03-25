@@ -10,6 +10,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Views\Shared\Components\Post\**" />
+    <Content Remove="Views\Shared\Components\Post\**" />
+    <EmbeddedResource Remove="Views\Shared\Components\Post\**" />
+    <None Remove="Views\Shared\Components\Post\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Remove="Views\Shared\Home\PostDetail.cshtml" />
   </ItemGroup>
 
@@ -30,10 +37,6 @@
     <Content Update="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Views\Shared\Components\Post\" />
   </ItemGroup>
 
 </Project>

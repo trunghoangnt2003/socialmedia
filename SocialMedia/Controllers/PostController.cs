@@ -35,6 +35,7 @@ namespace SocialMedia.Controllers
                 .Include(p => p.Reactions)
                 .Include(p => p.Resources)
                 .Include(p => p.Comments)
+                .ThenInclude(c=>c.AuthorNavigation)
                 .Include(p => p.AuthorNavigation)
                 .FirstOrDefault(p => p.Id == id);
             return View(post);
@@ -75,7 +76,7 @@ namespace SocialMedia.Controllers
                     Receiver = post.Author,
                     SendTime = DateTime.Now,
                     Message = $"đã bình luận bài viết của bạn",
-                    Status = 0 
+                    Status = 1 
                 };
                 _socialNetworkContext.Notifications.Add(notification);
                 await _socialNetworkContext.SaveChangesAsync();
@@ -86,7 +87,7 @@ namespace SocialMedia.Controllers
                     await _signalRHubContext.Clients.Client(receiverConnectionId).SendAsync("ReceiveNotification",
                         user1.Name,
                         notification.Message,
-                        notification.SendTime?.ToString("o"),post.Id);
+                        notification.SendTime?.ToString("o"),post.Id,notification.Id);
                 }
             }
 
@@ -140,7 +141,7 @@ namespace SocialMedia.Controllers
                     Receiver = post.Author,
                     SendTime = DateTime.Now,
                     Message = $"đã thích bài viết của bạn",
-                    Status = 0 
+                    Status = 1
                 };
                 _socialNetworkContext.Notifications.Add(notification);
                 await _socialNetworkContext.SaveChangesAsync();
@@ -151,7 +152,8 @@ namespace SocialMedia.Controllers
                         sender,
                         notification.Message,
                         notification.SendTime?.ToString("o"),
-                        post.Id);
+                        post.Id,
+                        notification.Id);
                 }
             }
 
@@ -161,29 +163,58 @@ namespace SocialMedia.Controllers
 
             return Ok(new { liked = isLiked, likeCount });
         }
+        [HttpPost]
+        public async Task<IActionResult> MarkNotificationAsRead(int notificationId)
+        {
+            var notification = _socialNetworkContext.Notifications.Find(notificationId);
+            if (notification == null) return NotFound();
 
-        [HttpGet]
-        public IActionResult GetRecentNotifications()
+            string user = HttpContext.Session.GetString("User");
+            int userID = int.Parse(user);
+            if (notification.Receiver != userID) return Unauthorized();
+
+            notification.Status = 3; // Đã đọc
+            _socialNetworkContext.SaveChanges();
+
+            return Ok(new { success = true });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> MarkAllNotificationsAsRead()
         {
             string user = HttpContext.Session.GetString("User");
             int userID = int.Parse(user);
-
             var notifications = _socialNetworkContext.Notifications
-                .Include(n => n.SenderNavigation)
+                .Where(n => n.Receiver == userID && n.Status == 1);
+
+            foreach (var notification in notifications)
+            {
+                notification.Status = 3;
+            }
+            _socialNetworkContext.SaveChanges();
+
+            return Ok(new { success = true });
+        }
+
+        [HttpGet]
+        public IActionResult GetNotifications()
+        {
+            string user = HttpContext.Session.GetString("User");
+            int userID = int.Parse(user);
+            var notifications = _socialNetworkContext.Notifications.Include(n=>n.SenderNavigation)
                 .Where(n => n.Receiver == userID)
                 .OrderByDescending(n => n.SendTime)
-                .Take(10)
-                .ToList()
+                .Take(5)
                 .Select(n => new
                 {
-                    Sender = n.SenderNavigation != null ? n.SenderNavigation.Name : "Unknown",
+                    n.Id,
+                    Sender = n.SenderNavigation.Name,
                     n.Message,
-                    SendTime = n.SendTime?.ToString("yyyy-MM-dd HH:mm:ss"),
+                    n.SendTime,
                     n.Status
                 })
                 .ToList();
-
-            return Ok(notifications);
+            return Json(notifications);
         }
     }
 }

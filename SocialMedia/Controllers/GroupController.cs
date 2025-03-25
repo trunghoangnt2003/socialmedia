@@ -19,7 +19,7 @@ namespace SocialMedia.Controllers
 
         public IActionResult Details(int id)
         {
-            var group = _context.Groups
+            var group = _context.Groups.Include(g=>g.UserGroups).ThenInclude(u=>u.UserNavigation)
             .FirstOrDefault(g => g.Id == id);
 
             int? userId = int.Parse(HttpContext.Session.GetString("User"));

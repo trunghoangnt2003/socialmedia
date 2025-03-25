@@ -93,10 +93,12 @@
                 @foreach (var u in ViewBag.Friends)
                 {
                     <div class="col-4 mb-2">
-                        <div class="friend-card">
-                            <img src="@u.Friend1Navigation.Avatar" alt="@u.Friend1Navigation.Name" class="rounded img-fluid">
-                            <p class="friend-name text-wrap" >@u.Friend1Navigation.Name</p>
-                        </div>
+                                            <a href="@Url.Action("Index", "ProfileUser", new { id = (u.Friend1Navigation.Id) })" class="text-decoration-none">
+                                                <div class="friend-card">
+                                                    <img src="@u.Friend1Navigation.Avatar" alt="@u.Friend1Navigation.Name" class="rounded img-fluid">
+                                                    <p class="friend-name text-wrap">@u.Friend1Navigation.Name</p>
+                                                </div>
+                                            </a>
                     </div>   
                 }
             </div>
@@ -166,6 +168,7 @@
         <div class="friends-list" id="friendsList">
                 @foreach (var u in ViewBag.Friends)
                 {
+                    <a href="@Url.Action("Index", "ProfileUser", new { id = (u.Friend1Navigation.Id) })">
                         <div class="friend">
                             <img src="@u.Friend1Navigation.Avatar" alt="@u.Friend1Navigation.Name">
                             <div class="friend-info">
@@ -173,6 +176,7 @@
                             </div>
                             <button class="friend-options">⋮</button>
                         </div>
+                        </a>
                 }
         </div>
         </div>

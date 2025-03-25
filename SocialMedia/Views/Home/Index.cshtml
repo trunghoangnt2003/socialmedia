@@ -294,6 +294,18 @@
             toastElement.addEventListener('hidden.bs.toast', function () {
                 toastElement.remove();
             });
+            function addFriend(friendId) {
+            $.post("/Home/AddFriend", { friendId: friendId }, function(response) {
+                if (response.success) {
+                    showToast("Đã gửi lời mời kết bạn thành công!", "success");
+                    setTimeout(() => location.reload(), 1500); // Reload to update posts
+                } else {
+                    showToast(response.message || "Không thể gửi lời mời kết bạn.", "danger");
+                }
+            }).fail(function() {
+                showToast("Đã xảy ra lỗi khi gửi lời mời.", "danger");
+            });
+        }
         }
        
         

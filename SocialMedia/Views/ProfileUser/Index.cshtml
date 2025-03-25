@@ -168,15 +168,24 @@
         <div class="friends-list" id="friendsList">
                 @foreach (var u in ViewBag.Friends)
                 {
-                    <a href="@Url.Action("Index", "ProfileUser", new { id = (u.Friend1Navigation.Id) })">
-                        <div class="friend">
-                            <img src="@u.Friend1Navigation.Avatar" alt="@u.Friend1Navigation.Name">
+                    <div class="friend d-flex align-items-center justify-content-between border rounded p-3 mb-3 bg-light">
+                        <a class="text-decoration-none d-flex align-items-center gap-3" href="@Url.Action("Index", "ProfileUser", new { id = (u.Friend1Navigation.Id) })">
+                            <img src="@u.Friend1Navigation.Avatar" alt="@u.Friend1Navigation.Name" class="rounded-circle">
                             <div class="friend-info">
                                 <strong>@u.Friend1Navigation.Name</strong>
                             </div>
-                            <button class="friend-options">⋮</button>
-                        </div>
                         </a>
+
+                        <div class="dropdown">
+                            <button class="btn btn-link text-decoration-none p-0" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fa-solid fa-ellipsis-vertical"></i>
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <li><a class="dropdown-item" href="@Url.Action("Index", "ProfileUser", new { id = (u.Friend1Navigation.Id) })">View Profile</a></li>
+                                <li><a class="dropdown-item" href="#">Remove Friend</a></li>
+                            </ul>
+                        </div>
+                    </div>
                 }
         </div>
         </div>

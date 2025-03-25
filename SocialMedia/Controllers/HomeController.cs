@@ -69,7 +69,7 @@ namespace SocialMedia.Controllers
         .Include(p => p.Reactions)
         .Include(p => p.Comments)
         .Include(p => p.GroupNavigation)
-        .Where(p => (p.Group == null && (friendIds.Contains(p.Author) || p.Author == userID)) || // Non-group posts by friends or user
+        .Where(p => (p.Group == null &&p.Type == 1&& (friendIds.Contains(p.Author) || p.Author == userID)) || // Non-group posts by friends or user
                     (p.Group != null && _socialNetworkContext.UserGroups
                         .Any(ug => ug.Group == p.Group && ug.User == userID))) // Group posts only if user is a member
         .OrderByDescending(p => p.ModifyTime)
@@ -87,6 +87,13 @@ namespace SocialMedia.Controllers
         .Select(ug => ug.GroupNavigation)
         .ToList();
             ViewBag.UserGroups = userGroups;
+            var stories = _socialNetworkContext.Posts
+        .Include(p => p.AuthorNavigation)
+        .Include(p => p.Resources)
+        .Where(p => p.Type == 2 && (friendIds.Contains(p.Author) || p.Author == userID))
+        .OrderByDescending(p => p.ModifyTime)
+        .ToList();
+            ViewBag.Stories = stories;
             return View();
         }
         public IActionResult PostDetail(int id)
@@ -169,6 +176,248 @@ namespace SocialMedia.Controllers
         {
             return View();
         }
+        [HttpPost]
+        public IActionResult AddFriend(int friendId)
+        {
+            string user = HttpContext.Session.GetString("User");
+            if (string.IsNullOrEmpty(user))
+            {
+                TempData["ErrorMessage"] = "Bạn cần đăng nhập để thêm bạn.";
+                return RedirectToAction("Index");
+            }
 
+            int userID = int.Parse(user);
+
+            // Check if friendship already exists
+            if (_socialNetworkContext.Friends.Any(f => (f.User == userID && f.Friend1 == friendId) ||
+                                                       (f.User == friendId && f.Friend1 == userID)))
+            {
+                TempData["ErrorMessage"] = "Bạn đã là bạn bè hoặc đã gửi lời mời.";
+                return RedirectToAction("Index");
+            }
+
+            // Add friend request
+            var friendRequest = new Friend
+            {
+                User = userID,
+                Friend1 = friendId,
+                Status = 1, // 1 = pending
+                SendTime = DateTime.Now
+            };
+            _socialNetworkContext.Friends.Add(friendRequest);
+            _socialNetworkContext.SaveChanges();
+
+            TempData["SuccessMessage"] = "Đã gửi lời mời kết bạn thành công!";
+            return RedirectToAction("Index");
+        }
+        public IActionResult FriendRequests()
+        {
+            string user = HttpContext.Session.GetString("User");
+            if (string.IsNullOrEmpty(user)) return RedirectToAction("Login");
+
+            int userID = int.Parse(user);
+
+            // Fetch pending friend requests where the current user is the recipient (Friend1)
+            var friendRequests = _socialNetworkContext.Friends
+                .Where(f => f.Friend1 == userID && f.Status == 1)
+                .Include(f => f.UserNavigation)
+                .ToList();
+
+            // Calculate mutual friends for each request
+            var friendRequestViewModels = friendRequests.Select(request =>
+            {
+                var mutualFriendsCount = _socialNetworkContext.Friends
+                    .Where(f => f.User == request.User && f.Status == 2)
+                    .Count(f => _socialNetworkContext.Friends
+                        .Any(f2 => f2.User == userID && f2.Friend1 == f.Friend1 && f2.Status == 2));
+
+                return new FriendRequestViewModel
+                {
+                    FriendRequest = request,
+                    MutualFriendsCount = mutualFriendsCount
+                };
+            }).ToList();
+
+            return View(friendRequestViewModels);
+        }
+        [HttpPost]
+        public IActionResult AcceptFriendRequest(int id)
+        {
+            string user = HttpContext.Session.GetString("User");
+            if (string.IsNullOrEmpty(user))
+            {
+                TempData["ErrorMessage"] = "Bạn cần đăng nhập để chấp nhận lời mời.";
+                return RedirectToAction("FriendRequests");
+            }
+
+            int userID = int.Parse(user);
+            var friendRequest = _socialNetworkContext.Friends
+                .FirstOrDefault(f => f.Id == id && f.Friend1 == userID && f.Status == 1);
+
+            if (friendRequest == null)
+            {
+                TempData["ErrorMessage"] = "Lời mời kết bạn không tồn tại.";
+                return RedirectToAction("FriendRequests");
+            }
+
+            friendRequest.Status = 2; // 2 = accepted
+            _socialNetworkContext.SaveChanges();
+
+            TempData["SuccessMessage"] = "Đã chấp nhận lời mời kết bạn!";
+            return RedirectToAction("FriendRequests");
+        }
+
+        // Action to cancel a friend request
+        [HttpPost]
+        public IActionResult CancelFriendRequest(int id)
+        {
+            string user = HttpContext.Session.GetString("User");
+            if (string.IsNullOrEmpty(user))
+            {
+                TempData["ErrorMessage"] = "Bạn cần đăng nhập để hủy lời mời.";
+                return RedirectToAction("FriendRequests");
+            }
+
+            int userID = int.Parse(user);
+            var friendRequest = _socialNetworkContext.Friends
+                .FirstOrDefault(f => f.Id == id && f.Friend1 == userID && f.Status == 1);
+
+            if (friendRequest == null)
+            {
+                TempData["ErrorMessage"] = "Lời mời kết bạn không tồn tại.";
+                return RedirectToAction("FriendRequests");
+            }
+
+            _socialNetworkContext.Friends.Remove(friendRequest);
+            _socialNetworkContext.SaveChanges();
+
+            TempData["SuccessMessage"] = "Đã hủy lời mời kết bạn!";
+            return RedirectToAction("FriendRequests");
+        }
+        // Load the story creation modal
+        public IActionResult LoadCreateStory()
+        {
+            return PartialView("_CreateStory");
+        }
+
+        // Handle story creation
+        [HttpPost]
+        public IActionResult CreateStory(string contents, IFormFile image)
+        {
+            string user = HttpContext.Session.GetString("User");
+            if (string.IsNullOrEmpty(user))
+            {
+                TempData["ErrorMessage"] = "Bạn cần đăng nhập để tạo tin.";
+                return RedirectToAction("Index");
+            }
+
+            int userID = int.Parse(user);
+
+            // Create a new story (Post with Type = 2)
+            var story = new Post
+            {
+                Contents = contents,
+                ModifyTime = DateTime.Now,
+                Author = userID,
+                Type = 2 // Story type
+            };
+            _socialNetworkContext.Posts.Add(story);
+            _socialNetworkContext.SaveChanges();
+
+            // Handle image upload (if provided)
+            if (image != null && image.Length > 0)
+            {
+                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
+                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads", fileName);
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    image.CopyTo(stream);
+                }
+
+                // Save the image as a Resource linked to the story
+                var resource = new Resource
+                {
+                    //Post = story.Id,
+                    // = "/uploads/" + fileName,
+                    //Type = "image"
+                };
+                _socialNetworkContext.Resources.Add(resource);
+                _socialNetworkContext.SaveChanges();
+            }
+
+            TempData["SuccessMessage"] = "Đã tạo tin thành công!";
+            return RedirectToAction("Index");
+        }
+        public IActionResult LoadStoryViewer(int storyId)
+        {
+            try
+            {
+                string user = HttpContext.Session.GetString("User");
+                if (string.IsNullOrEmpty(user))
+                {
+                    return Content("Bạn cần đăng nhập để xem tin.");
+                }
+
+                if (!int.TryParse(user, out int userID))
+                {
+                    return Content("ID người dùng không hợp lệ.");
+                }
+
+                // Fetch all stories from the user and their friends
+                var friendIds = _socialNetworkContext.Friends
+                    .Where(f => f.User == userID && f.Status == 1)
+                    .Select(f => f.Friend1)
+                    .ToList();
+
+                var stories = _socialNetworkContext.Posts
+                    .Include(p => p.AuthorNavigation)
+                    .Include(p => p.Resources)
+                    .Where(p => p.Type == 2 && (friendIds.Contains(p.Author) || p.Author == userID))
+                    .OrderByDescending(p => p.ModifyTime)
+                    .ToList();
+
+                // Find the index of the selected story
+                var selectedStoryIndex = stories.FindIndex(s => s.Id == storyId);
+                if (selectedStoryIndex == -1)
+                {
+                    return Content("Không tìm thấy tin.");
+                }
+
+                // Map to DTO to avoid serialization issues
+                var storyDtos = stories.Select(s => new StoryDto
+                {
+                    Id = s.Id,
+                    Contents = s.Contents,
+                    ModifyTime = s.ModifyTime,
+                    AuthorName = s.AuthorNavigation?.Name,
+                    ResourceLinks = s.Resources?.Select(r => r.Url).ToList() ?? new List<string>()
+                }).ToList();
+
+                ViewBag.Stories = storyDtos;
+                ViewBag.SelectedStoryIndex = selectedStoryIndex;
+
+                return PartialView("_StoryViewer");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in LoadStoryViewer: {ex.Message}");
+                Console.WriteLine($"Stack Trace: {ex.StackTrace}");
+                return StatusCode(500, $"An error occurred while loading the story viewer: {ex.Message}");
+            }
+        }
+
+    }
+    public class StoryDto
+    {
+        public int Id { get; set; }
+        public string Contents { get; set; }
+        public DateTime? ModifyTime { get; set; }
+        public string AuthorName { get; set; }
+        public List<string> ResourceLinks { get; set; }
+    }
+    public class FriendRequestViewModel
+    {
+        public Friend FriendRequest { get; set; }
+        public int MutualFriendsCount { get; set; }
     }
 }

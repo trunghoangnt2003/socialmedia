@@ -1,0 +1,23 @@
+﻿<div class="modal fade" id="createStoryModal" tabindex="-1" aria-labelledby="createStoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createStoryModalLabel">Tạo tin mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form asp-action="CreateStory" asp-controller="Home" method="post" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="contents" class="form-label">Nội dung</label>
+                        <textarea class="form-control" id="contents" name="contents" rows="3" placeholder="Bạn đang nghĩ gì?"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="image" class="form-label">Hình ảnh</label>
+                        <input type="file" class="form-control" id="image" name="image" accept="image/*">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Đăng tin</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -97,6 +97,60 @@
     padding: 0;
     overflow: hidden; /* Cuộn toàn trang */
     }
+    /* Story Styles */
+    .story-container {
+        display: flex;
+        overflow-x: auto;
+        padding: 10px 0;
+        margin-bottom: 20px;
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE and Edge */
+    }
+
+        .story-container::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
+        }
+
+    .story-card {
+        flex: 0 0 auto;
+        width: 100px;
+        margin-right: 10px;
+        border-radius: 10px;
+        overflow: hidden;
+        position: relative;
+        height: 150px;
+        background-color: #f0f2f5;
+        cursor: pointer;
+    }
+
+    .story-background {
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        opacity: 0.8;
+    }
+
+    .story-avatar {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 3px solid #1877f2;
+        background-color: #fff;
+    }
+
+    .story-name {
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+        color: #fff;
+        font-size: 12px;
+        font-weight: 500;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    }
 </style>
 
 <div class="row">
@@ -112,7 +166,7 @@
                 <ul class="list-unstyled">
                     <li class="d-flex align-items-center mb-2">
                         <i class="fas fa-user-friends text-primary mr-2"></i>
-                        <span class="ps-1">  Bạn bè</span>
+                        <a href="@Url.Action("FriendRequests", "Home")" class="ps-1 text-decoration-none text-dark">Lời mời kết bạn</a>
                     </li>
                     <li class="d-flex align-items-center mb-2">
                         <i class="fas fa-users text-primary mr-2"></i>
@@ -188,6 +242,31 @@
     <div class="col-md-6 colCustome">
         <div class="container d-flex justify-content-center align-items-start"> 
             <div class="w-100"> 
+                <div class="story-container">
+                    <!-- Create Story Card -->
+                    <div class="story-card" style="background: linear-gradient(180deg, #f0f2f5, #1877f2);" data-bs-toggle="modal" data-bs-target="#createStoryModal">
+                        <div class="story-background"></div>
+                        <img src="@ViewBag.User.Avatar" class="story-avatar" alt="Create Story">
+                        <div class="story-name">Tạo tin</div>
+                    </div>
+                    <!-- Existing Stories -->
+                    @if (ViewBag.Stories != null && ((List<SocialMedia.Models.Post>)ViewBag.Stories).Any())
+                    {
+                        @foreach (var story in ViewBag.Stories as List<SocialMedia.Models.Post>)
+                        {
+                            var backgroundImage = story.Resources != null && story.Resources.Any() ? story.Resources.First().Url : "/path/to/default-story-bg.jpg";
+                            <div class="story-card" onclick="viewStory(@story.Id)">
+                                <div class="story-background" style="background-image: url('@backgroundImage');"></div>
+                                <img src="@story?.AuthorNavigation?.Avatar" class="story-avatar" alt="@story?.AuthorNavigation?.Name">
+                                <div class="story-name">@story?.AuthorNavigation?.Name</div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-muted">Không có tin nào để hiển thị.</div>
+                    }
+                </div>
                  <div class="d-flex align-items-start mb-3 input-container" > 
                      <img src="@ViewBag.User.Avatar" class="rounded-circle" width="40" height="40" alt="User profile picture"> 
                      <div class="ms-2 text-black-50 input-container2 w-100" style="cursor:pointer" data-bs-toggle="modal" 
@@ -219,8 +298,13 @@
                                     <div class="card-body text-center">
                                         <img src="@friend.Avatar" alt="@friend.Name" class="rounded-circle mb-2" width="80" height="80">
                                         <h6 class="card-title">@friend.Name</h6>
-                                        <button class="btn btn-primary btn-sm" onclick="addFriend(@friend.Id)">Thêm bạn</button>
-                                        <a href="@Url.Action("Index", "ProfileUser", new { id = friend.Id })" class="btn btn-outline-secondary btn-sm">Xem trang cá nhân</a>
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <form asp-action="AddFriend" asp-controller="Home" method="post" class="d-inline">
+                                                <input type="hidden" name="friendId" value="@friend.Id" />
+                                                <button type="submit" class="btn btn-primary btn-sm">Thêm bạn</button>
+                                            </form>
+                                            <a href="@Url.Action("Index", "ProfileUser", new { id = friend.Id })" class="btn btn-outline-secondary btn-sm">Xem trang cá nhân</a>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -259,9 +343,28 @@
 <div id="modal"> 
 
 </div>
+<div id="modal1">
+</div>
 @section Scripts {
     <script>
+             function viewStory(storyId) {
+            $.get("/Home/LoadStoryViewer?storyId=" + storyId, function(data) {
+                $("#modal1").html(data);
+                $("#storyViewerModal").modal("show");
+            }).fail(function(jqXHR, textStatus, errorThrown) {
+                console.error("Error loading story viewer: ", textStatus, errorThrown);
+                console.log("Response: ", jqXHR.responseText);
+            });
+        }
         $(document).ready(function() {
+        @if (TempData["SuccessMessage"] != null)
+        {
+            @:showToast("@TempData["SuccessMessage"]", "success");
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            @:showToast("@TempData["ErrorMessage"]", "danger");
+        }
                 // Load ngay khi trang vừa mở
                 $.get("/Home/LoadCreatePost", function(data) {
                     $("#modal").html(data);
@@ -294,19 +397,9 @@
             toastElement.addEventListener('hidden.bs.toast', function () {
                 toastElement.remove();
             });
-            function addFriend(friendId) {
-            $.post("/Home/AddFriend", { friendId: friendId }, function(response) {
-                if (response.success) {
-                    showToast("Đã gửi lời mời kết bạn thành công!", "success");
-                    setTimeout(() => location.reload(), 1500); // Reload to update posts
-                } else {
-                    showToast(response.message || "Không thể gửi lời mời kết bạn.", "danger");
-                }
-            }).fail(function() {
-                showToast("Đã xảy ra lỗi khi gửi lời mời.", "danger");
-            });
+
         }
-        }
+       
        
         
     </script>

@@ -1,0 +1,400 @@
+﻿@model IEnumerable<SocialMedia.Models.Post>
+@using Microsoft.AspNetCore.Html
+@using Newtonsoft.Json
+
+@{
+    var userJson = Context.Session.GetString("UserFull");
+    User user = new User { Name = "Unknown" };
+
+    if (!string.IsNullOrEmpty(userJson))
+    {
+        try
+        {
+            user = JsonConvert.DeserializeObject<User>(userJson);
+        }
+        catch (JsonException ex)
+        {
+            Console.WriteLine($"Error deserializing user: {ex.Message}");
+        }
+    }
+}
+
+<style>
+    .nav-link {
+    text-decoration: none; /* Remove underline by default */
+    }
+
+    .nav-link:hover {
+    text-decoration: underline; /* Add underline on hover */
+    }
+    .group-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding: 20px;
+    background-color: #f5f5f5;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .group-avatar {
+    width: 1000px;
+    height: 300px;
+    border-radius: 10px;
+    object-fit: cover;
+    margin-right: 20px;
+    }
+
+    .group-details h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: bold;
+    }
+
+    .group-member-count {
+    color: #666;
+    font-size: 14px;
+    margin-top: 5px;
+    }
+
+    .group-actions {
+    margin-top: 10px;
+    }
+
+    .group-actions button {
+    background-color: #008CBA;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 20px;
+    margin-right: 10px;
+    font-size: 14px;
+    cursor: pointer;
+    }
+
+    .group-actions .btn-invite {
+    background-color: orange;
+    }
+
+    .group-actions .btn-share {
+    background-color: lightgray;
+    }
+
+    .group-actions .btn-joined {
+    background-color: #4CAF50;
+    }
+
+    .group-actions button:hover {
+    opacity: 0.8;
+    }
+
+    .image-grid {
+    display: grid;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+    justify-content: center;
+    align-items: stretch;
+    }
+
+    .media-item {
+    display: flex;
+    align-items: stretch;
+    }
+
+    .media-item img, .media-item video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+    aspect-ratio: 1 / 1;
+    }
+
+    .media-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    font-size: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 8px;
+    }
+
+    .join-group-container {
+        border: 1px solid #e9ecef;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .join-group-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+    .join-group-icon {
+        color: #007bff;
+    }
+
+    .join-group-title {
+        font-size: 1.5rem;
+        color: #343a40;
+    }
+
+    .join-group-text {
+        font-size: 1.1rem;
+        line-height: 1.5;
+    }
+
+    .join-group-btn {
+        padding: 12px 24px;
+        font-size: 1.1rem;
+        border-radius: 25px;
+        background-color: #007bff;
+        border: none;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+        .join-group-btn:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
+
+        .join-group-btn:active {
+            transform: scale(0.98);
+        }
+</style>
+<div>
+
+    <div>
+        <div class="container">
+            <!-- Cover Photo -->
+            <div class="position-relative">
+                <img src="@ViewBag.Group.Avatar" class="img-fluid w-100" style="height: 200px; object-fit: cover;" alt="Cover photo of a graphics card with three fans">
+            </div>
+            <!-- Group Info -->
+            <div class="bg-white rounded-lg mt-n5 p-4">
+                <div class="d-flex align-items-center">
+                    <div class="ml-4">
+                        <h1 class="h4 font-weight-bold">@ViewBag.Group.Name</h1>
+                        <p class="text-muted"><i class="fas fa-users"></i> Nhóm Công khai · @ViewBag.Group.UserGroups.Count thành viên</p>
+                    </div>
+                </div>
+                <div class="mt-1 d-flex align-items-center justify-content-between">
+                    <!-- Left Side: Member Images -->
+                    <div class="d-flex align-items-center">
+                        @{
+                            int maxDisplay = 7;
+                            int totalMembers = @ViewBag.Group.UserGroups.Count;
+                            int counter = 0;
+
+                            foreach (var userGroup in @ViewBag.Group.UserGroups)
+                            {
+                                if (counter < maxDisplay)
+                                {
+                                    <img src="@userGroup?.UserNavigation?.Avatar" class="rounded-circle ml-1" alt="Member @(counter + 1)" width="30" height="30">
+                                    counter++;
+                                }
+                                else
+                                {
+                                    break;
+                                }
+                            }
+                            if (totalMembers > maxDisplay)
+                            {
+                                int remainingMembers = totalMembers - maxDisplay;
+                                <span class="text-muted ml-2">+@remainingMembers</span>
+                            }
+                        }
+                    </div>
+                    <!-- Right Side: Buttons -->
+                    <div class="d-flex align-items-center">
+
+                        @if (ViewBag.Group != null && ViewBag.Group.UserGroups != null && ((IEnumerable<UserGroup>)ViewBag.Group.UserGroups).Any(u => u.User == user.Id))
+                        {
+                            <button class="btn btn-primary ms-3">+ Mời</button>
+                            <button class="btn btn-light ms-2">Chia sẻ</button>
+                            <button class="btn btn-light ms-2">Đã tham gia <i class="fas fa-caret-down ms-1"></i></button>
+                            <div class="dropdown ms-2">
+                                <button class="btn btn-light" type="button" id="moreOptionsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-ellipsis-h"></i>
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="moreOptionsDropdown">
+                                    <li><a class="dropdown-item" href="#" onclick="leaveGroup()">Rời nhóm</a></li>
+                                    <!-- Add more options here if needed -->
+                                </ul>
+                            </div>
+                        }
+                        else
+                        {
+                            <button class="btn btn-primary ms-2" onclick="joinGroup()">+ Tham gia</button>
+                        }
+
+                        
+                    </div>
+                </div>
+                <!-- Navigation -->
+                <div class="d-flex justify-content-between align-items-center border-top mt-2">
+                    <div class="d-flex">
+                        <a href="#" class="text-primary font-weight-bold nav-link">Giới thiệu</a>
+                        <a href="#" class="text-primary font-weight-bold ms-3 nav-link">Thảo luận</a>
+                        <a href="#" class="text-primary font-weight-bold ms-3 nav-link">Mọi người</a>
+                        <a href="#" class="text-primary font-weight-bold ms-3 nav-link">Sự kiện</a>
+                        <a href="#" class="text-primary font-weight-bold ms-3 nav-link">File phương tiện</a>
+                        <a href="#" class="text-primary font-weight-bold ms-3 nav-link">File</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="bg-light">
+            <div class="container pt-4">
+                <div class="row">
+                    <!-- Left Column -->
+                    <div class="col-md-8">
+                        @if (ViewBag.Group != null && ViewBag.Group.UserGroups != null && ((IEnumerable<UserGroup>)ViewBag.Group.UserGroups).Any(u => u.User == user.Id))
+                        {
+                            <div class="bg-white p-4 rounded shadow-sm mb-4">
+                                <div class="d-flex align-items-center mb-2">
+                                    <img src="@user?.Avatar" class="rounded-circle me-2" alt="User profile picture" width="40" height="40">
+                                    <input type="text" class="form-control rounded-pill" placeholder="Bạn viết gì đi..." readonly onclick="loadAndShowModal()">
+                                </div>
+                                <div class="d-flex justify-content-between border-top">
+                                    <button class="btn text-danger"><i class="fas fa-video me-1"></i> Thước phim</button>
+                                    <button class="btn text-success"><i class="fas fa-image me-1"></i> Ảnh/video</button>
+                                    <button class="btn text-warning"><i class="fas fa-poll me-1"></i> Thăm dò ý kiến</button>
+                                </div>
+                            </div>
+                            <!-- Post -->
+                            @foreach (Post post in @Model)
+                            {
+                                @await Html.PartialAsync("Group/_ViewPost", post)
+                            }
+                        }
+                        else
+                        {
+                            <div class="join-group-container bg-white p-5 rounded-lg shadow-lg mb-4 text-center animate__animated animate__fadeIn">
+                                <div class="join-group-icon mb-3">
+                                    <i class="fas fa-users fa-3x text-primary"></i>
+                                </div>
+                                <h3 class="join-group-title fw-bold mb-2">Tham gia nhóm để khám phá!</h3>
+                                <p class="join-group-text text-muted mb-4">Bạn cần tham gia nhóm để xem các bài viết và nội dung thú vị từ cộng đồng.</p>
+                                <button class="btn btn-primary btn-lg join-group-btn" onclick="joinGroup()">
+                                    <i class="fas fa-sign-in-alt me-2"></i> Tham gia ngay
+                                </button>
+                            </div>
+                        }
+                        
+                        
+
+                    </div>
+                    <!-- Right Column -->
+                    <div class="col-md-4">
+                        <div class="bg-white p-4 rounded shadow-sm">
+                            <h5 class="font-weight-bold">Giới thiệu</h5>
+                            <div class="mt-2">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-globe text-muted me-2"></i>
+                                    <span>Công khai</span>
+                                </div>
+                                <p class="text-muted">Bất kỳ ai cũng có thể nhìn thấy mọi người trong nhóm và những gì họ đăng.</p>
+                            </div>
+                            <div class="mt-2">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-eye text-muted me-2"></i>
+                                    <span>Hiển thị</span>
+                                </div>
+                                <p class="text-muted">Ai cũng có thể tìm thấy nhóm này.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        
+    </div>
+</div>
+ @if (ViewBag.Group != null && ViewBag.Group.UserGroups != null && ((IEnumerable<UserGroup>)ViewBag.Group.UserGroups).Any(u => u.User == user.Id))
+ {
+<div id="modal">
+    </div>
+}
+<script>
+    function loadAndShowModal() {
+        var groupId = @ViewBag.Group.Id;
+        $.get("/Group/LoadCreatePost?groupId=" + groupId, function(data) {
+            $("#modal").html(data);
+            $("#createModal").modal('show');
+        }).fail(function() {
+            showToast("Không thể tải form tạo bài viết.", "danger");
+        });
+    }
+
+    function joinGroup() {
+        var groupId = @ViewBag.Group.Id;
+        $.post("/Group/JoinGroup", { groupId: groupId }, function(response) {
+            if (response.success) {
+                showToast("Bạn đã tham gia nhóm thành công!", "success");
+                setTimeout(() => location.reload(), 1500); // Reload after 1.5s to allow toast visibility
+            } else {
+                showToast(response.message || "Không thể tham gia nhóm. Vui lòng thử lại.", "danger");
+            }
+        }).fail(function() {
+            showToast("Đã xảy ra lỗi khi tham gia nhóm.", "danger");
+        });
+    }
+
+    function leaveGroup() {
+        if (confirm("Bạn có chắc chắn muốn rời nhóm này không?")) {
+            var groupId = @ViewBag.Group.Id;
+            $.post("/Group/LeaveGroup", { groupId: groupId }, function(response) {
+                if (response.success) {
+                    showToast("Bạn đã rời nhóm thành công!", "success");
+                    setTimeout(() => location.reload(), 1500); // Reload after 1.5s
+                } else {
+                    showToast(response.message || "Không thể rời nhóm. Vui lòng thử lại.", "danger");
+                }
+            }).fail(function() {
+                showToast("Đã xảy ra lỗi khi rời nhóm.", "danger");
+            });
+        }
+    }
+
+    // Function to show a Bootstrap toast
+    function showToast(message, type = "success") {
+        var toastId = "toast-" + Date.now(); // Unique ID for each toast
+        var bgClass = type === "success" ? "bg-success" : "bg-danger"; // Color based on type
+        var toastHtml = `
+            <div id="${toastId}" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-bs-delay="3000">
+                <div class="toast-header ${bgClass} text-white">
+                    <strong class="me-auto">${type === "success" ? "Thành công" : "Lỗi"}</strong>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    ${message}
+                </div>
+            </div>
+        `;
+
+        // Append toast to container
+        $("#toastContainer").append(toastHtml);
+
+        // Initialize and show the toast
+        var toastElement = document.getElementById(toastId);
+        var toast = new bootstrap.Toast(toastElement);
+        toast.show();
+
+        // Remove toast from DOM after it hides
+        toastElement.addEventListener('hidden.bs.toast', function () {
+            toastElement.remove();
+        });
+    }
+</script>
+

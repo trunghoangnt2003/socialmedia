@@ -16,4 +16,5 @@ public partial class Group
     public string? Avatar { get; set; }
 
     public virtual ICollection<UserGroup> UserGroups { get; set; } = new List<UserGroup>();
+    public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
 }

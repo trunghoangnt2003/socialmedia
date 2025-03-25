@@ -1,0 +1,228 @@
+﻿@model SocialMedia.Models.User
+<style>
+    .image-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        grid-gap: 10px;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .image-wrapper {
+        position: relative;
+        height: 200px;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .image-grid img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .remove-btn {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background-color: rgba(0, 0, 0, 0.5);
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        text-align: center;
+        line-height: 24px;
+        z-index: 1;
+        cursor: pointer;
+        border: none;
+        font-size: 14px;
+        color: white;
+        padding: 0;
+    }
+
+        .remove-btn::after {
+            content: '\2716';
+            font-size: 14px;
+            color: white;
+        }
+</style>
+<div class="modal" id="createModal" tabindex="-1" role="dialog" aria-labelledby="createCategoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content" id="postContainer">
+            <div class="bg-white text-dark" style="max-width: 900px; border-radius: 8px; padding: 16px; box-shadow: 0 0 14px rgba(0,0,0,0.1);">
+                <form asp-controller="Group" asp-action="Upload" enctype="multipart/form-data" method="post" id="postForm">
+                    <input type="hidden" name="groupId" value="@ViewBag.Group.Id" />
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2 class="h5">Tạo bài viết ở @ViewBag.Group.Name</h2>
+                        <i class="fas fa-times" style="cursor: pointer;" onclick="closeModal()"></i>
+                    </div>
+                    <div class="d-flex align-items-center mb-4">
+                        <img alt="User profile picture" class="rounded-circle mr-3" height="35" src="@Model?.Avatar" width="35" />
+                        <div>
+                            <p class="mb-1 ms-3 mt-1">@Model?.Name</p>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <textarea class="form-control bg-light text-dark border-0" placeholder="@Model?.Name ơi, bạn đang nghĩ gì thế?" rows="3" name="content"></textarea>
+                    </div>
+                    <div id="image" class="image-grid mb-4"></div>
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-mobile-alt fa-lg mr-2"></i>
+                            <p class="mb-0 ms-2">Thêm ảnh và video từ thiết bị</p>
+                        </div>
+                        <input type="file" id="fileInput" accept="image/*,video/*" multiple style="display: none;" onchange="addMedia(event)" name="media">
+                        <button class="btn btn-light border" onclick="triggerFileInput()" type="button">Thêm</button>
+                    </div>
+                    <button class="btn btn-light w-100 text-muted border" type="submit">Đăng</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function triggerFileInput() {
+        document.getElementById('fileInput').click();
+    }
+
+    function addMedia(event) {
+        const files = event.target.files;
+        const mediaContainer = document.getElementById('image');
+        const dataTransfer = new DataTransfer();
+
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            if (file && (file.type.startsWith('image/') || file.type.startsWith('video/'))) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const mediaWrapper = document.createElement('div');
+                    mediaWrapper.className = 'image-wrapper';
+                    if (file.type.startsWith('image/')) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        mediaWrapper.appendChild(img);
+                    } else if (file.type.startsWith('video/')) {
+                        const video = document.createElement('video');
+                        video.src = e.target.result;
+                        video.controls = true;
+                        video.style.width = '100%';
+                        video.style.height = '100%';
+                        mediaWrapper.appendChild(video);
+                    }
+                    const removeBtn = document.createElement('button');
+                    removeBtn.className = 'remove-btn';
+                    removeBtn.onclick = function () {
+                        mediaContainer.removeChild(mediaWrapper);
+                        removeFile(file);
+                        updateGridLayout();
+                    };
+                    mediaWrapper.appendChild(removeBtn);
+                    mediaContainer.appendChild(mediaWrapper);
+                    updateGridLayout();
+                };
+                reader.readAsDataURL(file);
+                dataTransfer.items.add(file);
+            }
+        }
+        document.getElementById('fileInput').files = dataTransfer.files;
+    }
+
+    function removeFile(file) {
+        const fileInput = document.getElementById('fileInput');
+        const dataTransfer = new DataTransfer();
+        for (let i = 0; i < fileInput.files.length; i++) {
+            if (fileInput.files[i] !== file) {
+                dataTransfer.items.add(fileInput.files[i]);
+            }
+        }
+        fileInput.files = dataTransfer.files;
+    }
+
+    function updateGridLayout() {
+        const imageContainer = document.getElementById('image');
+        const images = imageContainer.querySelectorAll('.image-wrapper');
+        if (images.length === 1) {
+            images[0].style.gridColumn = 'span 2';
+            images[0].style.height = '400px';
+        } else if (images.length === 2) {
+            images.forEach(img => {
+                img.style.gridColumn = 'span 1';
+                img.style.height = '200px';
+            });
+        } else if (images.length === 3) {
+            images[0].style.gridRow = 'span 1';
+            images[0].style.height = '200px';
+            images[1].style.gridRow = 'span 1';
+            images[1].style.height = '200px';
+            images[2].style.gridColumn = 'span 2';
+            images[2].style.height = '200px';
+        } else {
+            images.forEach((img, index) => {
+                img.style.gridColumn = 'span 1';
+                img.style.height = '200px';
+                img.style.gridRow = 'auto';
+            });
+            if (images.length >= 3) {
+                images[0].style.gridRow = 'span 2';
+                images[0].style.height = '410px';
+            }
+        }
+    }
+
+    function closeModal() {
+        $("#createModal").modal('hide');
+    }
+
+    // Handle form submission with AJAX
+    $(document).ready(function() {
+        $("#postForm").on("submit", function(event) {
+            event.preventDefault();
+            var form = $(this);
+            var formData = new FormData(this);
+
+            // Show loading spinner
+            $("#loadingSpinner").show();
+            $("#createModal").modal('hide'); // Hide modal immediately
+
+            $.ajax({
+                url: form.attr("action"),
+                type: form.attr("method"),
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    $("#loadingSpinner").hide();
+                    showToast("Bài viết đã được đăng thành công!", "success");
+                    setTimeout(() => location.reload(), 1500); // Reload after toast
+                },
+                error: function() {
+                    $("#loadingSpinner").hide();
+                    showToast("Đã xảy ra lỗi khi đăng bài viết.", "danger");
+                }
+            });
+        });
+    });
+
+    // Toast function (assuming it's available from the main view)
+    function showToast(message, type = "success") {
+        var toastId = "toast-" + Date.now();
+        var bgClass = type === "success" ? "bg-success" : "bg-danger";
+        var toastHtml = `
+            <div id="${toastId}" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-bs-delay="3000">
+                <div class="toast-header ${bgClass} text-white">
+                    <strong class="me-auto">${type === "success" ? "Thành công" : "Lỗi"}</strong>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    ${message}
+                </div>
+            </div>
+        `;
+        $("#toastContainer").append(toastHtml);
+        var toastElement = document.getElementById(toastId);
+        var toast = new bootstrap.Toast(toastElement);
+        toast.show();
+        toastElement.addEventListener('hidden.bs.toast', function () {
+            toastElement.remove();
+        });
+    }
+</script>

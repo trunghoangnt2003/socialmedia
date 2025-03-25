@@ -28,10 +28,134 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="~/css/header-layout.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/chat-modal.css" asp-append-version="true" />
+    
+    <style>
+        .header-icon-child {
+            position: relative; /* Đảm bảo phần tử cha có position để position:absolute hoạt động */
+            width: 40px; /* Đảm bảo kích thước hình tròn */
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #unreadNotiCount {
+            position: absolute;
+            top: -5px; /* Di chuyển lên trên */
+            right: -5px; /* Di chuyển sang phải */
+            width: 20px; /* Kích thước hình tròn nhỏ */
+            height: 20px;
+            line-height: 20px; /* Căn giữa số trong hình tròn */
+            font-size: 12px; /* Kích thước chữ nhỏ hơn */
+            background-color: #dc3545; /* Màu đỏ cho nền */
+            color: #fff; /* Màu trắng cho số */
+            border-radius: 50%; /* Hình tròn */
+            text-align: center;
+            border: 2px solid #fff; /* Viền trắng để nổi bật */
+        }
+        .popup-notification {
+            position: fixed; /* Thay absolute thành fixed để kiểm tra */
+            top: 50px; /* Đặt vị trí cụ thể */
+            right: 10px;
+            width: 350px;
+            max-height: 400px;
+            background-color: #fff; /* Đảm bảo có nền trắng */
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            overflow-y: auto;
+            z-index: 2000; /* Tăng z-index */
+            display: none;
+        }
+
+            .popup-notification.show {
+                display: block !important;
+                z-index: 3000 !important; /* Tăng cao hơn để vượt qua navbar */
+            }
+
+        .notification-list {
+            padding: 5px;
+        }
+
+        .notification-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+            .notification-item.unread {
+                background-color: #f0f7ff;
+            }
+
+            .notification-item:hover {
+                background-color: #f8f9fa;
+            }
+
+            .notification-item p {
+                margin: 0;
+                font-size: 0.9rem;
+            }
+
+            .notification-item .time {
+                font-size: 0.75rem;
+                color: #6c757d;
+            }
+
+        .no-notifications {
+            padding: 10px;
+            text-align: center;
+            color: #6c757d;
+        }
+
+        .notification-toast {
+            min-width: 300px;
+            max-width: 400px;
+            margin-bottom: 10px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+            .notification-toast.show {
+                opacity: 1;
+            }
+
+            .notification-toast .toast-icon {
+                width: 40px;
+                height: 40px;
+                background-color: #007bff;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-right: 10px;
+            }
+
+                .notification-toast .toast-icon i {
+                    color: #fff;
+                }
+
+            .notification-toast .toast-content p {
+                margin: 0;
+                font-size: 0.9rem;
+            }
+
+            .notification-toast .toast-content .time {
+                font-size: 0.75rem;
+                color: #6c757d;
+            }
+    </style>
 </head>
 <body>
     <header>
-        <nav class="relative  p-2 navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="relative p-2 navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="row">
                 <div class="col-6 d-flex">
                     <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">SocialMedia</a>
@@ -39,21 +163,17 @@
                         <div class="search-box">
                             <i class="fas fa-search search-icon"></i>
                             <input type="text" class="form-control search-input" placeholder="Search anything...">
-                            @* <button class="btn btn-primary search-button">
-                                Search
-                            </button> *@
                         </div>
                     </div>
                 </div>
-              
-                <div class="navbar-collapse collapse d-sm-inline-flex  col-6">
+                <div class="navbar-collapse collapse d-sm-inline-flex col-6">
                     <ul class="navbar-nav flex-grow-1 justify-content-end">
                         <li class="header-icon nav-item me-2 icon" id="messenger">
                             <div class="position-relative">
                                 <div class="header-icon-child rounded-circle bg-primary nav-link">
                                     <i class="fa-brands fa-facebook-messenger fa-xl" style="color: #ffffff;"></i>
                                 </div>
-                                <div id="unreadCount" class="position-absolute rounded-circle rounded-2 bg-danger text-white text-center d-none ">
+                                <div id="unreadCount" class="position-absolute rounded-circle rounded-2 bg-danger text-white text-center d-none">
                                     0
                                 </div>
                             </div>
@@ -64,22 +184,26 @@
                             </div>
                         </li>
                         <li class="header-icon nav-item me-2 icon" id="notification">
-                            <div class="header-icon-child icon rounded-circle bg-primary nav-link text-center">
-                                <i class="fa-solid fa-bell fa-xl" style="color: #ffffff;"></i>
-                            </div>
-                            <div class="popup-notification" id="popupNoti">
-                                <div class="element-noti">
-                                    <i class="fa-solid fa-user text-primary me-2"></i> @(user.Name) notifi
+                            <div class="position-relative">
+                                <div class="header-icon-child icon rounded-circle bg-primary nav-link text-center">
+                                    <i class="fa-solid fa-bell fa-xl" style="color: #ffffff;"></i>
+                                </div>
+                                <div id="unreadNotiCount" class="position-absolute rounded-circle bg-danger text-white text-center d-none">
+                                    0
                                 </div>
                             </div>
+                            <div class="popup-notification" id="popupNoti">
+                                <div class="notification-header p-2 border-bottom d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0">Thông báo</h6>
+                                    <button id="markAllRead" class="btn btn-link btn-sm">Đọc tất cả</button>
+                                </div>
+                                <div class="notification-list" id="notificationList"></div>
+                            </div>
                         </li>
-                        <li class="header-icon position-relative nav-item me-4 icon"  id="avatar">
-                            <img src="@(user.Avatar)"
-                                 alt="Avatar of user"
-                                 class="rounded-circle "
-                                 width="40" height="40">
-                            <div class="user-icon rounded-circle border border-white border-2 position-absolute bottom-0 end-0 d-flex align-items-center justify-content-center ">
-                                <i class="fa-solid fa-angle-down fa-2xs text-white" ></i>
+                        <li class="header-icon position-relative nav-item me-4 icon" id="avatar">
+                            <img src="@(user.Avatar)" alt="Avatar of user" class="rounded-circle" width="40" height="40">
+                            <div class="user-icon rounded-circle border border-white border-2 position-absolute bottom-0 end-0 d-flex align-items-center justify-content-center">
+                                <i class="fa-solid fa-angle-down fa-2xs text-white"></i>
                             </div>
                             <div class="popup-menu" id="popupMenu">
                                 <div class="element-menu">
@@ -95,12 +219,22 @@
             </div>
         </nav>
     </header>
-    <div class="container">
+    <div class="">
         <main role="main" class="pb-3">
+            <div aria-live="polite" aria-atomic="true" class="position-fixed top-0 end-0 p-3" style="z-index: 1050;">
+                <div id="toastContainer"></div>
+            </div>
+
+            <div id="loadingSpinner" class="position-fixed top-50 start-50 translate-middle" style="display: none; z-index: 1060;">
+                <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                    <span class="visually-hidden">Đang tải...</span>
+                </div>
+            </div>
             @RenderBody()
         </main>
         <div id="chat-modal" class="chat-modal position-fixed"></div>
     </div>
+    <div id="notification-toast-container" class="position-fixed bottom-0 start-0 p-3" style="z-index: 1050;"></div>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
@@ -108,25 +242,48 @@
     <script src="~/js/chat-modal.js" asp-append-version="true"></script>
     <script src="~/js/header.js" asp-append-version="true"></script>
     <script src="~/js/signalr/dist/browser/signalr.js"></script>
+    <script src="~/js/noti.js" asp-append-version="true"></script>
     <script>
         "use strict";
 
         var connection = new signalR.HubConnectionBuilder().withUrl("/signalRService").build();
+        var currentUser = @Html.Raw(Json.Serialize(Context.Session.GetString("UserFull")));
+
         connection.start().then(function () {
-
-            console.log("currentUser "+ currentUser + "id " + connection.connectionId);
+            console.log("Connected to SignalR, Connection ID: " + connection.connectionId);
+            window.initializeNotification(connection, currentUser);
+        }).catch(function (err) {
+            console.error("SignalR connection error: " + err.toString());
         });
-        var currentUser = @Context.Session.GetString("User");
 
-        connection.on("SendMessageTo", function (reciver) {
-            console.log("Send to" + `${reciver}`);
-            if(reciver != currentUser) LoadChatData(reciver,false);
+        connection.on("SendMessageTo", function (receiver) {
+            console.log("Send to: " + receiver);
+            if (receiver !== currentUser) LoadChatData(receiver, false);
         });
 
         connection.on("ReceiveMessageFrom", function (sender) {
-            console.log("Receive from" + `${sender}`);
+            console.log("Receive from: " + sender);
             FetchNumberMessage();
-            if(sender != currentUser) LoadChatData(sender,true);
+            if (sender !== currentUser) LoadChatData(sender, true);
+        });
+
+        document.getElementById('notification').addEventListener('click', function (e) {
+            e.stopPropagation();
+            console.log("Mo popu[]");
+            const popupNoti = document.getElementById('popupNoti');
+            popupNoti.classList.toggle('show');
+            if (popupNoti.classList.contains('show')) {
+                console.log("Mo popu[] 2");
+                window.loadNotifications(); // Gọi hàm từ noti.js
+            }
+        });
+
+        document.addEventListener('click', function (e) {
+            const notification = document.getElementById('notification');
+            if (!notification.contains(e.target)) {
+                console.log("Clicked outside, hiding popup");
+                document.getElementById('popupNoti').classList.remove('show');
+            }
         });
     </script>
 </body>

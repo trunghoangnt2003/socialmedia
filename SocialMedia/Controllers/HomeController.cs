@@ -1,10 +1,11 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using SocialMedia.Models;
 using SocialMedia.Services;
 using System.Diagnostics;
+using System.Drawing.Printing;
 
 namespace SocialMedia.Controllers
 {
@@ -19,9 +20,27 @@ namespace SocialMedia.Controllers
         {
             _logger = logger;
             _cloudinaryServices = cloudinaryServices;
-            _socialNetworkContext=socialNetworkContext;
+            _socialNetworkContext = socialNetworkContext;
+        }
+        public IActionResult LoadMorePosts(int page = 1)
+        {
+            int pageSize = 5;
+            var posts = _socialNetworkContext.Posts
+                                .OrderByDescending(p => p.ModifyTime)
+                                .Skip((page - 1) * pageSize)
+                                .Take(pageSize)
+                                .ToList();
+
+            return PartialView("Home/_ViewPost", posts);
         }
 
+        public IActionResult LoadCreatePost()
+        {
+            string user = HttpContext.Session.GetString("User");
+            int userID = int.Parse(user);
+            var userDB = _socialNetworkContext.Users.FirstOrDefault(u => u.Id == userID);
+            return PartialView("Home/_CreatePost", userDB);
+        }
         public IActionResult Index()
         {
             string user = HttpContext.Session.GetString("User");
@@ -29,11 +48,84 @@ namespace SocialMedia.Controllers
 
             int userID = int.Parse(user);
             var listFriends = _socialNetworkContext.Friends.Where(f => f.User == userID).Include(f => f.Friend1Navigation);
+            var userDB = _socialNetworkContext.Users.FirstOrDefault(u => u.Id == userID);
             ViewBag.Friends = listFriends.ToList();
-            
+            ViewBag.User = userDB;
+            var posts = _socialNetworkContext.Posts
+                    .Include(p => p.Resources)
+                    .Include(p => p.Reactions)
+                    .Include(p => p.Comments)
+                    .Include(p => p.GroupNavigation)
+                    .Where(p => p.Group == null || // Posts not in a group are visible to all
+                                _socialNetworkContext.UserGroups
+                                    .Any(ug => ug.Group == p.Group && ug.User == userID)) // Posts in groups where user is a member
+                    .OrderByDescending(p => p.ModifyTime)
+                    .ToList();
+            ViewBag.Posts = posts;
+            var suggestedGroups = _socialNetworkContext.Groups
+            .Where(g => !_socialNetworkContext.UserGroups
+                .Any(ug => ug.Group == g.Id && ug.User == userID))
+            .Take(4) 
+            .ToList();
+            ViewBag.SuggestedGroups = suggestedGroups;
+            var userGroups = _socialNetworkContext.UserGroups
+        .Where(ug => ug.User == userID)
+        .Include(ug => ug.GroupNavigation)
+        .Select(ug => ug.GroupNavigation)
+        .ToList();
+            ViewBag.UserGroups = userGroups;
             return View();
         }
+        public IActionResult PostDetail(int id)
+        {
+            var post = _socialNetworkContext.Posts.Include(p => p.Reactions).Include(p => p.Resources).FirstOrDefault(p => p.Id == id);
+            return View(post);
+        }
+        [HttpPost]
+        public async Task<IActionResult> UploadAsync(List<IFormFile> media, string content)
+        {
+            string user = HttpContext.Session.GetString("User");
+            int userID = int.Parse(user);
+            Post post = new Post
+            {
+                Contents = content,
+                ModifyTime = DateTime.Now,
+                Author = userID,
+                Post1 = null,
+                Type = (int?)Types.POST
+            };
+            _socialNetworkContext.Posts.Add(post);
+            _socialNetworkContext.SaveChanges();
+            List<Dictionary<string, string>> resClound = await _cloudinaryServices.PutFilesToCloundinary(media.ToArray());
 
+            if (resClound.Count > 0)
+            {
+                foreach (Dictionary<string, string> pairs in resClound)
+                {
+                    var url = pairs["url"];
+                    var type = pairs["resource_type"];
+                    Resource resource = new Resource
+                    {
+                        Url = url,
+                        Post = post.Id
+                    };
+
+                    if (type == "image")
+                    {
+                        resource.Type = (int?)Types.IMAGE;
+                    }
+                    else if (type == "video")
+                    {
+                        var format = pairs["format"];
+                        if (format == "mp3") resource.Type = (int?)Types.AUDIO;
+                        else resource.Type = (int?)Types.VIDEO;
+                    }
+                    _socialNetworkContext.Resources.Add(resource);
+                    _socialNetworkContext.SaveChanges();
+                }
+            }
+            return RedirectToAction(nameof(Index));
+        }
         [Authorize(Policy = "AdminOnly")]
         public IActionResult Privacy()
         {
@@ -43,8 +135,8 @@ namespace SocialMedia.Controllers
         public IActionResult Privacy(string id)
         {
             var session = HttpContext.Session;
-            HttpContext.Session.SetString("User",id);
-            User user = _socialNetworkContext.Users.FirstOrDefault( u => u.Id  == int.Parse(id) );
+            HttpContext.Session.SetString("User", id);
+            User user = _socialNetworkContext.Users.FirstOrDefault(u => u.Id == int.Parse(id));
             ViewBag.User = user;
             var userJson = JsonConvert.SerializeObject(user, new JsonSerializerSettings
             {

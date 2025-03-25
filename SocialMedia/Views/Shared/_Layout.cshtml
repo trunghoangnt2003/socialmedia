@@ -207,10 +207,14 @@
                             </div>
                             <div class="popup-menu" id="popupMenu">
                                 <div class="element-menu">
-                                    <i class="fa-solid fa-user text-primary me-2"></i> @(user.Name)
+                                    <a asp-controller="ProfileUser" asp-route-id="@user.Id" class="text-decoration-none text-black">
+                                        <i class="fa-solid fa-user text-primary me-2"></i> @(user.Name)
+                                   </a>
                                 </div>
                                 <div class="element-menu">
+                                    <a asp-controller="Logout"  class="text-decoration-none text-black">
                                     <i class="fa-solid fa-right-from-bracket text-secondary me-2"></i> Logout
+                                    </a>
                                 </div>
                             </div>
                         </li>

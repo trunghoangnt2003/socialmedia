@@ -199,7 +199,10 @@
                 </ul>
                 <hr>
                 <div>
-                    <h5 class="font-weight-bold mb-3">Nhóm của bạn</h5>
+                    <div class="d-flex justify-content-between">
+                        <h5 class="font-weight-bold mb-3">Nhóm của bạn</h5>
+                        <h3><a href="@Url.Action("Create", "Group")"><i class="fa-solid fa-circle-plus" style="color: #74C0FC;"></i></a></h3>
+                    </div>
                     <ul class="list-unstyled">
                         @if (ViewBag.UserGroups != null && ((List<SocialMedia.Models.Group>)ViewBag.UserGroups).Any())
                         {

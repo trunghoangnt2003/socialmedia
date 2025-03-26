@@ -39,7 +39,9 @@
 }
 
 .friend-card img {
-    width: 100%;
+    width: 110px; 
+    height: 140px;
+    object-fit: cover;
     border-radius: 10px;
 }
 

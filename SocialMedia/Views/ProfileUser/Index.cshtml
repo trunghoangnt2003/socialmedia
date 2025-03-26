@@ -29,7 +29,17 @@
             }
             else
             {
-                <button class="btn btn-secondary">Bạn bè</button>
+                <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" id="friendDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa-solid fa-user-check"></i> Bạn bè
+                    </button>
+
+                    <ul class="dropdown-menu" aria-labelledby="friendDropdown">
+                        <li><button class="dropdown-item text-danger"><i class="fa-solid fa-user-xmark"></i> Hủy bạn bè</button></li>
+                        <li><button class="dropdown-item text-warning"><i class="fa-solid fa-shield"></i> Chặn</button></li>
+                    </ul>
+                </div>
+
             <button class="btn btn-primary">Nhắn tin</button>
             }
 </div>
@@ -93,10 +103,12 @@
                 @foreach (var u in ViewBag.Friends)
                 {
                     <div class="col-4 mb-2">
-                        <div class="friend-card">
-                            <img src="@u.Friend1Navigation.Avatar" alt="@u.Friend1Navigation.Name" class="rounded img-fluid">
-                            <p class="friend-name text-wrap" >@u.Friend1Navigation.Name</p>
-                        </div>
+                                            <a href="@Url.Action("Index", "ProfileUser", new { id = (u.Friend1Navigation.Id) })" class="text-decoration-none">
+                                                <div class="friend-card">
+                                                    <img src="@u.Friend1Navigation.Avatar" alt="@u.Friend1Navigation.Name" class="rounded img-fluid">
+                                                    <p class="friend-name text-wrap">@u.Friend1Navigation.Name</p>
+                                                </div>
+                                            </a>
                     </div>   
                 }
             </div>
@@ -167,13 +179,24 @@
         <div class="friends-list" id="friendsList">
                 @foreach (var u in ViewBag.Friends)
                 {
-                        <div class="friend">
-                            <img src="@u.Friend1Navigation.Avatar" alt="@u.Friend1Navigation.Name">
+                    <div class="friend d-flex align-items-center justify-content-between border rounded p-3 mb-3 bg-light">
+                        <a class="text-decoration-none d-flex align-items-center gap-3" href="@Url.Action("Index", "ProfileUser", new { id = (u.Friend1Navigation.Id) })">
+                            <img src="@u.Friend1Navigation.Avatar" alt="@u.Friend1Navigation.Name" class="rounded-circle">
                             <div class="friend-info">
                                 <strong>@u.Friend1Navigation.Name</strong>
                             </div>
-                            <button class="friend-options">⋮</button>
+                        </a>
+
+                        <div class="dropdown">
+                            <button class="btn btn-link text-decoration-none p-0" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fa-solid fa-ellipsis-vertical"></i>
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <li><a class="dropdown-item" href="@Url.Action("Index", "ProfileUser", new { id = (u.Friend1Navigation.Id) })">View Profile</a></li>
+                                <li><a class="dropdown-item" href="#">Remove Friend</a></li>
+                            </ul>
                         </div>
+                    </div>
                 }
         </div>
         </div>
@@ -189,9 +212,11 @@
                 {
                     @foreach (var resource in ViewBag.listImages)
                     {
-                            <div class="photo-item">
-                                <img src="@resource.Url" alt="Image"/>
-                            </div>
+                        <div class="photo-item">
+                            <a href="@Url.Action("PostDetail", "Post", new { id = resource.PostNavigation.Id })">
+                                <img src="@resource.Url" alt="Image" />
+                            </a>
+                        </div>
                     }
                 }
                 else

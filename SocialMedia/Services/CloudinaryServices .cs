@@ -71,5 +71,28 @@ namespace SocialMedia.Services
             }
             return results;
         }
+
+        public async Task<string> PutImageToCloudinary(IFormFile file)
+        {
+            if (file == null || !file.ContentType.StartsWith("image/"))
+            {
+                throw new ArgumentException("Please upload a valid image file.");
+            }
+
+            var stream = file.OpenReadStream();
+            var fileDescription = new FileDescription(file.FileName, stream);
+
+            var uploadParams = new ImageUploadParams
+            {
+                File = fileDescription,
+                Folder = Folder,
+                Tags = Tags
+            };
+
+            var result = await _cloudinary.UploadAsync(uploadParams).ConfigureAwait(false);
+
+            return result?.SecureUrl?.ToString() ?? throw new Exception("Image upload failed.");
+        }
+
     }
 }

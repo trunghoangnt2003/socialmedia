@@ -52,7 +52,7 @@ namespace SocialMedia.Controllers
             var userDB = _contextDb.Users.FirstOrDefault(u => u.Id == userID);
             ViewBag.Friends = listFriends.ToList();
             ViewBag.User = userDB;
-            var posts = _contextDb.Posts.Include(p => p.Resources).Include(p => p.Reactions).Include(p => p.Comments)
+            var posts = _contextDb.Posts.Include(p => p.Resources).Include(p => p.Reactions).Include(p => p.Comments).Where(p => p.Author == id)
                                 .OrderByDescending(p => p.ModifyTime)
                                 .ToList();
             ViewBag.Posts = posts;

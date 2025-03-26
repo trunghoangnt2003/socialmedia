@@ -278,16 +278,16 @@
                     </span>
                 </div>
                 <div class="mb-4">
-                   
-                        
+
+
                         @foreach (var comment in Model.Comments)
                         {
                         <div class="d-flex mb-3">
-                            <img alt="User profile picture" class="rounded-circle" height="40" src="@comment.AuthorNavigation.Avatar" width="40" />
+                            <img alt="User profile picture" class="rounded-circle" height="40" src="@comment?.AuthorNavigation?.Avatar" width="40" />
                             <div class="bg-light p-2 rounded-lg ms-2 flex-grow-1">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <span class="fw-bold">
-                                        @comment.AuthorNavigation.Name
+                                        @comment?.AuthorNavigation?.Name
                                     </span>
                                     <span class="text-secondary small">
                                         @{
@@ -304,7 +304,7 @@
                                     </span>
                                 </div>
                                 <p class="mb-1">
-                                    @comment.Contents
+                                    @comment?.Contents
                                 </p>
                                 <div class="d-flex text-secondary small">
                                     <button class="btn btn-link p-0 me-3">
@@ -314,6 +314,7 @@
                             </div>
                         </div>
                         }
+                    
                     <div id="commentList-@Model.Id">
                         
 

@@ -1,0 +1,106 @@
+﻿@model List<SocialMedia.Controllers.FriendRequestViewModel>
+
+@{
+    ViewData["Title"] = "Danh sách lời mời kết bạn";
+}
+
+<style>
+    .friend-request-card {
+        border: 1px solid #e4e6eb;
+        border-radius: 8px;
+        overflow: hidden;
+        background-color: #fff;
+    }
+
+    .friend-request-image {
+        width: 100%;
+        height: 150px;
+        background-size: cover;
+        background-position: center;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+    }
+
+    .friend-request-body {
+        padding: 15px;
+        text-align: center;
+    }
+
+    .friend-request-name {
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: #050505;
+    }
+
+    .friend-request-info {
+        font-size: 14px;
+        color: #65676b;
+        margin-bottom: 10px;
+    }
+
+    .btn-confirm {
+        background-color: #1877f2;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 8px 16px;
+        font-weight: 500;
+        margin-right: 8px;
+    }
+
+    .btn-cancel {
+        background-color: #e4e6eb;
+        color: #050505;
+        border: none;
+        border-radius: 6px;
+        padding: 8px 16px;
+        font-weight: 500;
+    }
+</style>
+
+<div class="container my-5">
+    <h2 class="text-center mb-4">Lời mời kết bạn</h2>
+    @if (Model != null && Model.Any())
+    {
+        <div class="row">
+            @foreach (var request in Model)
+            {
+                <div class="col-md-3 mb-4">
+                    <div class="friend-request-card">
+                        <div class="friend-request-image" style="background-image: url('@request.FriendRequest.UserNavigation.Avatar');"></div>
+                        <div class="friend-request-body">
+                            <div class="friend-request-name">@request.FriendRequest.UserNavigation.Name</div>
+                            <div class="friend-request-info">
+                                @if (request.MutualFriendsCount > 0)
+                                {
+                                    <span>@request.MutualFriendsCount bạn chung</span>
+                                }
+                                else
+                                {
+                                    <span>Có thể quen biết</span>
+                                }
+                            </div>
+                            <div class="d-flex justify-content-center gap-2">
+                                <form asp-action="AcceptFriendRequest" asp-controller="Home" method="post" class="d-inline">
+                                    <input type="hidden" name="id" value="@request.FriendRequest.Id" />
+                                    <button type="submit" class="btn btn-confirm">Xác nhận</button>
+                                </form>
+                                <form asp-action="CancelFriendRequest" asp-controller="Home" method="post" class="d-inline">
+                                    <input type="hidden" name="id" value="@request.FriendRequest.Id" />
+                                    <button type="submit" class="btn btn-cancel">Xóa</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center">
+            <h4 class="text-muted">Không có lời mời kết bạn nào.</h4>
+        </div>
+    }
+</div>

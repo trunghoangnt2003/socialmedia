@@ -1,0 +1,85 @@
+﻿
+<div class="modal fade" id="storyViewerModal" tabindex="-1" aria-labelledby="storyViewerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="storyViewerModalLabel">Tin</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center position-relative">
+                <button id="prevStory" class="btn btn-light position-absolute top-50 start-0 translate-middle-y" style="z-index: 10;"><</button>
+                <button id="nextStory" class="btn btn-light position-absolute top-50 end-0 translate-middle-y" style="z-index: 10;">></button>
+                <div id="storyContent">
+                    @{
+                        var stories = ViewBag.Stories as List<SocialMedia.Controllers.StoryDto>;
+                        var selectedIndex = ViewBag.SelectedStoryIndex;
+                        var story = stories[selectedIndex];
+                        var backgroundImage = story.ResourceLinks != null? story.ResourceLinks[0] : "/path/to/default-story-bg.jpg";
+                    }
+                    <div class="story-viewer-content" data-story-id="@story.Id">
+                        <img src="@backgroundImage" class="img-fluid" style="max-height: 500px;" alt="Story Image">
+                        <div class="mt-2">
+                            <strong>@story.AuthorName</strong>
+                            <p>@story.Contents</p>
+                            <small>@story.ModifyTime?.ToString("dd/MM/yyyy HH:mm")</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    #storyViewerModal {
+        z-index: 1060;
+    }
+
+        #storyViewerModal + .modal-backdrop {
+            z-index: 1059;
+        }
+
+        #storyViewerModal .modal-content {
+            background-color: white;
+        }
+</style>
+
+<script>
+    $(document).ready(function() {
+        // Ensure the modal is shown
+        $('#storyViewerModal').modal('show');
+
+        var stories = @Html.Raw(Json.Serialize(ViewBag.Stories));
+        var currentIndex = @ViewBag.SelectedStoryIndex;
+
+        function loadStory(index) {
+            var story = stories[index];
+            var backgroundImage = story.ResourceLinks && story.ResourceLinks.length > 0 ? story.ResourceLinks[0] : '/path/to/default-story-bg.jpg';
+            var storyHtml = `
+                <div class="story-viewer-content" data-story-id="${story.Id}">
+                    <img src="${backgroundImage}" class="img-fluid" style="max-height: 500px;" alt="Story Image">
+                    <div class="mt-2">
+                        <strong>${story.AuthorName}</strong>
+                        <p>${story.Contents || ''}</p>
+                        <small>${new Date(story.ModifyTime).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</small>
+                    </div>
+                </div>
+            `;
+            $('#storyContent').html(storyHtml);
+        }
+
+        $('#prevStory').click(function() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                loadStory(currentIndex);
+            }
+        });
+
+        $('#nextStory').click(function() {
+            if (currentIndex < stories.length - 1) {
+                currentIndex++;
+                loadStory(currentIndex);
+            }
+        });
+    });
+</script>

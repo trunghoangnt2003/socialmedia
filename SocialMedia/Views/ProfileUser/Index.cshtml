@@ -29,7 +29,17 @@
             }
             else
             {
-                <button class="btn btn-secondary">Bạn bè</button>
+                <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" id="friendDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa-solid fa-user-check"></i> Bạn bè
+                    </button>
+
+                    <ul class="dropdown-menu" aria-labelledby="friendDropdown">
+                        <li><button class="dropdown-item text-danger"><i class="fa-solid fa-user-xmark"></i> Hủy bạn bè</button></li>
+                        <li><button class="dropdown-item text-warning"><i class="fa-solid fa-shield"></i> Chặn</button></li>
+                    </ul>
+                </div>
+
             <button class="btn btn-primary">Nhắn tin</button>
             }
 </div>

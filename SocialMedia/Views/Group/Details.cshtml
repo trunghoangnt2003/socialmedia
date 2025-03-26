@@ -189,7 +189,7 @@
                     <!-- Left Side: Member Images -->
                     <div class="d-flex align-items-center">
                         @{
-                            int maxDisplay = 7;
+                            int maxDisplay = 5;
                             int totalMembers = @ViewBag.Group.UserGroups.Count;
                             int counter = 0;
 
@@ -197,7 +197,9 @@
                             {
                                 if (counter < maxDisplay)
                                 {
-                                    <img src="@userGroup?.UserNavigation?.Avatar" class="rounded-circle ml-1" alt="Member @(counter + 1)" width="30" height="30">
+                                    <a asp-action="Index" asp-controller="ProfileUser" asp-route-id="@userGroup?.UserNavigation?.Id">
+                                        <img src="@userGroup?.UserNavigation?.Avatar" class="rounded-circle ml-1" alt="Member @(counter + 1)" width="30" height="30">
+                                    </a>
                                     counter++;
                                 }
                                 else

@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SocialMedia.Models;
 using SocialMedia.Services;
 using System.Linq;
 namespace SocialMedia.Controllers
 {
+    [Authorize(Policy = "UserOnly")]
     public class GroupController : Controller
     {
         private readonly SocialNetworkContext _context;

@@ -29,16 +29,43 @@
             }
             else
             {
-                <div class="dropdown">
-                    <button class="btn btn-secondary dropdown-toggle" type="button" id="friendDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fa-solid fa-user-check"></i> Bạn bè
-                    </button>
+                if (ViewData["isFriend"] == "Friend")
+                {
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="friendDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa-solid fa-user-check"></i> Bạn bè
+                        </button>
 
-                    <ul class="dropdown-menu" aria-labelledby="friendDropdown">
-                        <li><button class="dropdown-item text-danger"><i class="fa-solid fa-user-xmark"></i> Hủy bạn bè</button></li>
-                        <li><button class="dropdown-item text-warning"><i class="fa-solid fa-shield"></i> Chặn</button></li>
-                    </ul>
-                </div>
+                        <ul class="dropdown-menu" aria-labelledby="friendDropdown">
+                            <li><button class="dropdown-item text-danger"><i class="fa-solid fa-user-xmark"></i> Hủy bạn bè</button></li>
+                            <li><button class="dropdown-item text-warning"><i class="fa-solid fa-shield"></i> Chặn</button></li>
+                        </ul>
+                    </div>
+                }
+                else if (ViewData["isFriend"] == "None")
+                {
+                    <div class="dropdown">
+                        <form asp-action="AddFriend" asp-controller="ProfileUser" method="post" class="d-inline">
+                            <input type="hidden" name="id" value="@ViewBag.user.Id" />
+                            <button class="btn btn-secondary" type="submit" id="addFriend" aria-expanded="false">
+                                <i class="fa-solid fa-user-plus"></i> Thêm Bạn bè
+                            </button>
+                        </form>
+                        
+                    </div>
+                }
+                else if (ViewData["isFriend"] == "Send")
+                {
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="friendDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa-solid fa-user-check"></i> Đã Gủi Lời Mời
+                        </button>
+
+                        <ul class="dropdown-menu" aria-labelledby="friendDropdown">
+                            <li><button class="dropdown-item text-danger"><i class="fa-solid fa-user-xmark"></i> Hủy</button></li>
+                        </ul>
+                    </div>
+                }
 
             <button class="btn btn-primary">Nhắn tin</button>
             }
@@ -103,7 +130,7 @@
                 @foreach (var u in ViewBag.Friends)
                 {
                     <div class="col-4 mb-2">
-                                            <a href="@Url.Action("Index", "ProfileUser", new { id = (u.Friend1Navigation.Id) })" class="text-decoration-none">
+                                            <a href="@Url.Action("Index", "ProfileUser", new { id = (u?.Friend1Navigation?.Id) })" class="text-decoration-none">
                                                 <div class="friend-card">
                                                     <img src="@u.Friend1Navigation.Avatar" alt="@u.Friend1Navigation.Name" class="rounded img-fluid">
                                                     <p class="friend-name text-wrap">@u.Friend1Navigation.Name</p>
@@ -137,23 +164,6 @@
                  <div id="loading" class="text-center mt-3" style="display: none;"> 
                     <span>Đang tải thêm bài viết...</span>
                  </div>
-            </div>
-
-            <!-- Danh sách bài viết -->
-            <div class="card p-3 mb-3">
-                <div class="d-flex align-items-center">
-                    <img src="https://via.placeholder.com/40" class="rounded-circle me-2" width="40" height="40">
-                    <div>
-                        <strong>Nguyễn Mạnh Huy</strong>
-                        <small class="text-muted d-block">13 tháng 1</small>
-                    </div>
-                </div>
-                <p class="mt-2">Nói chung là có cố gắng nhưng chưa đủ 😢😢😢</p>
-                <img src="https://via.placeholder.com/500x300" class="img-fluid rounded">
-                <div class="mt-2">
-                    <button class="btn btn-light btn-sm"><i class="fa fa-thumbs-up"></i> Thích</button>
-                    <button class="btn btn-light btn-sm"><i class="fa fa-comment"></i> Bình luận</button>
-                </div>
             </div>
 
         </div>
@@ -213,7 +223,7 @@
                     @foreach (var resource in ViewBag.listImages)
                     {
                         <div class="photo-item">
-                            <a href="@Url.Action("PostDetail", "Post", new { id = resource.PostNavigation.Id })">
+                            <a href="@Url.Action("PostDetail", "Post", new { id = resource?.PostNavigation?.Id })">
                                 <img src="@resource.Url" alt="Image" />
                             </a>
                         </div>
@@ -237,9 +247,9 @@
                 {
                     @foreach (var resource in photo.Resources)
                     {
-                                        <div class="photo-item">
-                                            <img src="@resource.Url" alt="Image"/>
-                                        </div>
+                        <div class="photo-item">
+                            <img src="@resource.Url" alt="Image"/>
+                        </div>
                     }
                 }
         </div>

@@ -260,7 +260,16 @@ namespace SocialMedia.Controllers
                 return RedirectToAction("FriendRequests");
             }
 
-            friendRequest.Status = 2; // 2 = accepted
+            friendRequest.Status = 2;
+
+            var friend = new Friend
+            {
+                User = id,
+                Friend1 = userID,
+                Status = 2, 
+                SendTime = DateTime.Now
+            };
+            _socialNetworkContext.Friends.Add(friend);
             _socialNetworkContext.SaveChanges();
 
             TempData["SuccessMessage"] = "Đã chấp nhận lời mời kết bạn!";

@@ -373,7 +373,10 @@
                                         <p class="m-2">Join time: @mem.JoinTime.ToString("dd-MM-yyyy")</p>
                                     </div>
                                 </div>
-                                <button type="button" class="btn btn-danger" onclick="removeMember(@mem.UserNavigation.Id)" data-mdb-ripple-init>Remove</button>
+                                @if(ViewBag.AdminId == user.Id)
+                                {
+                                    <button type="button" class="btn btn-danger" onclick="removeMember(@mem.UserNavigation.Id, @ViewBag.Group.Id)" data-mdb-ripple-init>Remove</button>
+                                }
                             </div>
                         }
 
@@ -441,27 +444,14 @@
     </div>
 }
  <script>
-    function removeMember(userId) {
+    
+    function removeMember(userId, groupId) {
         if (confirm("Are you sure you want to remove this user?")) {
-            // AJAX request to remove the user
-            $.ajax({
-                url: '/Group/RemoveMember',   // Controller action URL
-                type: 'POST',                 // HTTP method
-                data: { userId: userId },     // Data sent to the server
-                success: function (response) {
-                    if (response.success) {
-                        alert("User removed successfully.");
-                        location.reload();  // Reload the page or remove the user from the DOM dynamically
-                    } else {
-                        alert("Failed to remove user. Please try again.");
-                    }
-                },
-                error: function () {
-                    alert("An error occurred while removing the user.");
-                }
-            });
+            // Redirect to the controller action with query parameters
+            window.location.href = `/Group/RemoveMember?userId=${userId}&groupId=${groupId}`;
         }
     }
+
 
 
     function loadData(target) {

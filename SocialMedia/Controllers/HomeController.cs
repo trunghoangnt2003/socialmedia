@@ -264,8 +264,8 @@ namespace SocialMedia.Controllers
 
             var friend = new Friend
             {
-                User = id,
-                Friend1 = userID,
+                User = userID,
+                Friend1 = friendRequest.User,
                 Status = 2, 
                 SendTime = DateTime.Now
             };
@@ -273,7 +273,7 @@ namespace SocialMedia.Controllers
             _socialNetworkContext.SaveChanges();
 
             TempData["SuccessMessage"] = "Đã chấp nhận lời mời kết bạn!";
-            return RedirectToAction("FriendRequests");
+            return RedirectToAction("Index");
         }
 
         // Action to cancel a friend request
@@ -301,7 +301,7 @@ namespace SocialMedia.Controllers
             _socialNetworkContext.SaveChanges();
 
             TempData["SuccessMessage"] = "Đã hủy lời mời kết bạn!";
-            return RedirectToAction("FriendRequests");
+            return RedirectToAction("Index");
         }
         // Load the story creation modal
         public IActionResult LoadCreateStory()

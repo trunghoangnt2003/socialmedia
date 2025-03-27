@@ -37,32 +37,39 @@
                         </button>
 
                         <ul class="dropdown-menu" aria-labelledby="friendDropdown">
-                            <li><button class="dropdown-item text-danger"><i class="fa-solid fa-user-xmark"></i> Hủy bạn bè</button></li>
-                            <li><button class="dropdown-item text-warning"><i class="fa-solid fa-shield"></i> Chặn</button></li>
+                            <li><button class="dropdown-item text-danger" onclick="UnFriend(@ViewBag.user.Id)"><i class="fa-solid fa-user-xmark"></i> Hủy bạn bè</button></li>
                         </ul>
                     </div>
                 }
                 else if (ViewData["isFriend"] == "None")
                 {
                     <div class="dropdown">
-                        <form asp-action="AddFriend" asp-controller="ProfileUser" method="post" class="d-inline">
-                            <input type="hidden" name="id" value="@ViewBag.user.Id" />
-                            <button class="btn btn-secondary" type="submit" id="addFriend" aria-expanded="false">
+                        @* <form asp-action="AddFriend" asp-controller="ProfileUser" method="post" class="d-inline"> *@
+                        @*     <input type="hidden" name="id" value="@ViewBag.user.Id" /> *@
+                            <button class="btn btn-secondary" type="submit" onclick="AddFriend(@ViewBag.user.Id)" id="addFriend" aria-expanded="false">
                                 <i class="fa-solid fa-user-plus"></i> Thêm Bạn bè
                             </button>
-                        </form>
-                        
+                        @* </form> *@
                     </div>
                 }
                 else if (ViewData["isFriend"] == "Send")
                 {
                     <div class="dropdown">
-                        <button class="btn btn-secondary dropdown-toggle" type="button" id="friendDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <button class="btn btn-secondary" onclick="CancelSend(@ViewBag.user.Id)">
                             <i class="fa-solid fa-user-check"></i> Đã Gủi Lời Mời
+                        </button>
+                    </div>
+                }
+                else if (ViewData["isFriend"] == "Request")
+                {
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="friendDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa-solid fa-user-check"></i> Yêu Cầu Kết Bạn
                         </button>
 
                         <ul class="dropdown-menu" aria-labelledby="friendDropdown">
-                            <li><button class="dropdown-item text-danger"><i class="fa-solid fa-user-xmark"></i> Hủy</button></li>
+                            <li><button class="dropdown-item text-success" onclick="AcceptRequest(@ViewBag.user.Id)"><i class="fa-solid fa-user-xmark"></i>Chấp Nhận</button></li>
+                            <li><button class="dropdown-item text-danger" onclick="CancelRequest(@ViewBag.user.Id)"><i class="fa-solid fa-user-xmark"></i> Hủy</button></li>
                         </ul>
                     </div>
                 }
@@ -130,12 +137,12 @@
                 @foreach (var u in ViewBag.Friends)
                 {
                     <div class="col-4 mb-2">
-                                            <a href="@Url.Action("Index", "ProfileUser", new { id = (u?.Friend1Navigation?.Id) })" class="text-decoration-none">
-                                                <div class="friend-card">
-                                                    <img src="@u.Friend1Navigation.Avatar" alt="@u.Friend1Navigation.Name" class="rounded img-fluid">
-                                                    <p class="friend-name text-wrap">@u.Friend1Navigation.Name</p>
-                                                </div>
-                                            </a>
+                        <a href="@Url.Action("Index", "ProfileUser", new { id = (u?.Friend1Navigation?.Id) })" class="text-decoration-none">
+                            <div class="friend-card">
+                                <img src="@u.Friend1Navigation.Avatar" alt="@u.Friend1Navigation.Name" class="rounded img-fluid">
+                                <p class="friend-name text-wrap">@u.Friend1Navigation.Name</p>
+                            </div>
+                        </a>
                     </div>   
                 }
             </div>
@@ -144,27 +151,29 @@
         </div>
        <div class="col-md-8">
             <!-- Ô đăng bài -->
-            <div class="card p-3 mb-3">
-                  <div class="container d-flex justify-content-center align-items-start">
-                        <div class="w-100">
-                                <div class="post-input-container" data-bs-toggle="modal" data-bs-target="#createModal">
-                                    <img src="@ViewBag.User.Avatar" alt="User profile picture">
-                                    <div class="post-input">Bạn đang nghĩ gì?</div>
-                                </div>
-                        </div>
-                   </div>
+                        @if (user != null && user.Equals(ViewBag.user.Id.ToString()))
+                        {
+             <div class="card p-3 mb-3">
+               <div class="container d-flex justify-content-center align-items-start">
+                     <div class="w-100">
+                             <div class="post-input-container" data-bs-toggle="modal" data-bs-target="#createModal">
+                                 <img src="@ViewBag.User.Avatar" alt="User profile picture">
+                                 <div class="post-input">Bạn đang nghĩ gì?</div>
+                             </div>
+                     </div>
+                </div>
 
-                 <div id="postContainer" class="pb-5">
-
-                                        @foreach (Post post in ViewBag.Posts)
-                                        {
-                                            @await Html.PartialAsync("Home/_ViewPost", post)
-                                        } 
-                 </div> 
-                 <div id="loading" class="text-center mt-3" style="display: none;"> 
-                    <span>Đang tải thêm bài viết...</span>
-                 </div>
-            </div>
+              <div id="postContainer" class="pb-5">
+                                    @foreach (Post post in ViewBag.Posts)
+                                    {
+                                        @await Html.PartialAsync("Home/_ViewPost", post)
+                                    } 
+              </div> 
+              <div id="loading" class="text-center mt-3" style="display: none;"> 
+                 <span>Đang tải thêm bài viết...</span>
+              </div>
+         </div>
+                        }
 
         </div>
     </div>
@@ -339,9 +348,6 @@
 
 <!-- JavaScript for Upload -->
 <script>
-
-
-
      document.addEventListener("DOMContentLoaded", function () {
         document.getElementById('uploadButton').addEventListener('click', function () {
             let input = document.createElement('input'); 
@@ -462,3 +468,90 @@ $(document).ready(function () {
         </script>
 
 }
+
+<script>
+
+    function AddFriend(id){
+        fetch("/Friend/Add/" + id)
+        .then(response => {
+            if(response.ok){
+                showToast("Đã gủi lời mời kết bạn","success");
+                setTimeout(() => {
+                    window.location.href = window.location.href;
+                }, 1500);
+                
+            }else{
+                 showToast("Đã sảy ra lỗi ","error");
+            }
+        })
+    }
+
+    function CancelSend(id){
+        fetch("/Friend/CancelSend/" + id)
+        .then(response => {
+            if(response.ok){
+                window.location.reload();
+            }else{
+            }
+        })
+    } 
+    function CancelRequest(id){
+        fetch("/Friend/CancelRequest/" + id)
+        .then(response => {
+            if(response.ok){
+                window.location.reload();
+            }else{
+            }
+        })
+    }
+
+    function UnFriend(id){
+        fetch("/Friend/Unfriend/" + id)
+        .then(response => {
+            if(response.ok){
+                window.location.reload();
+            }else{
+            }
+        })
+    }
+    function AcceptRequest(id){
+        fetch("/Friend/AcceptRequest/" + id)
+        .then(response => {
+            if(response.ok){
+                window.location.reload();
+            }else{
+            }
+        })
+    }
+
+
+
+    function showToast(message, type = "success") {
+        var toastId = "toast-" + Date.now(); 
+        var bgClass = type === "success" ? "bg-success" : "bg-danger"; 
+        var toastHtml = `
+            <div id="${toastId}" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-bs-delay="1500">
+                <div class="toast-header ${bgClass} text-white">
+                    <strong class="me-auto">${type === "success" ? "Thành công" : "Lỗi"}</strong>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    ${message}
+                </div>
+            </div>
+        `;
+
+        $("#toastContainer").append(toastHtml);
+
+        var toastElement = document.getElementById(toastId);
+        var toast = new bootstrap.Toast(toastElement);
+        toast.show();
+
+        toastElement.addEventListener('hidden.bs.toast', function () {
+            toastElement.remove();
+           
+        });
+    }
+
+
+</script>

@@ -40,17 +40,18 @@ namespace SocialMedia.Controllers
             .SelectMany(p => p.Resources)
             .Where(r => r.Type == 6)
             .ToList();
+
             var getUser = _contextDb.Users.FirstOrDefault(us => us.Id == id);
             if (user == null)
             {
                 return NotFound();
             }
-     //       string user = HttpContext.Session.GetString("User");
             if (string.IsNullOrEmpty(user)) return View();
 
             int userID = int.Parse(user);
-     //       var listFriends = _socialNetworkContext.Friends.Where(f => f.User == userID).Include(f => f.Friend1Navigation);
             var userDB = _contextDb.Users.FirstOrDefault(u => u.Id == userID);
+
+
             var AccountFriends = _contextDb.Friends.Where(f => f.User == userID).Include(f => f.Friend1Navigation);
             ViewBag.Friends = listFriends.ToList();
             ViewBag.User = userDB;
@@ -59,7 +60,9 @@ namespace SocialMedia.Controllers
                                 .OrderByDescending(p => p.ModifyTime)
                                 .ToList();
 
-           var isFriend = AccountFriends.FirstOrDefault(f => f.Friend1 == id);
+            var isFriend = AccountFriends.FirstOrDefault(f => f.Friend1 == id);
+
+            var friendRequset = _contextDb.Friends.FirstOrDefault(f => f.User == id && f.Friend1 == userID);
 
             if (isFriend != null && isFriend.Status == 1 )
             {
@@ -70,7 +73,15 @@ namespace SocialMedia.Controllers
             }
             else
             {
-                ViewData["isFriend"] = "None";
+                if(friendRequset != null)
+                {
+                    ViewData["isFriend"] = "Request";
+                }
+                else
+                {
+
+                    ViewData["isFriend"] = "None";
+                }
             }
             
             
@@ -182,39 +193,6 @@ namespace SocialMedia.Controllers
         }
 
     
-        public IActionResult AddFriend(int id)
-        {
-            string user = HttpContext.Session.GetString("User");
-            if (string.IsNullOrEmpty(user))
-            {
-                TempData["ErrorMessage"] = "Bạn cần đăng nhập để thêm bạn.";
-                return RedirectToAction("Index");
-            }
-
-            int userID = int.Parse(user);
-
-            // Check if friendship already exists
-            if (_contextDb.Friends.Any(f => (f.User == userID && f.Friend1 == id) ||
-                                                       (f.User == id && f.Friend1 == userID)))
-            {
-                TempData["ErrorMessage"] = "Bạn đã là bạn bè hoặc đã gửi lời mời.";
-                return RedirectToAction("Index");
-            }
-
-            // Add friend request
-            var friendRequest = new Friend
-            {
-                User = userID,
-                Friend1 = id,
-                Status = 1, // 1 = pending
-                SendTime = DateTime.Now
-            };
-            _contextDb.Friends.Add(friendRequest);
-            _contextDb.SaveChanges();
-
-            TempData["SuccessMessage"] = "Đã gửi lời mời kết bạn thành công!";
-
-            return RedirectToAction("Index", new {id = id });
-        }
+       
     }
 }

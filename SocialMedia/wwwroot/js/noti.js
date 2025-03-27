@@ -42,7 +42,8 @@ function addNotificationToast(sender, message, sendTime, postId,notiId) {
 
     toast.addEventListener('click', () => {
         if (notiId) markNotificationAsRead(notiId);
-        if (postId) window.location.href = `/Post/PostDetail/${postId}`;
+        if (postId != 0) window.location.href = `/Post/PostDetail/${postId}`;
+        else window.location.href = `/Home/FriendRequests`;
     });
 
     setTimeout(() => {

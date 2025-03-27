@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using SocialMedia.Models;
 using SocialMedia.Services;
 using System.Linq;
@@ -50,7 +51,8 @@ namespace SocialMedia.Controllers
             var userGroup = new UserGroup
             {
                 Group = groupId,
-                User = userId
+                User = userId,
+                JoinTime = DateTime.Now
                 // Add other properties like JoinDate if needed
             };
 
@@ -134,6 +136,8 @@ namespace SocialMedia.Controllers
             var group = _context.Groups.Include(g=>g.UserGroups).ThenInclude(u=>u.UserNavigation)
             .FirstOrDefault(g => g.Id == id);
 
+            var adminId = group.Admin;
+
             int? userId = int.Parse(HttpContext.Session.GetString("User"));
 
             var user = _context.Users.FirstOrDefault(u => u.Id == userId);
@@ -151,9 +155,24 @@ namespace SocialMedia.Controllers
                 .Include(p => p.Reactions)
                 .ToList();
 
+            var usersInGroup = _context.UserGroups
+                .Where(ug => ug.Group == id)
+                .Select(ug => new UserGroup
+                {
+                    UserNavigation = ug.UserNavigation,
+                    JoinTime = ug.JoinTime,
+                })
+                .ToList();
+
+           
+
+            ViewBag.AdminId = adminId;
             ViewBag.Group = group;
             ViewBag.Member = countMember;
             ViewBag.User = user;
+            ViewBag.ListMember = usersInGroup;
+            ViewBag.TotalMember = usersInGroup.Count;
+            ViewBag.TotalPost = posts.Count;
             return View(posts);
         }
 
@@ -189,6 +208,55 @@ namespace SocialMedia.Controllers
             return RedirectToAction("Details", new { id = newGroup.Id });
         }
 
+        public IActionResult RemoveMember(int userId, int groupId)
+        {
+            var user = _context.UserGroups.
+                Include(u => u.UserNavigation)
+                .FirstOrDefault(g => g.User == userId);
+
+            var post = _context.Posts.Where(g => g.Group == groupId).ToList();
+
+            try
+            {
+                foreach (var p in post)
+                {
+                    var comment = _context.Comments.Where(c => c.Author == userId && c.Post == p.Id).ToList();
+                    var react = _context.Reactions.Where(c => c.User == userId && c.Post == p.Id).ToList();
+
+                    _context.Reactions.RemoveRange(react);
+                    _context.Comments.RemoveRange(comment);
+                    _context.SaveChanges();
+                }
+
+
+                var myPost = _context.Posts
+                    .Include(p => p.Comments)
+                    .ThenInclude(p => p.Comment1Navigation)
+                    .Include(p => p.Reactions)
+                    .Include(p => p.Resources)
+                    .Where(p => p.Author == userId && p.Group == groupId).ToList();
+
+                if(myPost.Count > 0)
+                {
+                    _context.RemoveRange(myPost);
+                    _context.SaveChanges();
+                }
+                
+                
+
+                if (user != null)
+                {
+                    _context.UserGroups.Remove(user);
+                    _context.SaveChanges();
+                    return RedirectToAction("Details", new {id = groupId });
+                }
+                return RedirectToAction("Details", new {id = groupId });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false });
+            }
+        }
 
     }
 }

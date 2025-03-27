@@ -215,6 +215,11 @@
     .click-item {
         cursor: pointer;
     }
+
+    .about-card {
+        background: #ffffff;
+        border-radius: 10px;
+    }
 </style>
 <div>
 
@@ -290,7 +295,7 @@
                 <!-- Navigation -->
                 <div class="d-flex justify-content-be align-items-start border-top mt-3 pt-3">
                     <div class="d-flex gap-5 fs-6 py-10">
-                        <a onclick="loadData('about')" href="#" class="text-decoration-none text-dark">
+                        <a onclick="loadData('viewAbout')" href="#" class="text-decoration-none text-dark">
                             <i class="fa-solid fa-circle-info me-1"></i>About
                         </a>
                         <a onclick="loadData('viewPost')" href="#" class="text-decoration-none text-dark">
@@ -368,7 +373,7 @@
                                         <p class="m-2">Join time: @mem.JoinTime.ToString("dd-MM-yyyy")</p>
                                     </div>
                                 </div>
-                                <button type="button" class="btn btn-danger" data-mdb-ripple-init>Remove</button>
+                                <button type="button" class="btn btn-danger" onclick="removeMember(@mem.UserNavigation.Id)" data-mdb-ripple-init>Remove</button>
                             </div>
                         }
 
@@ -376,6 +381,26 @@
                         {
                             <button type="button" id="showMoreButton" class="btn btn-primary mt-3">Show More</button>
                         }
+                    </div>
+
+                    <div id="viewAbout" class="col-md-8" style="display: none">
+                        <div class="card about-card">
+                            <h5 class="m-3">About this group</h5>
+                            <hr class="m-3"/>
+                            <span class="m-3">
+                                <p> Group dành cho những sinh viên FU đang định cư trên Hòa Lạc</p>
+                                <p> Đọc kỹ nội quy trước khi post bài, đặc biệt là các bạn có ý định kinh doanh.</p>
+                                <p> - Không add thành viên bên ngoài ngoại trừ sinh viên + cán bộ đang theo học và giảng dạy trên Hòa Lạc</p>
+                                <p> - Không post bài hay comment bằng teencode</p>
+                                <p>- Không spam</p>
+                                <p>- Group không chỉ là nơi mua bán hàng, nó còn là nơi để hỏi thăm, tìm kiếm thông tin, thu thập ý kiến, cũng như bày tỏ những tâm sự cá nhân. Vì thế nên đừng tỏ ra gay gắt với những post KHÔNG PHẢI MUA BÁN (trừ khi nó lố quá)</p>
+                                <p>- Các cửa hàng chỉ được phép đăng bài quảng cáo 3 lần mỗi ngày, vào mỗi khung giờ sáng - trưa - tối; phải sử dụng hình ảnh thật của sản phẩm; trước khi bán hàng phải đăng ký kinh doanh tại đây :<a href="http://goo.gl/c0dGyU">http://goo.gl/c0dGyU</a></p>
+                                <p>- Không sử dụng nick clone để buôn bán</p>
+                                <p>- Muốn đưa ra ý kiến của mình ? Vào đây : <a href="http://goo.gl/R4hPT2">http://goo.gl/R4hPT2</a></p>
+                                <p>- Danh sach ban/kick : <a href="http://goo.gl/lLewT7">http://goo.gl/lLewT7</a></p>
+                            </span>
+                        </div>
+
                     </div>
 
                     <!-- Right Column -->
@@ -397,6 +422,13 @@
                                 <p class="text-muted">Ai cũng có thể tìm thấy nhóm này.</p>
                             </div>
                         </div>
+                        <div class="bg-white p-4 rounded shadow-sm mt-3">
+                            <h5>Activity</h5>
+                            <hr class="mt-3"/>
+                            <p><span><i class="fa-solid fa-pen-to-square m-2"></i>Total Post: @ViewBag.TotalPost</span></p>
+                            <p><span><i class="fa-solid fa-users m-2"></i>Total Member: @ViewBag.TotalMember</span></p>
+                            <p><span><i class="fa-solid fa-clock m-2"></i>Create On: @ViewBag.Group.CreateDate</span></p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -409,7 +441,31 @@
     </div>
 }
  <script>
+    function removeMember(userId) {
+        if (confirm("Are you sure you want to remove this user?")) {
+            // AJAX request to remove the user
+            $.ajax({
+                url: '/Group/RemoveMember',   // Controller action URL
+                type: 'POST',                 // HTTP method
+                data: { userId: userId },     // Data sent to the server
+                success: function (response) {
+                    if (response.success) {
+                        alert("User removed successfully.");
+                        location.reload();  // Reload the page or remove the user from the DOM dynamically
+                    } else {
+                        alert("Failed to remove user. Please try again.");
+                    }
+                },
+                error: function () {
+                    alert("An error occurred while removing the user.");
+                }
+            });
+        }
+    }
+
+
     function loadData(target) {
+        event.preventDefault();
         const contentBlocks = document.querySelectorAll('[id^="view"]');
         contentBlocks.forEach(block => {
             block.style.display = 'none';

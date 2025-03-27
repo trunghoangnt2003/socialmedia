@@ -166,6 +166,8 @@ namespace SocialMedia.Controllers
             ViewBag.Member = countMember;
             ViewBag.User = user;
             ViewBag.ListMember = usersInGroup;
+            ViewBag.TotalMember = usersInGroup.Count;
+            ViewBag.TotalPost = posts.Count;
             return View(posts);
         }
 
@@ -201,6 +203,25 @@ namespace SocialMedia.Controllers
             return RedirectToAction("Details", new { id = newGroup.Id });
         }
 
+        public IActionResult RemoveMember(int userId)
+        {
+            var user = _context.UserGroups
+                .FirstOrDefault(g => g.User == userId);
+            try
+            {
+                if (user != null)
+                {
+                    _context.UserGroups.Remove(user);
+                    _context.SaveChanges();
+                    return Json(new { success = true });
+                }
+                return Json(new { success = false });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false });
+            }
+        }
 
     }
 }

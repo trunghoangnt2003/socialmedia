@@ -151,9 +151,21 @@ namespace SocialMedia.Controllers
                 .Include(p => p.Reactions)
                 .ToList();
 
+            var usersInGroup = _context.UserGroups
+                .Where(ug => ug.Group == id)
+                .Select(ug => new UserGroup
+                {
+                    UserNavigation = ug.UserNavigation,
+                    JoinTime = ug.JoinTime,
+                })
+                .ToList();
+
+           
+
             ViewBag.Group = group;
             ViewBag.Member = countMember;
             ViewBag.User = user;
+            ViewBag.ListMember = usersInGroup;
             return View(posts);
         }
 

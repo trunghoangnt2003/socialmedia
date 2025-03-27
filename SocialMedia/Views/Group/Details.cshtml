@@ -168,6 +168,53 @@
         .join-group-btn:active {
             transform: scale(0.98);
         }
+
+    .member-avatar {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 2px solid #fff;
+    }
+
+    .member-card {
+        transition: all 0.3s ease;
+        border: none;
+        background: #ffffff;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+        .member-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+        }
+
+    .member-status {
+        font-size: 0.9rem;
+        color: #666;
+    }
+
+    .online-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 5px;
+    }
+
+    .online {
+        background-color: #28a745;
+    }
+
+    .offline {
+        background-color: #dc3545;
+    }
+
+    .click-item {
+        cursor: pointer;
+    }
 </style>
 <div>
 
@@ -197,9 +244,9 @@
                             {
                                 if (counter < maxDisplay)
                                 {
-                                    <a asp-action="Index" asp-controller="ProfileUser" asp-route-id="@userGroup?.UserNavigation?.Id">
-                                        <img src="@userGroup?.UserNavigation?.Avatar" class="rounded-circle ml-1" alt="Member @(counter + 1)" width="30" height="30">
-                                    </a>
+                                                <a asp-action="Index" asp-controller="ProfileUser" asp-route-id="@userGroup?.UserNavigation?.Id">
+                                                    <img src="@userGroup?.UserNavigation?.Avatar" class="rounded-circle ml-1" alt="Member @(counter + 1)" width="30" height="30">
+                                                </a>
                                     counter++;
                                 }
                                 else
@@ -210,7 +257,7 @@
                             if (totalMembers > maxDisplay)
                             {
                                 int remainingMembers = totalMembers - maxDisplay;
-                                <span class="text-muted ml-2">+@remainingMembers</span>
+                                            <span class="text-muted ml-2">+@remainingMembers</span>
                             }
                         }
                     </div>
@@ -243,22 +290,22 @@
                 <!-- Navigation -->
                 <div class="d-flex justify-content-be align-items-start border-top mt-3 pt-3">
                     <div class="d-flex gap-5 fs-6 py-10">
-                        <a href="#" class="text-decoration-none text-dark">
+                        <a onclick="loadData('about')" href="#" class="text-decoration-none text-dark">
                             <i class="fa-solid fa-circle-info me-1"></i>About
                         </a>
-                        <a href="#" class="text-decoration-none text-dark">
+                        <a onclick="loadData('viewPost')" href="#" class="text-decoration-none text-dark">
                             <i class="fa-solid fa-edit me-1"></i>Post
                         </a>
-                        <a href="#" class="text-decoration-none text-dark">
+                        <a onclick="loadData('viewMember')" href="#" class="text-decoration-none text-dark">
                             <i class="fa-solid fa-user-group me-1"></i>Members
                         </a>
-                        <a href="#" class="text-decoration-none text-dark">
+                        <a onclick="loadData('viewEvent')" href="#" class="text-decoration-none text-dark">
                             <i class="fa-solid fa-calendar-days me-1"></i>Events
                         </a>
-                        <a href="#" class="text-decoration-none text-dark">
+                        <a onclick="loadData('viewImage')" href="#" class="text-decoration-none text-dark">
                             <i class="fa-solid fa-image me-1"></i>Image
                         </a>
-                        <a href="#" class="text-decoration-none text-dark">
+                        <a onclick="loadData('viewVideo')" href="#" class="text-decoration-none text-dark">
                             <i class="fa-solid fa-photo-film me-1"></i>Video
                         </a>
                     </div>
@@ -270,7 +317,7 @@
             <div class="container pt-4">
                 <div class="row">
                     <!-- Left Column -->
-                    <div class="col-md-8">
+                    <div id="viewPost" class="col-md-8">
                         @if (ViewBag.Group != null && ViewBag.Group.UserGroups != null && ((IEnumerable<UserGroup>)ViewBag.Group.UserGroups).Any(u => u.User == user.Id))
                         {
                             <div class="bg-white p-4 rounded shadow-sm mb-4">
@@ -303,10 +350,34 @@
                                 </button>
                             </div>
                         }
-                        
-                        
-
                     </div>
+
+                    <div id="viewMember" class="col-md-8" style="display: none">
+                        @foreach (var mem in ViewBag.ListMember)
+                        {
+                            <div class="d-flex align-items-center justify-content-between member-card p-3 m-2">
+                                <div onclick="viewProfile(@mem.UserNavigation.Id)" class="d-flex align-items-center click-item">
+                                    <img class="member-avatar" src="@mem.UserNavigation.Avatar" />
+                                    <div class="ms-3">
+                                        <div class="d-flex align-items-center">
+                                            <p class="member-status m-2">
+                                                <span class="online-dot @(mem.UserNavigation.Online ? "online" : "offline")"></span>
+                                            </p>
+                                            <p class="m-2 fw-bold">@mem.UserNavigation.Name</p>
+                                        </div>
+                                        <p class="m-2">Join time: @mem.JoinTime.ToString("dd-MM-yyyy")</p>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-danger" data-mdb-ripple-init>Remove</button>
+                            </div>
+                        }
+
+                        @if (ViewBag.ListMember.Count > 5)
+                        {
+                            <button type="button" id="showMoreButton" class="btn btn-primary mt-3">Show More</button>
+                        }
+                    </div>
+
                     <!-- Right Column -->
                     <div class="col-md-4">
                         <div class="bg-white p-4 rounded shadow-sm">
@@ -330,10 +401,6 @@
                 </div>
             </div>
         </div>
-
-
-
-        
     </div>
 </div>
  @if (ViewBag.Group != null && ViewBag.Group.UserGroups != null && ((IEnumerable<UserGroup>)ViewBag.Group.UserGroups).Any(u => u.User == user.Id))
@@ -341,27 +408,45 @@
 <div id="modal">
     </div>
 }
-<script>
+ <script>
+    function loadData(target) {
+        const contentBlocks = document.querySelectorAll('[id^="view"]');
+        contentBlocks.forEach(block => {
+            block.style.display = 'none';
+        });
+
+        // Display the selected content block
+        const selectedBlock = document.getElementById(target);
+        if (selectedBlock) {
+            selectedBlock.style.display = 'block';
+        }
+    }
+
+     function viewProfile(id) {
+         console.log("id clicked: " + id);
+        window.location.href = `/ProfileUser/Index/${id}`;
+     }
+
     function loadAndShowModal() {
         var groupId = @ViewBag.Group.Id;
-        $.get("/Group/LoadCreatePost?groupId=" + groupId, function(data) {
+        $.get("/Group/LoadCreatePost?groupId=" + groupId, function (data) {
             $("#modal").html(data);
             $("#createModal").modal('show');
-        }).fail(function() {
+        }).fail(function () {
             showToast("Không thể tải form tạo bài viết.", "danger");
         });
     }
 
     function joinGroup() {
         var groupId = @ViewBag.Group.Id;
-        $.post("/Group/JoinGroup", { groupId: groupId }, function(response) {
+        $.post("/Group/JoinGroup", { groupId: groupId }, function (response) {
             if (response.success) {
                 showToast("Bạn đã tham gia nhóm thành công!", "success");
                 setTimeout(() => location.reload(), 1500); // Reload after 1.5s to allow toast visibility
             } else {
                 showToast(response.message || "Không thể tham gia nhóm. Vui lòng thử lại.", "danger");
             }
-        }).fail(function() {
+        }).fail(function () {
             showToast("Đã xảy ra lỗi khi tham gia nhóm.", "danger");
         });
     }
@@ -369,14 +454,14 @@
     function leaveGroup() {
         if (confirm("Bạn có chắc chắn muốn rời nhóm này không?")) {
             var groupId = @ViewBag.Group.Id;
-            $.post("/Group/LeaveGroup", { groupId: groupId }, function(response) {
+            $.post("/Group/LeaveGroup", { groupId: groupId }, function (response) {
                 if (response.success) {
                     showToast("Bạn đã rời nhóm thành công!", "success");
                     setTimeout(() => location.reload(), 1500); // Reload after 1.5s
                 } else {
                     showToast(response.message || "Không thể rời nhóm. Vui lòng thử lại.", "danger");
                 }
-            }).fail(function() {
+            }).fail(function () {
                 showToast("Đã xảy ra lỗi khi rời nhóm.", "danger");
             });
         }
@@ -387,16 +472,17 @@
         var toastId = "toast-" + Date.now(); // Unique ID for each toast
         var bgClass = type === "success" ? "bg-success" : "bg-danger"; // Color based on type
         var toastHtml = `
-            <div id="${toastId}" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-bs-delay="3000">
-                <div class="toast-header ${bgClass} text-white">
-                    <strong class="me-auto">${type === "success" ? "Thành công" : "Lỗi"}</strong>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+                <div id="${toastId}" class="toast" role="alert" aria-live="assertive" aria-atomic="true"
+                     data-bs-autohide="true" data-bs-delay="3000">
+                    <div class="toast-header ${bgClass} text-white">
+                        <strong class="me-auto">${type === "success" ? "Thành công" : "Lỗi"}</strong>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                    <div class="toast-body">
+                        ${message}
+                    </div>
                 </div>
-                <div class="toast-body">
-                    ${message}
-                </div>
-            </div>
-        `;
+            `;
 
         // Append toast to container
         $("#toastContainer").append(toastHtml);
@@ -411,5 +497,6 @@
             toastElement.remove();
         });
     }
-</script>
+ </script>
+
 

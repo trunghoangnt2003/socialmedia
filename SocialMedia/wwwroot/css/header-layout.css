@@ -1,0 +1,93 @@
+﻿ .header-icon {
+    cursor: pointer;
+}
+
+.header-icon-child{
+    height: 40px;
+    align-content: center;
+    text-align: center;
+}
+
+.popup-messenger {
+    position: absolute;
+    top: 53px;
+    right: 32px;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    display: none;
+    width: 250px;
+    height: fit-content;
+    z-index: 1000;
+}
+
+.popup-notification {
+    position: absolute;
+    top: 53px;
+    right: 32px;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    display: none;
+    width: 250px;
+    height: fit-content;
+    z-index: 1000;
+}
+
+.popup-menu {
+    position: absolute;
+    top: 45px;
+    right: 0;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    display: none;
+    width: 200px;
+    z-index: 1000;
+}
+
+.element-menu {
+    display: block;
+    padding: 8px 12px;
+    text-decoration: none;
+    color: black;
+}
+
+.element-menu:hover {
+    background: #f0f0f0;
+}
+
+.element-noti {
+    display: block;
+    padding: 8px 12px;
+    text-decoration: none;
+    color: black;
+}
+
+.element-noti:hover {
+    background: #f0f0f0;
+}
+
+.status-messager {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.content-message-noti{
+    font-size: 12px;
+    width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+#unreadCount {
+    font-size: 0.75rem;
+    width: 18px;
+    height: 18px;
+    top: -5px;
+    right: -5px;
+}

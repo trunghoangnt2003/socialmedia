@@ -1,0 +1,14 @@
+﻿@{
+    Layout = "_EmptyLayout";
+}
+@{
+    ViewBag.Title = "Mail Sent Successfully";
+}
+
+<div class="d-flex justify-content-center align-items-center vh-100">
+    <div class="card shadow-lg p-4 text-center" style="max-width: 400px; width: 100%;">
+        <h2 class="text-success">Mail Sent Successfully!</h2>
+        <p>Please check your email to retrieve your password.</p>
+        <a href="@Url.Action("Index", "Login")" class="btn btn-primary mt-3">Go to Login</a>
+    </div>
+</div>

@@ -21,10 +21,11 @@ public partial class User
 
     public string? Avatar { get; set; }
 
-    public bool? IsActive { get; set; }
+    public bool IsActive { get; set; }
 
     public bool? Online { get; set; }
     public bool? Gender { get; set; }
+    public int Role { get; set; }
 
     public virtual ICollection<Chat> ChatReceiverNavigations { get; set; } = new List<Chat>();
 

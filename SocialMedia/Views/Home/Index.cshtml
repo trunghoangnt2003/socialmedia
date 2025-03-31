@@ -1,19 +1,415 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
 }
+@using Newtonsoft.Json
+@{
+    var userJson = Context.Session.GetString("UserFull");
+    User user = new User { Name = "Unknown" };
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    if (!string.IsNullOrEmpty(userJson))
+    {
+        try
+        {
+            user = JsonConvert.DeserializeObject<User>(userJson);
+        }
+        catch (JsonException ex)
+        {
+            Console.WriteLine($"Error deserializing user: {ex.Message}");
+        }
+    }
+}
+<style>
+    .user-item{
+    cursor: pointer
+    }
 
-    <form method="Post" enctype="multipart/form-data" class="form-group">
-        <div class="mb-3">
-            <label for="fileupload" class="form-label">Select Images</label>
-            <input id="fileupload" type="file" class="form-control" name="images" multiple>
+    .user-item:hover {
+    background-color: lightgray;
+    }
+
+    .status { 
+    width: 10px; 
+    height: 10px; 
+    background-color: green; 
+    border-radius: 50%; 
+    margin-left: 5px; 
+    }
+
+    .input-container {
+    background-color: #f0f2f5;
+    border-radius: 8px;
+    padding: 10px 20px;
+    }
+
+    .input-container2 {
+    background-color: #EEEEEE;
+    border-radius: 50px;
+    padding: 10px 20px;
+    }
+
+    .input-container input {
+    background-color: #f0f2f5;
+    border: none;
+    color: #050505;
+    outline: none;
+    }
+
+    .btn-custom {
+    background-color: #e4e6eb;
+    color: #050505;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    }
+
+    .btn-custom i {
+    margin-right: 5px;
+    }
+
+    .btn-custom span {
+    color: #050505;
+    }
+
+    .btn-custom-red {
+    color: #f02849;
+    }
+
+    .btn-custom-green {
+    color: #45bd62;
+    }
+
+    .btn-custom-yellow {
+    color: #f7b928;
+    }
+
+    .colCustome {
+    height: 100vh; /* Chiều cao full màn hình */
+    overflow-y: auto; /* Thanh cuộn dọc */
+    padding-right: 10px; /* Tránh đè vào thanh cuộn */
+    scroll-behavior: smooth; /* Cuộn mượt */
+    }
+
+    html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden; /* Cuộn toàn trang */
+    }
+    /* Story Styles */
+    .story-container {
+        display: flex;
+        overflow-x: auto;
+        padding: 10px 0;
+        margin-bottom: 20px;
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE and Edge */
+    }
+
+        .story-container::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
+        }
+
+    .story-card {
+        flex: 0 0 auto;
+        width: 100px;
+        margin-right: 10px;
+        border-radius: 10px;
+        overflow: hidden;
+        position: relative;
+        height: 150px;
+        background-color: #f0f2f5;
+        cursor: pointer;
+    }
+
+    .story-background {
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        opacity: 0.8;
+    }
+
+    .story-avatar {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 3px solid #1877f2;
+        background-color: #fff;
+    }
+
+    .story-name {
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+        color: #fff;
+        font-size: 12px;
+        font-weight: 500;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    .right-bar {
+        height: 100vh;
+        overflow-y: auto;
+    }
+</style>
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="ms-4">
+            <div class="right-bar">
+                <div class="d-flex align-items-center mb-4">
+                    <img src="@user.Avatar" alt="User profile picture" class="rounded-circle mr-2" width="32" height="32">
+                    <a href="@Url.Action("Index", "ProfileUser", new { id = user.Id })" class="text-decoration-none text-dark fw-semibold ps-2">
+                        @user.Name
+                    </a>
+                </div>
+                <ul class="list-unstyled">
+                    <li class="d-flex align-items-center mb-2">
+                        <i class="fas fa-user-friends text-primary mr-2"></i>
+                        <a href="@Url.Action("FriendRequests", "Home")" class="ps-1 text-decoration-none text-dark">Lời mời kết bạn</a>
+                    </li>
+                    <li class="d-flex align-items-center mb-2">
+                        <i class="fas fa-users text-primary mr-2"></i>
+                        <span class="ps-1">  Nhóm</span>
+                    </li>
+                    <li class="d-flex align-items-center mb-2">
+                        <i class="fas fa-clock text-primary mr-2"></i>
+                        <span class="ps-1">  Kỷ niệm</span>
+                    </li>
+                    <li class="d-flex align-items-center mb-2">
+                        <i class="fas fa-bookmark text-purple mr-2"></i>
+                        <span class="ps-1">  Đã lưu</span>
+                    </li>
+                    <li class="d-flex align-items-center mb-2">
+                        <i class="fas fa-video text-primary mr-2"></i>
+                        <span class="ps-1"> Video</span>
+                    </li>
+                    <li class="d-flex align-items-center mb-2">
+                        <i class="fas fa-store text-primary mr-2"></i>
+                        <span class="ps-1">  Marketplace</span>
+                    </li>
+                    <li class="d-flex align-items-center mb-2">
+                        <i class="fas fa-newspaper text-primary mr-2"></i>
+                        <span class="ps-1">  Bảng feed</span>
+                    </li>
+                    <li class="d-flex align-items-center mb-2">
+                        <i class="fas fa-chevron-down text-secondary mr-2"></i>
+                        <span class="ps-1">  Xem thêm</span>
+                    </li>
+                </ul>
+                <hr>
+                <div>
+                    <div class="d-flex justify-content-between">
+                        <h5 class="font-weight-bold mb-3">Nhóm của bạn</h5>
+                        <h3><a href="@Url.Action("Create", "Group")"><i class="fa-solid fa-circle-plus" style="color: #74C0FC;"></i></a></h3>
+                    </div>
+                    <ul class="list-unstyled">
+                        @if (ViewBag.UserGroups != null && ((List<SocialMedia.Models.Group>)ViewBag.UserGroups).Any())
+                        {
+                            @foreach (var group in ViewBag.UserGroups as List<SocialMedia.Models.Group>)
+                            {
+                                <li class="d-flex align-items-center mb-2">
+                                    <img src="@group.Avatar" alt="@group.Name" class="rounded-circle mr-2" width="32" height="32">
+                                    <a href="@Url.Action("Details", "Group", new { id = group.Id })" class="ps-1 text-decoration-none text-dark">@group.Name</a>
+                                </li>
+                            }
+                        }
+                        else
+                        {
+                            <li class="text-muted">Bạn chưa tham gia nhóm nào.</li>
+                        }
+                    </ul>
+                    <hr>
+                    <h5 class="font-weight-bold mb-3">Các nhóm gợi ý cho bạn</h5>
+                    <ul class="list-unstyled" style="margin-bottom: 200px;">
+                        @if (ViewBag.SuggestedGroups != null && ((List<SocialMedia.Models.Group>)ViewBag.SuggestedGroups).Any())
+                        {
+                            @foreach (var group in ViewBag.SuggestedGroups as List<SocialMedia.Models.Group>)
+                            {
+                                <li class="d-flex align-items-center mb-2">
+                                    <img src="@group.Avatar" alt="@group.Name" class="rounded-circle mr-2" width="32" height="32">
+                                    <a href="@Url.Action("Details", "Group", new { id = group.Id })" class="ps-1 text-decoration-none text-dark">@group.Name</a>
+                                </li>
+                            }
+                        }
+                        else
+                        {
+                            <li class="text-muted">Không có nhóm gợi ý nào.</li>
+                        }
+                        
+                    </ul>
+                </div>
+            </div>
         </div>
-
-        <div class="d-grid">
-            <input type="submit" value="Upload" class="btn btn-primary btn-block">
+    </div>
+    <div class="col-md-6 colCustome">
+        <div class="container d-flex justify-content-center align-items-start"> 
+            <div class="w-100"> 
+                <div class="story-container">
+                    <!-- Create Story Card -->
+                    <div class="story-card" style="background: linear-gradient(180deg, #f0f2f5, #1877f2);" data-bs-toggle="modal" data-bs-target="#createStoryModal">
+                        <div class="story-background"></div>
+                        <img src="@ViewBag.User.Avatar" class="story-avatar" alt="Create Story">
+                        <div class="story-name">Tạo tin</div>
+                    </div>
+                    <!-- Existing Stories -->
+                    @if (ViewBag.Stories != null && ((List<SocialMedia.Models.Post>)ViewBag.Stories).Any())
+                    {
+                        @foreach (var story in ViewBag.Stories as List<SocialMedia.Models.Post>)
+                        {
+                            var backgroundImage = story.Resources != null && story.Resources.Any() ? story.Resources.First().Url : "/path/to/default-story-bg.jpg";
+                            <div class="story-card" onclick="viewStory(@story.Id)">
+                                <div class="story-background" style="background-image: url('@backgroundImage');"></div>
+                                <img src="@story?.AuthorNavigation?.Avatar" class="story-avatar" alt="@story?.AuthorNavigation?.Name">
+                                <div class="story-name">@story?.AuthorNavigation?.Name</div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-muted">Không có tin nào để hiển thị.</div>
+                    }
+                </div>
+                 <div class="d-flex align-items-start mb-3 input-container" > 
+                     <img src="@ViewBag.User.Avatar" class="rounded-circle" width="40" height="40" alt="User profile picture"> 
+                     <div class="ms-2 text-black-50 input-container2 w-100" style="cursor:pointer" data-bs-toggle="modal" 
+                     data-bs-target="#createModal">@ViewBag.User.Name ơi, bạn đang nghĩ gì thế?</div> 
+                 </div> 
+             </div> 
+         </div>
+        <div id="postContainer" class="pb-5">
+            @if (ViewBag.Posts != null && ((List<SocialMedia.Models.Post>)ViewBag.Posts).Any())
+            {
+                @foreach (Post post in ViewBag.Posts)
+                {
+                    @await Html.PartialAsync("Home/_ViewPost", post)
+                }
+            }
+            else
+            {
+                <div class="text-center my-5">
+                    <h4 class="text-muted">Hãy kết nối thêm bạn</h4>
+                    <p class="text-muted">Kết nối với bạn bè để xem thêm bài viết trên bảng tin của bạn.</p>
+                </div>
+                <div class="row">
+                    @if (ViewBag.SuggestedFriends != null && ((List<SocialMedia.Models.User>)ViewBag.SuggestedFriends).Any())
+                    {
+                        @foreach (var friend in ViewBag.SuggestedFriends as List<SocialMedia.Models.User>)
+                        {
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-body text-center">
+                                        <img src="@friend.Avatar" alt="@friend.Name" class="rounded-circle mb-2" width="80" height="80">
+                                        <h6 class="card-title">@friend.Name</h6>
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <form asp-action="AddFriend" asp-controller="Home" method="post" class="d-inline">
+                                                <input type="hidden" name="friendId" value="@friend.Id" />
+                                                <button type="submit" class="btn btn-primary btn-sm">Thêm bạn</button>
+                                            </form>
+                                            <a href="@Url.Action("Index", "ProfileUser", new { id = friend.Id })" class="btn btn-outline-secondary btn-sm">Xem trang cá nhân</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center">Không có gợi ý bạn bè nào.</p>
+                    }
+                </div>
+            }
         </div>
-    </form>
+         <div id="loading" class="text-center mt-3" style="display: none;"> 
+            <span>Đang tải thêm bài viết...</span>
+         </div>
+
+    </div>
+    <div class="col-md-3">
+        <h2>Danh sách bạn bè</h2>
+        @foreach (var friend in ViewBag.Friends)
+        {
+            <div class="user-item d-flex align-items-center p-2 rounded-3" onclick="OpenChat(@friend.Friend1Navigation.Id  )">
+                <div class="position-relative me-3">
+                    <img src="@friend.Friend1Navigation.Avatar"
+                    alt="Avatar of @friend.Friend1Navigation.Name" 
+                    class="rounded-circle" 
+                    width="30" height="30"> 
+                    <div class="status rounded-circle border border-white border-2 position-absolute bottom-0 end-0 "></div>
+                </div>
+                <span>@friend.Friend1Navigation.Name</span>
+            </div>
+        }
+    </div>
 </div>
+
+<div id="modal"> 
+
+</div>
+<div id="modal1">
+</div>
+@section Scripts {
+    <script>
+             function viewStory(storyId) {
+            $.get("/Home/LoadStoryViewer?storyId=" + storyId, function(data) {
+                $("#modal1").html(data);
+                $("#storyViewerModal").modal("show");
+            }).fail(function(jqXHR, textStatus, errorThrown) {
+                console.error("Error loading story viewer: ", textStatus, errorThrown);
+                console.log("Response: ", jqXHR.responseText);
+            });
+        }
+        $(document).ready(function() {
+        @if (TempData["SuccessMessage"] != null)
+        {
+            @:showToast("@TempData["SuccessMessage"]", "success");
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            @:showToast("@TempData["ErrorMessage"]", "danger");
+        }
+                // Load ngay khi trang vừa mở
+                $.get("/Home/LoadCreatePost", function(data) {
+                    $("#modal").html(data);
+                });
+            });
+            function showToast(message, type = "success") {
+            var toastId = "toast-" + Date.now(); // Unique ID for each toast
+            var bgClass = type === "success" ? "bg-success" : "bg-danger"; // Color based on type
+            var toastHtml = `
+                <div id="${toastId}" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-bs-delay="3000">
+                    <div class="toast-header ${bgClass} text-white">
+                        <strong class="me-auto">${type === "success" ? "Thành công" : "Lỗi"}</strong>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                </div>
+            `;
+
+            // Append toast to container
+            $("#toastContainer").append(toastHtml);
+
+            // Initialize and show the toast
+            var toastElement = document.getElementById(toastId);
+            var toast = new bootstrap.Toast(toastElement);
+            toast.show();
+
+            // Remove toast from DOM after it hides
+            toastElement.addEventListener('hidden.bs.toast', function () {
+                toastElement.remove();
+            });
+
+        }
+       
+       
+        
+    </script>
+
+}

@@ -18,7 +18,7 @@ public partial class Post
     public int? Post1 { get; set; }
 
     public int? Group { get; set; }
-
+    public Group? GroupNavigation { get;set; }
     public virtual User? AuthorNavigation { get; set; }
 
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();

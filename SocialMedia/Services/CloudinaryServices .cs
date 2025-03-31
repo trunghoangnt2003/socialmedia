@@ -1,8 +1,7 @@
 ﻿using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
-using static System.Net.Mime.MediaTypeNames;
+using System.IO;
 
 namespace SocialMedia.Services
 {
@@ -18,19 +17,21 @@ namespace SocialMedia.Services
             _cloudinary=cloudinary;
         }
 
-        public  async Task<List<Dictionary<string, string>>> PutFilesToCloundinary(IFormFile[] files)
+        public async Task<List<Dictionary<string, string>>>  PutFilesToCloundinary(IFormFile[] files)
         {
             var results = new List<Dictionary<string, string>>();
 
             foreach (var file in files)
             {
                 RawUploadParams uploadParams = new RawUploadParams();
+                var stream = file.OpenReadStream();
 
+                var fileDescription = new FileDescription(file.FileName, stream);
                 if (file.ContentType.StartsWith("image/"))
                 {
                     uploadParams = new ImageUploadParams
                     {
-                        File = new FileDescription(file.FileName, file.OpenReadStream()),
+                        File = fileDescription,
                         Folder = Folder,
                         Tags = Tags
                     };
@@ -39,7 +40,7 @@ namespace SocialMedia.Services
                 {
                     uploadParams = new VideoUploadParams
                     {
-                        File = new FileDescription(file.FileName, file.OpenReadStream()),
+                        File = fileDescription,
                         Folder = Folder,
                         Tags = Tags,
                         EagerAsync = true,
@@ -47,15 +48,15 @@ namespace SocialMedia.Services
                 }
                 else 
                 {
-                    uploadParams = new RawUploadParams
+                    uploadParams = new AutoUploadParams
                     {
-                        File = new FileDescription(file.FileName, file.OpenReadStream()),
+                        File = fileDescription,
                         Folder = Folder,
-                        Tags = Tags
+                        Tags = Tags,
                     };
                 }
 
-                var result = await _cloudinary.UploadAsync(uploadParams).ConfigureAwait(false);
+                var result =  await _cloudinary.UploadAsync(uploadParams).ConfigureAwait(false); ;
 
                 var imageProperties = new Dictionary<string, string>();
                 foreach (var token in result.JsonObj.Children())
@@ -70,5 +71,28 @@ namespace SocialMedia.Services
             }
             return results;
         }
+
+        public async Task<string> PutImageToCloudinary(IFormFile file)
+        {
+            if (file == null || !file.ContentType.StartsWith("image/"))
+            {
+                throw new ArgumentException("Please upload a valid image file.");
+            }
+
+            var stream = file.OpenReadStream();
+            var fileDescription = new FileDescription(file.FileName, stream);
+
+            var uploadParams = new ImageUploadParams
+            {
+                File = fileDescription,
+                Folder = Folder,
+                Tags = Tags
+            };
+
+            var result = await _cloudinary.UploadAsync(uploadParams).ConfigureAwait(false);
+
+            return result?.SecureUrl?.ToString() ?? throw new Exception("Image upload failed.");
+        }
+
     }
 }

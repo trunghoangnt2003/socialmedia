@@ -1,0 +1,557 @@
+﻿@{
+    ViewData["Title"] = "Profile";
+    var user = Context.Session.GetString("User");
+}
+
+<link rel="stylesheet" href="~/css/profile.css" asp-append-version="true">
+
+<div class="profile-container mb-3" style="display: flex;justify-content: center;" >
+    <div class="profile-header" style="width: 90%;">
+        <div class="profile-avatar">
+            <img src="@(ViewBag.user?.Avatar ?? "https://res.cloudinary.com/ddg2gdfee/image/upload/v1738900139/avatar_male_default_yjf1du.jpg")" 
+                 class="profile-picture" alt="Profile Picture">
+             @if (user != null && user.Equals(ViewBag.user.Id.ToString()))
+            {
+                <label for="avatarUpload" class="camera-icon d-flex align-items-center justify-content-center" data-bs-toggle="modal" data-bs-target="#updateAvatarModal">
+                    <i class="fa fa-camera"></i>
+            </label>
+            }
+        </div>
+
+        <div class="profile-info">
+            <h2>@ViewBag.user?.Name</h2>
+            <p><strong>@(ViewBag.Friends.Count)</strong> bạn bè</p>
+        </div>
+        <div class="profile-actions">
+            @if (user != null && user.Equals(ViewBag.user.Id.ToString()))
+            {
+                <button  data-bs-toggle="modal"  data-bs-target="#updateModal"  class="edit-btn">Chỉnh sửa trang cá nhân</button>
+            }
+            else
+            {
+                if (ViewData["isFriend"] == "Friend")
+                {
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="friendDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa-solid fa-user-check"></i> Bạn bè
+                        </button>
+
+                        <ul class="dropdown-menu" aria-labelledby="friendDropdown">
+                            <li><button class="dropdown-item text-danger" onclick="UnFriend(@ViewBag.user.Id)"><i class="fa-solid fa-user-xmark"></i> Hủy bạn bè</button></li>
+                        </ul>
+                    </div>
+                }
+                else if (ViewData["isFriend"] == "None")
+                {
+                    <div class="dropdown">
+                        @* <form asp-action="AddFriend" asp-controller="ProfileUser" method="post" class="d-inline"> *@
+                        @*     <input type="hidden" name="id" value="@ViewBag.user.Id" /> *@
+                            <button class="btn btn-secondary" type="submit" onclick="AddFriend(@ViewBag.user.Id)" id="addFriend" aria-expanded="false">
+                                <i class="fa-solid fa-user-plus"></i> Thêm Bạn bè
+                            </button>
+                        @* </form> *@
+                    </div>
+                }
+                else if (ViewData["isFriend"] == "Send")
+                {
+                    <div class="dropdown">
+                        <button class="btn btn-secondary" onclick="CancelSend(@ViewBag.user.Id)">
+                            <i class="fa-solid fa-user-check"></i> Đã Gủi Lời Mời
+                        </button>
+                    </div>
+                }
+                else if (ViewData["isFriend"] == "Request")
+                {
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="friendDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa-solid fa-user-check"></i> Yêu Cầu Kết Bạn
+                        </button>
+
+                        <ul class="dropdown-menu" aria-labelledby="friendDropdown">
+                            <li><button class="dropdown-item text-success" onclick="AcceptRequest(@ViewBag.user.Id)"><i class="fa-solid fa-user-xmark"></i>Chấp Nhận</button></li>
+                            <li><button class="dropdown-item text-danger" onclick="CancelRequest(@ViewBag.user.Id)"><i class="fa-solid fa-user-xmark"></i> Hủy</button></li>
+                        </ul>
+                    </div>
+                }
+
+            <button class="btn btn-primary">Nhắn tin</button>
+            }
+</div>
+        <button class="tab-more"><i class="fa fa-ellipsis-h"></i></button>
+    </div>
+  </div>
+   <div style="display: flex;justify-content: center;">
+       <div class="profile-tabs" style="width: 90%">
+    <a href="#" class="tab active" data-tab="posts">Bài viết</a>
+    <a href="#" class="tab" data-tab="friends">Bạn bè</a>
+    <a href="#" class="tab" data-tab="photos">Ảnh</a>
+    <a href="#" class="tab" data-tab="videos">Video</a>
+</div>
+   </div>
+
+<div id="profile-content">
+    <div class="tab-content active" id="posts">
+        <div class="profile-introduce">
+    <div class="container mt-4">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card profile-intro p-3 shadow-sm bg-white rounded">
+                <h3>Giới thiệu</h3>
+                <ul class="list-unstyled">
+                   <li><i class="fa-solid fa-cake-candles"></i> <span>&nbsp;@ViewBag.user?.Dob</span></li>
+                    <li><i class="fa-solid fa-house"></i><span>&nbsp;@ViewBag.user?.Address</span></li>
+
+                </ul>
+            </div>
+       <div class="card p-3 mt-3">
+        <h4>Tin Nổi Bật</h4>
+        <div class="highlighted-stories-container">
+            <div class="highlighted-stories">
+                <div class="story-item">
+                    <img src="https://res.cloudinary.com/ddg2gdfee/image/upload/v1738900139/avatar_male_default_yjf1du.jpg" class="rounded" alt="Story 1">
+                </div>
+                <div class="story-item">
+                    <img src="https://res.cloudinary.com/ddg2gdfee/image/upload/v1738900139/avatar_male_default_yjf1du.jpg" class="rounded" alt="Story 2">
+                </div>
+                <div class="story-item">
+                    <img src="https://res.cloudinary.com/ddg2gdfee/image/upload/v1738900139/avatar_male_default_yjf1du.jpg" class="rounded" alt="Story 3">
+                </div>
+                <div class="story-item">
+                    <img src="https://res.cloudinary.com/ddg2gdfee/image/upload/v1738900139/avatar_male_default_yjf1du.jpg" class="rounded" alt="Story 4">
+                </div>
+                <div class="story-item">
+                    <img src="https://res.cloudinary.com/ddg2gdfee/image/upload/v1738900139/avatar_male_default_yjf1du.jpg" class="rounded" alt="Story 5">
+                </div>
+            </div>
+        </div>
+    </div>
+
+     <div class="card p-3 mt-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h4 class="mb-0">Bạn bè</h4>
+            <a href="#" class="text-primary">Xem tất cả bạn bè</a>
+        </div>
+        <p class="text-muted">@(ViewBag.Friends.Count) người bạn</p>
+        <div class="friend-list">
+            <div class="row">
+                @foreach (var u in ViewBag.Friends)
+                {
+                    <div class="col-4 mb-2">
+                        <a href="@Url.Action("Index", "ProfileUser", new { id = (u?.Friend1Navigation?.Id) })" class="text-decoration-none">
+                            <div class="friend-card">
+                                <img src="@u.Friend1Navigation.Avatar" alt="@u.Friend1Navigation.Name" class="rounded img-fluid">
+                                <p class="friend-name text-wrap">@u.Friend1Navigation.Name</p>
+                            </div>
+                        </a>
+                    </div>   
+                }
+            </div>
+        </div>
+    </div>
+        </div>
+       <div class="col-md-8">
+            <!-- Ô đăng bài -->
+                        @if (user != null && user.Equals(ViewBag.user.Id.ToString()))
+                        {
+             <div class="card p-3 mb-3">
+               <div class="container d-flex justify-content-center align-items-start">
+                     <div class="w-100">
+                             <div class="post-input-container" data-bs-toggle="modal" data-bs-target="#createModal">
+                                 <img src="@ViewBag.User.Avatar" alt="User profile picture">
+                                 <div class="post-input">Bạn đang nghĩ gì?</div>
+                             </div>
+                     </div>
+                </div>
+
+              <div id="postContainer" class="pb-5">
+                                    @foreach (Post post in ViewBag.Posts)
+                                    {
+                                        @await Html.PartialAsync("Home/_ViewPost", post)
+                                    } 
+              </div> 
+              <div id="loading" class="text-center mt-3" style="display: none;"> 
+                 <span>Đang tải thêm bài viết...</span>
+              </div>
+         </div>
+                        }
+
+        </div>
+    </div>
+</div>
+
+    </div>
+</div>
+    </div>
+<div class="tab-content" id="friends">
+    <div class="friends-box" style="display: flex;justify-content: center;">
+        <div style="width: 90%;">
+            <div class="friends">
+            <h3>Bạn bè</h3>
+            <div class="friends-header">
+                <div class="search-box">
+                    <i class="fa fa-search"></i>
+                    <input type="hidden" id="currentUserId" value="@ViewBag.user?.Id">
+                    <input type="text" id="searchFriends" placeholder="Tìm kiếm bạn bè">
+                </div>
+            </div>
+        </div>
+        <div class="friends-list" id="friendsList">
+                @foreach (var u in ViewBag.Friends)
+                {
+                    <div class="friend d-flex align-items-center justify-content-between border rounded p-3 mb-3 bg-light">
+                        <a class="text-decoration-none d-flex align-items-center gap-3" href="@Url.Action("Index", "ProfileUser", new { id = (u.Friend1Navigation.Id) })">
+                            <img src="@u.Friend1Navigation.Avatar" alt="@u.Friend1Navigation.Name" class="rounded-circle">
+                            <div class="friend-info">
+                                <strong>@u.Friend1Navigation.Name</strong>
+                            </div>
+                        </a>
+
+                        <div class="dropdown">
+                            <button class="btn btn-link text-decoration-none p-0" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fa-solid fa-ellipsis-vertical"></i>
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <li><a class="dropdown-item" href="@Url.Action("Index", "ProfileUser", new { id = (u.Friend1Navigation.Id) })">View Profile</a></li>
+                                <li><a class="dropdown-item" href="#">Remove Friend</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                }
+        </div>
+        </div>
+    </div>
+</div>
+<div  style="display: flex;justify-content: center;">
+
+ <div class="tab-content" id="photos" style="width: 90%;">
+    <div class="photo-container">
+            <h3>Ảnh</h3>
+        <div class="photo-grid">
+                @if (ViewBag.listImages != null && ViewBag.listImages.Count > 0)
+                {
+                    @foreach (var resource in ViewBag.listImages)
+                    {
+                        <div class="photo-item">
+                            <a href="@Url.Action("PostDetail", "Post", new { id = resource?.PostNavigation?.Id })">
+                                <img src="@resource.Url" alt="Image" />
+                            </a>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p>No images found.</p>
+                }
+        </div>
+    </div>
+</div>
+</div>
+
+<div  style="display: flex;justify-content: center;">
+     <div class="tab-content" id="videos" style="width: 90%;">
+    <div class="photo-container">
+        <h3>Video</h3>
+        <div class="photo-grid">
+                @foreach (var photo in ViewBag.listVideos)
+                {
+                    @foreach (var resource in photo.Resources)
+                    {
+                        <div class="photo-item">
+                            <img src="@resource.Url" alt="Image"/>
+                        </div>
+                    }
+                }
+        </div>
+    </div>
+</div>
+</div>
+
+
+
+
+<div class="modal fade" id="updateModal" tabindex="-1" aria-labelledby="editProfileLabel" aria-hidden="true">
+    <div class="modal-dialog" style="max-width: 30%">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editProfileLabel">Edit Profile</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editNewsForm" asp-action="EditProfile" method="post" enctype="multipart/form-data">
+                    <div class="mb-3 text-center">
+                        <div class="profile-avatar">
+                            <img id="profileEditImage"
+                                 src="@(ViewBag.user?.Avatar ?? "https://res.cloudinary.com/ddg2gdfee/image/upload/v1738900139/avatar_male_default_yjf1du.jpg")"
+                                 class="profile-picture profile-picture-edit"
+                                 style="width: 200px; height: 200px; border-radius: 50%; object-fit: cover;"
+                                 alt="Profile Picture">
+                            <input type="file" id="avatarEditInput" name="avatarEditInput" accept="image/*" style="display: none;">
+                            <label for="avatarEditInput" class="camera-icon d-flex align-items-center justify-content-center" id="uploadEditButton">
+                                <i class="fa fa-camera"></i>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="name" name="Name" value="@ViewBag.user?.Name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="dob" class="form-label">Date of Birth</label>
+                        <input type="date" class="form-control" id="dob" name="Dob" value="@ViewBag.user?.Dob?.ToString("yyyy-MM-dd")" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="address" class="form-label">Address</label>
+                        <input type="text" class="form-control" id="address" name="Address" value="@ViewBag.user?.Address" required>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="updateAvatarModal" tabindex="-1" aria-labelledby="editAvatarLabel" aria-hidden="true">
+    <div class="modal-dialog" style="max-width: 30%">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="editAvatarLabel">Chọn ảnh đại diện</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editProfileForm" asp-action="EditAvatar" method="post" enctype="multipart/form-data">
+                    <div class="text-center">
+                        <img id="profileImage"
+                             src="@(ViewBag.user?.Avatar ?? "https://res.cloudinary.com/ddg2gdfee/image/upload/v1738900139/avatar_male_default_yjf1du.jpg")"
+                             class="profile-picture profile-picture-edit"
+                             style="width: 200px; height: 200px; border-radius: 50%; object-fit: cover;"
+                             alt="Profile Picture">
+                        <input type="file" id="avatarInput" name="avatarInput" accept="image/*" hidden>
+                    </div>
+                    <div class="text-center mt-4">
+                        <button type="button" class="btn btn-primary me-2" id="uploadButton">+ Tải Ảnh Lên</button>
+                        <button type="submit" class="btn btn-success w-25">Lưu</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="modal"> 
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+<!-- JavaScript for Upload -->
+<script>
+     document.addEventListener("DOMContentLoaded", function () {
+        document.getElementById('uploadButton').addEventListener('click', function () {
+            let input = document.createElement('input'); 
+            input.type = 'file'; 
+            input.accept = 'image/*'; 
+            input.style.display = 'none'; 
+            input.classList.add('avatarUpload');
+
+            input.addEventListener('change', function (event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        console.log('Đã chọn ảnh:', file.name);
+                        document.getElementById('profileImage').src = e.target.result;
+
+                        let avatarInput = document.getElementById('avatarInput');
+                        let dataTransfer = new DataTransfer();
+                        dataTransfer.items.add(file);
+                        avatarInput.files = dataTransfer.files;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            document.body.appendChild(input); 
+            input.click(); 
+            document.body.removeChild(input);
+        });
+
+            document.getElementById('avatarEditInput').addEventListener('change', function (event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                console.log('Image selected:', file.name);
+                document.getElementById('profileEditImage').src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+
+    document.querySelectorAll(".profile-tabs .tab").forEach(tab => {
+        tab.addEventListener("click", function (event) {
+            event.preventDefault();
+
+            // Remove active class from all tabs
+            document.querySelectorAll(".profile-tabs .tab").forEach(t => t.classList.remove("active"));
+            this.classList.add("active");
+
+            // Hide all tab contents
+            document.querySelectorAll(".tab-content").forEach(content => content.classList.remove("active"));
+
+            // Show the selected tab content
+            let tabName = this.getAttribute("data-tab");
+            document.getElementById(tabName).classList.add("active");
+        });
+    });
+
+    // Show default tab (posts)
+    document.getElementById("posts").classList.add("active");
+});
+</script>
+
+<script>
+$(document).ready(function () {
+    $("#searchFriends").on("input", function () {
+        let query = $(this).val();
+        let userId = $("#currentUserId").val(); // Lấy ID user hiện tại
+
+        $.ajax({
+            url: "/ProfileUser/SearchFriends",
+            type: "GET",
+            data: { searchTerm: query, id: userId },
+            success: function (data) {
+                console.log("Received data:", data);
+                let friendListContainer = $("#friendsList");
+                friendListContainer.empty(); // Xóa danh sách cũ
+
+                if (data.length === 0) {
+                    friendListContainer.append("<p>No friends found</p>");
+                    return;
+                }
+
+                // Thêm từng bạn bè vào danh sách
+                data.forEach(friend => {
+                    let friendItem = `
+                        <div class="friend">
+                            <img src="${friend.avatar}" alt="${friend.name}">
+                            <div class="friend-info">
+                                <strong>${friend.name}</strong>
+                            </div>
+                            <button class="friend-options">⋮</button>
+                        </div>
+                    `;
+                    friendListContainer.append(friendItem);
+                });
+            },
+            error: function () {
+                console.log("Error loading friends list");
+            }
+        });
+    });
+});
+
+
+</script>
+@section Scripts {
+        <script>
+            $(document).ready(function() {
+                    // Load ngay khi trang vừa mở
+                        $.get("/ProfileUser/LoadCreatePost", function(data) {
+                        $("#modal").html(data);
+                    });
+                });
+
+        </script>
+
+}
+
+<script>
+
+    function AddFriend(id){
+        fetch("/Friend/Add/" + id)
+        .then(response => {
+            if(response.ok){
+                showToast("Đã gủi lời mời kết bạn","success");
+                setTimeout(() => {
+                    window.location.href = window.location.href;
+                }, 1500);
+                
+            }else{
+                 showToast("Đã sảy ra lỗi ","error");
+            }
+        })
+    }
+
+    function CancelSend(id){
+        fetch("/Friend/CancelSend/" + id)
+        .then(response => {
+            if(response.ok){
+                window.location.reload();
+            }else{
+            }
+        })
+    } 
+    function CancelRequest(id){
+        fetch("/Friend/CancelRequest/" + id)
+        .then(response => {
+            if(response.ok){
+                window.location.reload();
+            }else{
+            }
+        })
+    }
+
+    function UnFriend(id){
+        fetch("/Friend/Unfriend/" + id)
+        .then(response => {
+            if(response.ok){
+                window.location.reload();
+            }else{
+            }
+        })
+    }
+    function AcceptRequest(id){
+        fetch("/Friend/AcceptRequest/" + id)
+        .then(response => {
+            if(response.ok){
+                window.location.reload();
+            }else{
+            }
+        })
+    }
+
+
+
+    function showToast(message, type = "success") {
+        var toastId = "toast-" + Date.now(); 
+        var bgClass = type === "success" ? "bg-success" : "bg-danger"; 
+        var toastHtml = `
+            <div id="${toastId}" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-bs-delay="1500">
+                <div class="toast-header ${bgClass} text-white">
+                    <strong class="me-auto">${type === "success" ? "Thành công" : "Lỗi"}</strong>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    ${message}
+                </div>
+            </div>
+        `;
+
+        $("#toastContainer").append(toastHtml);
+
+        var toastElement = document.getElementById(toastId);
+        var toast = new bootstrap.Toast(toastElement);
+        toast.show();
+
+        toastElement.addEventListener('hidden.bs.toast', function () {
+            toastElement.remove();
+           
+        });
+    }
+
+
+</script>
